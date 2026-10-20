@@ -1,0 +1,644 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Briefing Suporte – apresentação</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@200;300;400;500;600;700&family=Roboto:wght@300;400;500&display=swap">
+<style>
+/* Apresentação animada do Briefing Suporte. Dados fictícios. Palco 1920×1080 escalado para a janela. */
+:root{--navy:#193B4F;--teal:#007891;--aqua:#00AFAA;--amber:#CC851E;--rust:#A05E1E;--g1:#767A7B;--g2:#BFC3C6;--g3:#DFE0E2;--g4:#F3F3F3;--ink:#4A555C;
+  --ws:"Work Sans",system-ui,sans-serif;--rb:"Roboto",system-ui,sans-serif;--fundo:#0E2433}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--fundo);overflow:hidden;font-family:var(--rb);color:var(--navy)}
+#wrap{position:fixed;inset:0;display:grid;place-items:center}
+#stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;overflow:hidden;background:radial-gradient(1200px 800px at 70% 40%,#16384B 0%,var(--fundo) 70%);transform-origin:0 0}
+#camera{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
+#world{position:relative;width:2140px;height:2100px}
+
+/* ---------- tela (réplica do painel) ---------- */
+#screen{position:absolute;left:0;top:0;width:1440px;font-size:15px;line-height:1.6;font-weight:300}
+.pc{position:relative;background:#fff}
+.pc.sh{box-shadow:0 30px 70px rgba(0,0,0,.35)}
+b,strong{font-weight:500}
+.kicker{font-family:var(--ws);font-weight:600;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal)}
+#p-teal{z-index:3;background:var(--teal);height:176px;padding:48px 64px 0;color:#fff;border-radius:6px 6px 0 0}
+#p-teal .block{position:absolute;left:0;top:0;bottom:0;width:132px;background:var(--aqua);border-radius:6px 0 0 0}
+#p-teal .block::after{content:"";position:absolute;right:-26px;top:38px;width:52px;height:52px;border-radius:50%;background:var(--aqua)}
+#p-teal .dot{position:absolute;left:152px;bottom:-24px;width:48px;height:48px;border-radius:50%;background:var(--aqua);z-index:2}
+#p-teal .brand{display:flex;justify-content:space-between;margin-left:120px;position:relative;z-index:3}
+#p-teal .brand img{height:32px;display:block}
+#p-teal .right{display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+#p-teal .client{font-family:var(--ws);font-size:14px;letter-spacing:.06em;color:rgba(255,255,255,.85)}
+#p-teal .client b{color:#fff;font-weight:600}
+#p-teal .ed{font-family:var(--ws);font-size:12.5px;border:1px solid rgba(255,255,255,.35);border-radius:99px;padding:4px 14px}
+.bubbles{position:absolute;right:64px;bottom:0;transform:translateY(50%);display:flex;align-items:center;z-index:4}
+.bub{border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-family:var(--ws);box-shadow:0 0 0 5px var(--navy);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.bub+.bub{margin-left:-6px}
+.bub.b1{width:96px;height:96px;background:var(--rust);font-size:35px;z-index:3}
+.bub.b2{width:78px;height:78px;background:var(--amber);font-size:28px;z-index:2}
+.bub.b3{width:62px;height:62px;background:#fff;color:var(--navy);font-size:22px;z-index:1}
+#p-navy{background:var(--navy);color:#fff;padding:96px 64px 80px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:56px;align-items:center}
+.mast{margin:0;font-family:var(--ws);line-height:1}
+.mast .k{display:block;font-size:17px;font-weight:500;color:var(--aqua)}
+.mast .w{display:block;font-weight:700;font-size:196px;line-height:.8;letter-spacing:-.06em;margin:calc(-.11em + 10px) 0 0 -.05em}
+.mast .d{display:block;margin-top:15px;font-size:15px;font-weight:400;color:rgba(255,255,255,.62)}
+#say{justify-self:end;width:330px}
+#hello{margin:0;font-family:var(--ws);font-weight:300;font-size:30px;line-height:1.15;min-height:35px}
+#claim{margin:6px 0 0;font-family:var(--ws);font-weight:600;font-size:24px;line-height:1.2}
+.legend{list-style:none;margin:22px 0 0;padding:14px 0 0;border-top:1px solid rgba(255,255,255,.16);display:grid;gap:8px;font-size:14px}
+.legend li{display:grid;grid-template-columns:12px 3ch 1fr;gap:10px;align-items:baseline;color:rgba(255,255,255,.78)}
+.legend i{width:10px;height:10px;border-radius:50%;align-self:center}
+.legend b{font-family:var(--ws);font-weight:600;color:#fff;text-align:right}
+#p-filtros{background:var(--g4);border-bottom:1px solid var(--g3);padding:20px 64px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.sel{font-family:var(--ws);font-size:12.5px;background:#fff;border:1px solid var(--g3);border-radius:99px;padding:7px 34px 7px 14px;position:relative;white-space:nowrap}
+.sel::after{content:"";position:absolute;right:14px;top:50%;width:6px;height:6px;border-right:1.5px solid var(--navy);border-bottom:1.5px solid var(--navy);transform:translateY(-70%) rotate(45deg)}
+.sel.q{flex:1 1 200px;color:var(--g1);padding-right:14px}.sel.q::after{display:none}
+.evo-btn{display:inline-flex;align-items:center;gap:6px;font-family:var(--ws);font-size:12.5px;color:var(--teal);background:#fff;border:1px solid var(--g3);border-radius:99px;padding:6px 13px}
+.reset{font-family:var(--ws);font-size:12.5px;color:var(--teal);text-decoration:underline;text-underline-offset:3px}
+#sheet{background:#fff;padding:48px 64px 40px;border-radius:0 0 6px 6px}
+#p-comece{background:var(--teal);color:#fff;border-radius:22px 22px 22px 4px;padding:30px 36px;display:grid;grid-template-columns:150px 1fr auto;gap:28px;align-items:center}
+#p-comece .lb{font-family:var(--ws);font-weight:600;font-size:13px;color:#C9F2EF}
+#p-comece p{margin:0;font-family:var(--ws);font-size:22px;font-weight:300;line-height:1.4}
+#p-comece p b{font-weight:600}
+#p-comece .a{color:var(--navy);background:#fff;border-radius:99px;padding:11px 20px;font-family:var(--ws);font-weight:600;font-size:13.5px;white-space:nowrap}
+.sec-h{display:grid;grid-template-columns:1fr 220px;column-gap:48px;align-items:end}
+.sec-h h2{margin:10px 0 0;font-family:var(--ws);font-weight:300;font-size:27px;line-height:1.25}
+.sec-h h2 b{font-weight:600}
+.sec-h p{margin:10px 0 0;color:var(--ink)}
+.note{color:var(--g1);font-size:12.5px;line-height:1.6;font-weight:400}
+#p-board{margin-top:52px}
+.board{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-top:28px;align-items:start}
+.col-h{border-radius:16px 16px 4px 4px;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;color:#fff;background:var(--c)}
+.col-h strong{font-family:var(--ws);font-weight:200;font-size:50px;line-height:.9}
+.col-h span{text-align:right;font-family:var(--ws);font-weight:600;font-size:14px;line-height:1.3}
+.col-h small{display:block;font-weight:400;font-size:12px;opacity:.88}
+.col.soft .col-h{background:#fff;color:var(--navy);box-shadow:inset 0 0 0 1.5px var(--g3)}
+.col.soft .col-h strong{color:var(--c)}
+.it{display:grid;grid-template-columns:1fr auto;gap:2px 14px;padding:14px 4px 14px 2px;border-bottom:1px solid var(--g3)}
+.it .t{font-family:var(--ws);font-weight:500;font-size:15px;line-height:1.3}
+.it .c{font-size:13.5px;color:var(--ink)}
+.it .m{font-size:12px;color:var(--g1)}
+.it .d{grid-column:2;grid-row:1/span 3;text-align:right;font-family:var(--ws)}
+.it .d b{display:block;font-weight:400;font-size:20px;line-height:1.1}
+.it .d b.crit{color:var(--rust)}
+.it .d small{font-size:11.5px;color:var(--g1)}
+.tier{white-space:nowrap}
+.tier i{display:inline-block;width:7px;height:7px;border-radius:50%;margin:0 5px 1px 0;vertical-align:middle}
+.more{margin-top:10px;font-family:var(--ws);font-size:12.5px;color:var(--teal);text-decoration:underline;text-underline-offset:3px}
+.rule{height:1px;background:var(--g3);margin:56px 0}
+
+.crumbs{margin-top:22px;font-family:var(--ws);font-size:13px;height:20px;position:relative}
+.crumbs>div{position:absolute;left:0;top:0;white-space:nowrap}
+.crumbs u{color:var(--teal);text-underline-offset:3px}
+.crumbs i{font-style:normal;color:var(--g2);margin:0 10px}
+.mx{position:relative;margin-top:18px;height:330px}
+.mx .tb{position:absolute;inset:0}
+.mx .row,.mx .hd{display:grid;grid-template-columns:300px repeat(4,1fr);gap:6px;margin-bottom:6px}
+.mx .hd span{font-family:var(--ws);font-size:12px;font-weight:500;color:var(--g1);text-align:center}
+.mx .rh{font-family:var(--ws);font-weight:500;font-size:14.5px;display:flex;flex-direction:column;justify-content:center}
+.mx .rh small{font-family:var(--rb);font-weight:400;color:var(--g1);font-size:12px}
+.mx .rh .dots{display:inline-flex;gap:3px;margin-right:8px;vertical-align:middle}
+.mx .rh .dots i{width:8px;height:8px;border-radius:50%;display:block}
+.cell{text-align:center;border-radius:8px;padding:11px 6px;font-family:var(--ws);font-size:19px;background:var(--g4);color:var(--g2)}
+.cell small{display:block;font-size:11px;font-weight:500;opacity:.88}
+.cell.tot{box-shadow:inset 0 0 0 1.5px rgba(25,59,79,.15)}
+
+/* ---------- camada de destaque ---------- */
+#overlay{position:absolute;left:0;top:0;width:1440px;height:2100px;pointer-events:none}
+.slot{position:absolute;border:2px dashed rgba(255,255,255,.28);border-radius:10px}
+.spot{position:absolute;border-radius:18px;box-shadow:0 0 0 4000px rgba(9,26,37,.66);z-index:10}
+.ring{position:absolute;border-radius:14px;box-shadow:0 0 0 3px var(--aqua),0 0 0 9px rgba(0,175,170,.22),0 0 40px rgba(0,175,170,.35)}
+#cursor{position:absolute;left:0;top:0;width:26px;height:26px;z-index:20;filter:drop-shadow(0 3px 6px rgba(0,0,0,.35))}
+.ripple{position:absolute;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;border:2px solid var(--aqua);z-index:19}
+#drop{position:absolute;background:#fff;border-radius:12px;box-shadow:0 16px 40px rgba(25,59,79,.22);padding:6px;font-family:var(--ws);font-size:13px;width:220px;z-index:15}
+#drop div{padding:8px 12px;border-radius:8px}
+#drop .on{background:#E6F7F6;color:var(--teal);font-weight:600}
+#modal{position:absolute;width:880px;background:#fff;border-radius:22px 22px 22px 4px;padding:30px 36px 26px;box-shadow:0 30px 90px rgba(10,30,45,.45);z-index:12;font-weight:300}
+#modal h3{margin:8px 0 0;font-family:var(--ws);font-weight:300;font-size:24px}
+#modal h3 b{font-weight:600}
+#modal .esc{margin:6px 0 0;color:var(--ink);font-size:14px}
+#modal .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:22px}
+#modal .stat{border-top:1px solid var(--g3);padding-top:12px}
+#modal .stat .lb{display:flex;align-items:center;gap:8px;font-family:var(--ws);font-size:13px;font-weight:500}
+#modal .key{display:block;width:14px;height:2px;border-radius:2px}
+#modal .stat strong{display:block;font-family:var(--ws);font-weight:300;font-size:40px;line-height:1.15}
+#modal .stat small{color:var(--g1);font-size:12px}
+#modal svg{display:block;margin-top:18px}
+#modal .tk{font-family:var(--ws);font-size:11px;fill:var(--g1)}
+#tip{position:absolute;width:170px;background:#fff;border:1px solid var(--g3);border-radius:10px;padding:8px 12px;box-shadow:0 8px 24px rgba(25,59,79,.12);font-size:12.5px;z-index:13}
+#tip .dt{color:var(--g1);font-size:11.5px}
+#tip .r{display:flex;align-items:center;gap:8px;line-height:1.75}
+#tip .r b{font-family:var(--ws);font-weight:600;min-width:3ch}
+#tip .r span{color:var(--g1)}
+#dim{position:absolute;left:0;top:0;width:1440px;height:2100px;background:rgba(25,59,79,.55);z-index:11;border-radius:6px}
+
+/* ---------- celular com o e-mail ---------- */
+#phone{position:absolute;left:1640px;top:240px;width:440px;height:900px;border-radius:56px;background:#0B1C26;padding:18px;box-shadow:0 40px 90px rgba(0,0,0,.5),inset 0 0 0 2px #2A4555}
+#phone .scr{width:100%;height:100%;border-radius:40px;background:#E9EDEF;overflow:hidden;padding:64px 16px 0;position:relative}
+#phone .notch{position:absolute;left:50%;top:14px;width:120px;height:28px;margin-left:-60px;border-radius:20px;background:#0B1C26}
+#phone .inbox{font-family:var(--rb);font-size:12.5px;color:var(--g1);margin:0 6px 10px;display:flex;justify-content:space-between}
+#phone .inbox b{color:var(--navy);font-weight:500}
+#phone .subj{margin:-4px 6px 12px;font-family:var(--ws);font-size:14px;font-weight:600;color:var(--navy)}
+.mail{border-radius:20px;overflow:hidden;background:#fff}
+.mail .top{background:var(--navy);padding:26px 26px 26px;color:#fff}
+.mail .top img{height:24px;display:block}
+.mail .top .h{margin:22px 0 0;font-family:var(--ws);font-weight:300;font-size:26px}
+.mail .top .c{margin:4px 0 0;font-family:var(--ws);font-weight:600;font-size:19px;line-height:1.3}
+.mail .nums{display:grid;grid-template-columns:repeat(3,1fr);padding:24px 10px 6px;text-align:center}
+.mail .nums strong{display:block;font-family:var(--ws);font-weight:300;font-size:38px;line-height:1.1}
+.mail .nums span{font-size:11.5px;color:var(--g1)}
+.mail .cta{padding:20px 26px 28px;text-align:center}
+.mail .cta span{display:inline-block;background:var(--teal);color:#fff;border-radius:99px;padding:13px 26px;font-family:var(--ws);font-weight:600;font-size:14px}
+.mail-foot{text-align:center;font-size:11px;color:var(--g1);margin-top:14px}
+
+/* ---------- abertura, legendas, encerramento ---------- */
+.full{position:absolute;inset:0;display:grid;place-items:center;text-align:center;color:#fff;z-index:30}
+#intro{background:var(--fundo)}
+#intro .c1,#intro .c2,#intro .c3,#outro .c1{position:absolute;border-radius:50%;background:var(--aqua)}
+#intro .c1{width:240px;height:240px;left:180px;top:150px}
+#intro .c2{width:120px;height:120px;right:260px;bottom:180px;background:var(--teal)}
+#intro .c3{width:60px;height:60px;right:420px;top:240px}
+.ttl{font-family:var(--ws);font-weight:700;font-size:150px;letter-spacing:-.05em;line-height:.9}
+.ttl small{display:block;font-size:28px;font-weight:400;letter-spacing:.02em;color:rgba(255,255,255,.7);margin-top:26px}
+.full img{height:44px;margin:0 auto 46px;display:block}
+.cap{position:absolute;left:72px;bottom:118px;width:540px;background:#fff;border-radius:24px 24px 24px 4px;padding:30px 34px 32px;z-index:25;box-shadow:0 30px 70px rgba(0,0,0,.35)}
+.cap .n{font-family:var(--ws);font-weight:600;font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal)}
+.cap h2{margin:10px 0 0;font-family:var(--ws);font-weight:600;font-size:34px;line-height:1.15;color:var(--navy)}
+.cap p{margin:12px 0 0;font-size:19px;line-height:1.5;color:var(--ink);font-weight:300}
+.cap .bar{position:absolute;left:34px;right:34px;bottom:0;height:4px;border-radius:4px 4px 0 0;background:var(--aqua);transform-origin:0 50%}
+
+/* ---------- etiquetas com linha guia ---------- */
+#notas{position:absolute;left:0;top:0;width:1920px;height:1080px;z-index:24;pointer-events:none}
+#linhas{position:absolute;left:0;top:0;width:1920px;height:1080px;z-index:23;pointer-events:none;overflow:visible}
+#linhas line{stroke:var(--aqua);stroke-width:2.5;stroke-linecap:round}
+.pt{position:absolute;width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:50%;background:var(--aqua);box-shadow:0 0 0 5px rgba(0,175,170,.28),0 0 0 2px #fff inset;z-index:24}
+.lbl{position:absolute;z-index:24;background:#fff;color:var(--navy);font-family:var(--ws);font-weight:600;font-size:20px;line-height:1.25;padding:12px 18px 13px;border-radius:14px 14px 14px 4px;box-shadow:0 14px 36px rgba(0,0,0,.32);white-space:nowrap}
+.lbl small{display:block;font-family:var(--rb);font-weight:400;font-size:15px;color:var(--ink);margin-top:2px}
+.lbl::before{content:"";position:absolute;left:0;top:12px;bottom:12px;width:3px;border-radius:3px;background:var(--aqua);margin-left:-1px}
+.chips{display:flex;gap:14px;justify-content:center;margin-top:44px}
+.chips span{font-family:var(--ws);font-size:19px;font-weight:500;color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:99px;padding:10px 22px}
+.chips span i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:10px;vertical-align:1px}
+
+/* ---------- controles ---------- */
+#ctl{transition:opacity .4s;position:absolute;left:72px;right:72px;bottom:34px;height:48px;display:flex;align-items:center;gap:18px;z-index:40;color:#fff;font-family:var(--ws);font-size:14px;opacity:.9}
+#ctl button{font:inherit;color:inherit;background:rgba(255,255,255,.12);border:0;border-radius:99px;height:40px;padding:0 18px;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+#ctl button:hover{background:rgba(255,255,255,.22)}
+#ctl button:focus-visible{outline:2px solid var(--aqua);outline-offset:2px}
+#trk{flex:1;position:relative;height:40px;cursor:pointer}
+#trk .ln{position:absolute;left:0;right:0;top:19px;height:3px;border-radius:3px;background:rgba(255,255,255,.18)}
+#trk .pg{position:absolute;left:0;top:19px;height:3px;border-radius:3px;background:var(--aqua);width:0}
+#trk .ch{position:absolute;top:0;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;color:rgba(255,255,255,.55);white-space:nowrap}
+#trk .ch::before{content:"";width:9px;height:9px;border-radius:50%;background:currentColor;margin-top:15px}
+#trk .ch span{margin-top:6px}
+#trk .ch.on{color:#fff}
+#tm{font-variant-numeric:tabular-nums;min-width:86px;text-align:right;color:rgba(255,255,255,.7)}
+@media (prefers-reduced-motion:reduce){#ctl{opacity:1}}
+</style>
+</head>
+<body>
+<div id="wrap"><div id="stage">
+  <div id="camera"><div id="world">
+    <div id="screen">
+      <section class="pc" id="p-teal">
+        <span class="block"></span><span class="dot"></span>
+        <div class="brand"><img src="logo-brmed.png" alt="BR MED"><div class="right"><div class="client"><b>BRIEFING</b>&ensp;·&ensp;PRAZOS DO CLIENTE</div><div class="ed">Atual: ter 20/10, 07:00</div></div></div>
+        <div class="bubbles" id="bubbles"><div class="bub b1" id="bub1">00</div><div class="bub b2" id="bub2">00</div><div class="bub b3" id="bub3">00</div></div>
+      </section>
+      <section class="pc" id="p-navy">
+        <h1 class="mast"><span class="k">Edição da</span><span class="w">manhã</span><span class="d">07:00 · terça-feira, 20 de outubro</span></h1>
+        <div id="say"><p id="hello">Bom dia, time.</p><p id="claim">59 demandas pedem ação hoje.</p>
+          <ul class="legend" id="legend"><li><i style="background:var(--rust)"></i><b id="lg1">47</b><span>com prazo vencido</span></li><li><i style="background:var(--amber)"></i><b id="lg2">12</b><span>vencem hoje</span></li><li><i style="background:#fff"></i><b id="lg3">18</b><span>nos próximos 2 dias</span></li></ul></div>
+      </section>
+      <section class="pc" id="p-filtros">
+        <span class="kicker" style="margin-right:6px">Filtrar</span>
+        <span class="sel" id="selG" style="width:200px">Todos os gestores</span><span class="sel" style="width:190px">Todos os grupos</span><span class="sel" style="width:300px">Todas as empresas</span><span class="sel">Todas as áreas</span><span class="sel" id="selT">Todos os tiers</span>
+        <span class="sel q">Buscar demanda, empresa ou nº do card</span>
+        <span class="evo-btn" id="evoBtn"><svg width="14" height="14" viewBox="0 0 16 16"><path d="M2 12.5 6 7.5l3 2.5 5-6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Evolução</span>
+        <span class="reset">Limpar</span>
+      </section>
+      <div id="sheet" class="pc">
+        <div id="p-comece" class="pc"><span class="lb">Comece por aqui</span><p><b>Relatório Anual de Atlântico Portos</b>, 11 dias de atraso. Confirme o andamento com a área responsável e, se precisar, alinhe com o cliente.</p><span class="a" id="abrirCard">Abrir card no Pipefy</span></div>
+        <section id="p-board" class="pc">
+          <div class="sec-h"><div><span class="kicker">Onde atuar</span><h2>O que <b>precisa de ação hoje</b></h2><p>As duas primeiras colunas são o trabalho do dia. A terceira é para antecipar, se sobrar tempo.</p></div><aside class="note">Cada linha abre o card no Pipefy. Prazo é a maior data entre os campos de prazo da área.</aside></div>
+          <div class="board" id="board"></div>
+        </section>
+        <div class="rule"></div>
+        <section id="p-mx" class="pc">
+          <div class="sec-h"><div><span class="kicker">Visão gerencial</span><h2>Carteira de <b>Ana Ribeiro</b></h2><p>Clique no nome para descer um nível.</p></div><aside class="note">Cada célula conta as demandas na área. Quanto mais escura, maior a parte atrasada.</aside></div>
+          <div class="crumbs"><div id="cr1"><u>← Todos os gestores</u><i>›</i><b>Ana Ribeiro</b></div><div id="cr2"><u>← Todos os gestores</u><i>›</i><u>Ana Ribeiro</u><i>›</i><b>Grupo Atlântico</b></div></div>
+          <div class="mx"><div class="tb" id="tbG"></div><div class="tb" id="tbE"></div></div>
+        </section>
+      </div>
+    </div>
+    <div id="overlay">
+      <div id="slots"></div>
+      <div id="dim"></div>
+      <div id="modal">
+        <span class="kicker">Evolução</span><h3>Prazos <b>edição a edição</b></h3><p class="esc">Carteira de Ana Ribeiro. Uma edição da manhã por dia útil.</p>
+        <div class="stats">
+          <div class="stat"><span class="lb"><i class="key" style="background:#8A4A14"></i>Prazo vencido</span><strong id="ms1">0</strong><small>+0 desde 19/10</small></div>
+          <div class="stat"><span class="lb"><i class="key" style="background:#D99A2B"></i>Vence hoje</span><strong id="ms2">0</strong><small>−1 desde 19/10</small></div>
+          <div class="stat"><span class="lb"><i class="key" style="background:#00AFAA"></i>Próximos 2 dias</span><strong id="ms3">0</strong><small>igual a 19/10</small></div>
+        </div>
+        <svg id="chart" width="808" height="250" viewBox="0 0 808 250"></svg>
+      </div>
+      <div id="tip"><div class="dt" id="tipD">qui 15/10, 07:00</div><div class="r"><i class="key" style="background:#8A4A14"></i><b id="tip1">19</b><span>Prazo vencido</span></div><div class="r"><i class="key" style="background:#D99A2B"></i><b id="tip2">6</b><span>Vence hoje</span></div><div class="r"><i class="key" style="background:#00AFAA"></i><b id="tip3">10</b><span>Próximos 2 dias</span></div></div>
+      <div id="drop"><div>Todos os gestores</div><div id="dropAna">Ana Ribeiro</div><div>Bruno Tavares</div><div>Carla Mendes</div><div>Diego Moura</div></div>
+      <svg id="cursor" viewBox="0 0 26 26"><path d="M3 2l17 9.5-7.4 1.6L9.4 21z" fill="#fff" stroke="#193B4F" stroke-width="1.6" stroke-linejoin="round"/></svg>
+    </div>
+    <div id="phone"><div class="scr"><span class="notch"></span>
+      <div class="inbox"><span><b>Briefing Suporte</b> · agora</span><span>07:00</span></div>
+      <div class="subj" id="subj">Prazos: 21 vencidas, 6 vencem hoje · manhã</div>
+      <div class="mail" id="mail">
+        <div class="top"><img src="logo-brmed.png" alt="BR MED"><p class="h" id="mh">Bom dia, Ana.</p><p class="c">27 demandas pedem sua ação hoje.</p></div>
+        <div class="nums"><div><strong id="mn1" style="color:#A05E1E">0</strong><span>com prazo vencido</span></div><div><strong id="mn2" style="color:#CC851E">0</strong><span>vencem hoje</span></div><div><strong id="mn3" style="color:#007891">0</strong><span>nos próximos 2 dias</span></div></div>
+        <div class="cta"><span id="mcta">Ver minha carteira no painel</span></div>
+      </div>
+      <div class="mail-foot">Briefing Suporte · enviado automaticamente às 07:00</div>
+    </div></div>
+  </div></div>
+
+  <div class="full" id="intro"><span class="c1"></span><span class="c2"></span><span class="c3"></span>
+    <div><img src="logo-brmed.png" alt="BR MED" id="introLogo"><div class="ttl" id="introT">Briefing<small>Suporte · prazos do cliente</small></div></div></div>
+  <div class="full" id="outro" style="background:rgba(14,36,51,.86)"><div><img src="logo-brmed.png" alt="BR MED"><div class="ttl" style="font-size:120px">Briefing Suporte<small>Prazos do cliente, todo dia útil às 07:00.</small></div>
+    <div class="chips" id="chips"><span><i style="background:#A05E1E"></i>Onde atuar hoje</span><span><i style="background:#2EC4E6"></i>Cada carteira e tier</span><span><i style="background:#00AFAA"></i>Evolução edição a edição</span></div></div></div>
+  <svg id="linhas" viewBox="0 0 1920 1080"></svg><div id="notas"></div>
+  <div id="caps"></div>
+
+  <div id="ctl"><button type="button" id="play" aria-label="Pausar">❚❚ <span>Pausar</span></button><button type="button" id="again" aria-label="Recomeçar">↺</button><div id="trk"><div class="ln"></div><div class="pg" id="pg"></div></div><span id="tm">0:00 / 1:22</span></div>
+</div></div>
+
+<script>
+(async () => {
+  // ---------- dados fictícios ----------
+  const TIER = { Diamante: "#2EC4E6", Ouro: "#E3B341", Prata: "#AEB6BC", Bronze: "#B9825A" };
+  const tier = (t) => `<span class="tier"><i style="background:${TIER[t]}"></i>${t}</span>`;
+  const COLS = [
+    { c: "var(--rust)", t: "Prazo vencido", s: "mais antigas primeiro", n: 21, mais: 17, soft: false, itens: [
+      ["Relatório Anual", "Atlântico Portos", "SO", "Diamante", "Grupo Atlântico", 11], ["PGR", "Serra Verde Alimentos", "ST", "Ouro", "Grupo Serra Verde", 11],
+      ["PCMSO", "Atlântico Portos", "SO", "Diamante", "Grupo Atlântico", 9], ["Manutenção BR NET", "Atlântico Logística", "OG", "Prata", "Grupo Atlântico", 7]] },
+    { c: "var(--amber)", t: "Vence hoje", s: "resolver até o fim do dia", n: 6, mais: 3, soft: false, itens: [
+      ["Exames periódicos", "Atlântico Portos", "SO", "Diamante", "Grupo Atlântico", "20/10", "prazo no dia"], ["Entrega pós-visita", "Serra Verde Alimentos", "ST", "Ouro", "Grupo Serra Verde", "20/10", "prazo no dia"],
+      ["LTCAT", "Atlântico Portos", "ST", "Diamante", "Grupo Atlântico", "20/10", "prazo no dia"]] },
+    { c: "var(--teal)", t: "Próximos 2 dias", s: "para antecipar", n: 9, mais: 6, soft: true, itens: [
+      ["Laudo de insalubridade", "Atlântico Portos", "ST", "Diamante", "Grupo Atlântico", "21/10", "em 1 dia"], ["Relatório Anual", "Serra Verde Alimentos", "SO", "Ouro", "Grupo Serra Verde", "22/10", "em 2 dias"],
+      ["Manutenção BR NET (OP)", "Atlântico Logística", "OG", "Prata", "Grupo Atlântico", "22/10", "em 2 dias"]] },
+  ];
+  document.getElementById("board").innerHTML = COLS.map((col) => `<div class="col${col.soft ? " soft" : ""}" style="--c:${col.c}">
+      <div class="col-h"><strong data-n="${col.n}">00</strong><span>${col.t}<small>${col.s}</small></span></div>
+      <div>${col.itens.map(([t, e, a, ti, g, d, sub]) => `<div class="it"><div class="t">${t}</div><div class="d">${typeof d === "number" ? `<b class="crit">${d}</b><small>dias de atraso</small>` : `<b>${d}</b><small>${sub}</small>`}</div><div class="c">${e}</div><div class="m">${a} · ${tier(ti)} · ${g}</div></div>`).join("")}</div>
+      <div class="more">Ver mais ${col.mais}</div></div>`).join("");
+
+  const ramp = (s) => { const a = [241, 225, 210], b = [160, 94, 30], t = 0.2 + 0.8 * s; return `rgb(${a.map((x, i) => Math.round(x + (b[i] - x) * t)).join(",")})`; };
+  const cor = ([v, at]) => (!v ? null : at ? { bg: ramp(at / v), fg: at / v > 0.5 ? "#fff" : "#193B4F" } : { bg: "#E1F0F2", fg: "#193B4F" });
+  const cel = (x, tot) => `<div class="cell${tot ? " tot" : ""}" data-bg="${cor(x)?.bg ?? ""}" data-fg="${cor(x)?.fg ?? ""}">${x[0]}<small>${!x[0] ? "&nbsp;" : x[1] ? `${x[1]} ${x[1] === 1 ? "atrasada" : "atrasadas"}` : "no prazo"}</small></div>`;
+  const tabela = (rows) => `<div class="hd"><span></span><span>Segurança (ST)</span><span>Saúde (SO)</span><span>On-Going (OG)</span><span>Total</span></div>` +
+    rows.map(([nome, sub, tiers, st, so, og]) => { const tot = [st[0] + so[0] + og[0], st[1] + so[1] + og[1]];
+      return `<div class="row"><div class="rh"><span><span class="dots">${tiers.map((t) => `<i style="background:${TIER[t]}"></i>`).join("")}</span>${nome}</span><small>${sub}</small></div>${cel(st)}${cel(so)}${cel(og)}${cel(tot, true)}</div>`; }).join("");
+  document.getElementById("tbG").innerHTML = tabela([
+    ["Grupo Atlântico", "3 empresas", ["Diamante", "Prata"], [6, 5], [9, 8], [4, 3]], ["Grupo Serra Verde", "2 empresas", ["Ouro"], [5, 3], [3, 2], [2, 0]],
+    ["Grupo Litoral", "2 empresas", ["Prata"], [2, 0], [3, 1], [0, 0]], ["Grupo Pampa", "1 empresa", ["Bronze"], [1, 0], [1, 0], [0, 0]]]);
+  document.getElementById("tbE").innerHTML = tabela([
+    ["Atlântico Portos", "", ["Diamante"], [4, 4], [7, 6], [2, 1]], ["Atlântico Logística", "", ["Prata"], [2, 1], [2, 2], [2, 2]], ["Atlântico Terminais", "", ["Diamante"], [0, 0], [0, 0], [0, 0]]]);
+
+  // série fictícia da Ana para o modal de evolução
+  const DATAS = ["05/10", "06/10", "07/10", "08/10", "09/10", "12/10", "13/10", "14/10", "15/10", "16/10", "19/10", "20/10"];
+  const DIAS = ["seg", "ter", "qua", "qui", "sex", "seg", "ter", "qua", "qui", "sex", "seg", "ter"];
+  const SER = [["#8A4A14", [14, 16, 15, 18, 17, 19, 18, 20, 19, 22, 21, 21]], ["#D99A2B", [5, 7, 4, 6, 8, 5, 7, 4, 6, 9, 7, 6]], ["#00AFAA", [8, 9, 11, 7, 10, 9, 12, 8, 10, 11, 9, 9]]];
+  const svg = document.getElementById("chart"), CW = 808, CH = 250, ML = 36, MR = 120, MT = 10, IH = CH - MT - 26, IW = CW - ML - MR;
+  const cx = (i) => ML + (i * IW) / (DATAS.length - 1), cy = (v) => MT + IH - (v / 25) * IH;
+  let g = "";
+  for (const t of [0, 5, 10, 15, 20, 25]) g += `<line x1="${ML}" x2="${ML + IW}" y1="${cy(t)}" y2="${cy(t)}" stroke="#ECEEEF"/><text class="tk" x="${ML - 8}" y="${cy(t)}" dy=".32em" text-anchor="end">${t}</text>`;
+  DATAS.forEach((d, i) => { if (i % 2 === 0 || i === DATAS.length - 1) g += `<text class="tk" x="${cx(i)}" y="${CH - 6}" text-anchor="middle">${d}</text>`; });
+  g += `<line id="cross" x1="0" x2="0" y1="${MT}" y2="${MT + IH}" stroke="#BFC3C6"/>`;
+  const nomes = ["prazo vencido", "vence hoje", "próximos 2 dias"], fimY = [cy(21), cy(9) - 9, cy(6) + 9];
+  SER.forEach(([c, v], k) => {
+    g += `<path class="ln" d="${v.map((y, i) => `${i ? "L" : "M"}${cx(i).toFixed(1)},${cy(y).toFixed(1)}`).join("")}" fill="none" stroke="${c}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
+    g += `<circle class="fimdot" cx="${cx(11)}" cy="${cy(v[11])}" r="4" fill="${c}" stroke="#fff" stroke-width="2"/>`;
+    g += `<text class="fim" x="${ML + IW + 12}" y="${fimY[k]}" dy=".32em" font-family="Work Sans" font-size="12" fill="#767A7B"><tspan fill="#193B4F" font-weight="600">${v[11]}</tspan> ${nomes[k]}</text>`;
+  });
+  svg.innerHTML = g;
+
+  await document.fonts.ready;
+  await Promise.all([...document.images].map((im) => (im.complete ? 0 : new Promise((r) => (im.onload = im.onerror = r)))));
+
+  // ---------- palco: 1920×1080 centralizado e escalado para a janela ----------
+  const stage = document.getElementById("stage"), cam = document.getElementById("camera"), world = document.getElementById("world");
+  const ajustar = () => { const k = Math.min(innerWidth / 1920, innerHeight / 1080); stage.style.transform = `translate(-50%,-50%) scale(${k})`; stage.style.transformOrigin = "50% 50%"; };
+  ajustar(); addEventListener("resize", ajustar);
+
+  const $ = (id) => document.getElementById(id);
+  // retângulo de um elemento em coordenadas do mundo (medido com a câmera parada na origem)
+  const ret = (el) => { const w = world.getBoundingClientRect(), r = el.getBoundingClientRect(), k = w.width / world.offsetWidth; return { x: (r.left - w.left) / k, y: (r.top - w.top) / k, w: r.width / k, h: r.height / k }; };
+  const R = {};
+  for (const id of ["p-teal", "p-navy", "p-filtros", "p-comece", "p-board", "p-mx", "bubbles", "bub1", "bub2", "bub3", "say", "hello", "selG", "selT", "evoBtn", "abrirCard", "phone", "subj", "mcta", "mail"]) R[id] = ret($(id));
+  R.mxRow1 = ret(document.querySelector("#tbG .row .rh"));
+  R.cel1 = ret(document.querySelectorAll("#tbG .row .cell")[1]);
+  R.itTier = ret(document.querySelector("#board .it .tier"));
+  R.grid = ret($("board"));
+  R.colH = [...document.querySelectorAll("#board .col-h")].map(ret);
+  R.sels = [...document.querySelectorAll("#p-filtros .sel:not(.q)")].map(ret);
+  R.crumbs = { ...ret(document.querySelector(".crumbs")), w: 470 };
+  R.nums = ret(document.querySelector(".mail .nums"));
+  R.cover = { x: 0, y: 0, w: 1440, h: R["p-navy"].y + R["p-navy"].h };
+  R.all = { x: 0, y: 0, w: 1440, h: R["p-mx"].y + R["p-mx"].h + 40 };
+  R.mundo = { x: -40, y: 0, w: R.phone.x + R.phone.w + 40, h: Math.max(R.all.h, R.phone.y + R.phone.h) };
+  R.tierZoom = { x: R.itTier.x - 170, y: R.itTier.y - 70, w: 440, h: 140 };
+
+  const modal = $("modal"); modal.style.left = "280px"; modal.style.top = `${R["p-filtros"].y - 560}px`;
+  R.modal = ret(modal); R.ms1 = ret($("ms1"));
+  const drop = $("drop"); drop.style.left = `${R.selG.x}px`; drop.style.top = `${R.selG.y + R.selG.h + 6}px`;
+  R.dropAna = ret($("dropAna"));
+  const chartR = ret(svg);
+  $("tip").style.top = `${chartR.y + 4}px`;
+
+  // ---------- linha do tempo ----------
+  const TOTAL = 82;
+  const anims = [];
+  // K(el, [[t, quadro], ...]): uma animação por elemento, com os quadros em segundos absolutos
+  const K = (el, quadros, easing = "cubic-bezier(.4,0,.2,1)") => {
+    if (!el) return;
+    // uma propriedade que some dos últimos quadros voltaria ao valor original: o último valor vale até o fim
+    quadros = quadros.map(([t, f]) => [t, { ...f }]);
+    for (const p of new Set(quadros.flatMap(([, f]) => Object.keys(f)))) {
+      const ult = quadros.findLastIndex(([, f]) => p in f);
+      for (let i = ult + 1; i < quadros.length; i++) quadros[i][1][p] = quadros[ult][1][p];
+    }
+    const t0 = quadros[0][0], t1 = quadros[quadros.length - 1][0], d = Math.max(0.001, t1 - t0);
+    const a = el.animate(quadros.map(([t, f]) => ({ easing, ...f, offset: (t - t0) / d })), { delay: t0 * 1000, duration: d * 1000, fill: "both" });
+    a.pause(); anims.push(a); return a;
+  };
+
+  // câmera: enquadra um retângulo na área livre à direita da legenda
+  const BOX = { x: 660, y: 70, w: 1200, h: 880 }, BOXF = { x: 120, y: 60, w: 1680, h: 900 };
+  const foco = (r, pad = 40, box = BOX, zmax = 2.6) => {
+    const s = Math.min(box.w / (r.w + 2 * pad), box.h / (r.h + 2 * pad), zmax);
+    const tx = box.x + box.w / 2 - (r.x + r.w / 2) * s, ty = box.y + box.h / 2 - (r.y + r.h / 2) * s;
+    return { s, tx, ty, transform: `translate(${tx}px,${ty}px) scale(${s})` };
+  };
+  const C = {
+    all0: foco(R.all, 120), all: foco(R.all, 50),
+    m1: foco({ x: 0, y: 0, w: 1440, h: R["p-filtros"].y + R["p-filtros"].h }, 60),
+    m2: foco({ x: 0, y: R["p-filtros"].y - 40, w: 1440, h: R["p-board"].y + 300 - R["p-filtros"].y }, 60),
+    m3: foco({ x: 0, y: R["p-board"].y, w: 1440, h: R["p-mx"].y + R["p-mx"].h - R["p-board"].y }, 50), bub: foco({ ...R.bubbles, y: R.bubbles.y - 30, h: R.bubbles.h + 60 }, 60, BOX, 2.4),
+    fil: foco({ x: R["p-filtros"].x + 40, y: R["p-filtros"].y - 60, w: R.sels[4].x + R.sels[4].w - R["p-filtros"].x - 10, h: R["p-filtros"].h + 280 }, 20), cov: foco(R.cover, 20), com: foco(R["p-comece"], 50), brd: foco(R["p-board"], 30),
+    tier: foco(R.tierZoom, 10), mx: foco(R["p-mx"], 30), mod: foco(R.modal, 40), pho: foco(R.phone, 40), mun: foco(R.mundo, 40, BOXF),
+  };
+  const tr = (c) => ({ transform: c.transform });
+  // aproximação lenta durante uma cena parada, em torno do centro da área de enquadramento
+  const deriva = (c, f = 1.035) => { const ox = BOX.x + BOX.w / 2, oy = BOX.y + BOX.h / 2, s = c.s * f, tx = ox - (ox - c.tx) * f, ty = oy - (oy - c.ty) * f;
+    return { s, tx, ty, transform: `translate(${tx}px,${ty}px) scale(${s})` }; };
+  K(cam, [
+    [0, tr(C.m1)], [4, tr(C.m1)], [6.4, tr(C.m1)], [7.7, tr(C.m2)], [8.6, tr(C.m2)], [9.6, tr(C.m3)], [10.2, tr(C.m3)], [11.4, tr(C.all)], [12, tr(C.all)],
+    [13.2, tr(C.bub)], [20.2, tr(deriva(C.bub, 1.03))],
+    [21.6, tr(C.fil)], [25.4, tr(C.fil)], [26.8, tr(C.cov)], [29.5, tr(deriva(C.cov))],
+    [30.7, tr(C.com)], [34, tr(deriva(C.com))],
+    [35.4, tr(C.brd)], [39.8, tr(deriva(C.brd, 1.025))], [41, tr(C.tier)], [43, tr(deriva(C.tier, 1.03))],
+    [44.6, tr(C.mx)], [52, tr(deriva(C.mx, 1.03))],
+    [53.4, tr(C.mod)], [61.2, tr(deriva(C.mod, 1.03))],
+    [62.8, tr(C.pho)], [71.4, tr(deriva(C.pho, 1.04))],
+    [73.6, tr(C.mun)], [TOTAL, tr(C.mun)],
+  ], "cubic-bezier(.65,0,.35,1)");
+  // a camada das etiquetas acompanha a aproximação lenta, para os pontos não se descolarem dos elementos
+  const DERIVAS = [[13.2, 20.2, 1.03], [26.8, 29.5, 1.035], [30.7, 34, 1.035], [35.4, 39.8, 1.025], [41, 43, 1.03], [44.6, 52, 1.03], [53.4, 61.2, 1.03], [62.8, 71.4, 1.04]];
+  const quadrosDeriva = [[0, { transform: "none" }], ...DERIVAS.flatMap(([a, b, f]) => [[a, { transform: "none" }], [b, { transform: `scale(${f})` }], [b + 0.01, { transform: "none" }]])];
+  for (const id of ["notas", "linhas"]) { $(id).style.transformOrigin = `${BOX.x + BOX.w / 2}px ${BOX.y + BOX.h / 2}px`; K($(id), quadrosDeriva, "cubic-bezier(.65,0,.35,1)"); }
+
+  // ---------- etiquetas com linha guia (em coordenadas do palco, com a câmera parada) ----------
+  const linhas = $("linhas"), notas = $("notas");
+  // nota(câmera, ponto no mundo, deslocamento do rótulo no palco, título, subtítulo, entra, sai)
+  const nota = (c, [wx, wy], [dx, dy], titulo, sub, t0, t1) => {
+    t1 = Math.max(t1, t0 + 1.3);
+    const ax = c.tx + wx * c.s, ay = c.ty + wy * c.s, lx = ax + dx, ly = ay + dy;
+    const pt = document.createElement("i"); pt.className = "pt"; pt.style.left = `${ax}px`; pt.style.top = `${ay}px`;
+    const ln = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    Object.entries({ x1: ax, y1: ay, x2: lx, y2: ly, pathLength: 1, "stroke-dasharray": 1 }).forEach(([k, v]) => ln.setAttribute(k, v));
+    const lb = document.createElement("div"); lb.className = "lbl"; lb.textContent = titulo;
+    if (sub) { const sm = document.createElement("small"); sm.textContent = sub; lb.append(sm); }
+    const hx = Math.abs(dx) >= Math.abs(dy) ? (dx < 0 ? "-100%" : "0") : "-50%", hy = Math.abs(dx) >= Math.abs(dy) ? "-50%" : dy < 0 ? "-100%" : "0";
+    const gx = Math.abs(dx) >= Math.abs(dy) ? (dx < 0 ? -10 : 10) : 0, gy = Math.abs(dx) >= Math.abs(dy) ? 0 : dy < 0 ? -10 : 10;
+    lb.style.left = `${lx + gx}px`; lb.style.top = `${ly + gy}px`;
+    notas.append(pt, lb); linhas.append(ln);
+    K(pt, [[0, { transform: "scale(0)" }], [t0, { transform: "scale(0)" }], [t0 + 0.35, { transform: "scale(1)" }], [t1 - 0.25, { transform: "scale(1)" }], [t1, { transform: "scale(0)" }]], "cubic-bezier(.2,1.5,.4,1)");
+    K(ln, [[0, { strokeDashoffset: 1, opacity: 1 }], [t0 + 0.15, { strokeDashoffset: 1 }], [t0 + 0.6, { strokeDashoffset: 0 }], [t1 - 0.25, { opacity: 1 }], [t1, { opacity: 0 }]]);
+    K(lb, [[0, { opacity: 0, transform: `translate(${hx},${hy}) scale(.92)` }], [t0 + 0.45, { opacity: 0, transform: `translate(${hx},${hy}) scale(.92)` }], [t0 + 0.8, { opacity: 1, transform: `translate(${hx},${hy})` }], [t1 - 0.25, { opacity: 1 }], [t1, { opacity: 0 }]], "cubic-bezier(.2,1.2,.4,1)");
+  };
+  const meio = (r, fx = 0.5, fy = 0.5) => [r.x + r.w * fx, r.y + r.h * fy];
+
+  // números do dia
+  nota(C.bub, meio(R.bub1, 0.08, 0.5), [-230, 0], "Prazo vencido", "a bolha maior é a mais urgente", 15.8, 20.2);
+  nota(C.bub, meio(R.bub2, 0.5, 0.97), [0, 190], "Vence hoje", "resolver até o fim do dia", 16.6, 20.2);
+  nota(C.bub, meio(R.bub3, 0.5, 0.06), [0, -130], "Próximos 2 dias", "para antecipar", 17.4, 20.2);
+  // filtros
+  ["Gestor", "Grupo", "Empresa", "Área", "Tier"].forEach((f, i) => nota(C.fil, meio(R.sels[i], 0.5, 0), [0, -70 - (i % 2) * 52], f, "", 21.9 + i * 0.15, 23.7));
+  // capa já filtrada
+  nota(C.cov, meio(R.hello, 0.02, 0.5), [-120, -120], "Saudação pelo nome", "o link do e-mail já abre na carteira", 27.6, 29.4);
+  // comece por aqui
+  nota(C.com, meio(R.abrirCard, 0.3, 1), [-260, 130], "Link direto para o card", "abre no Pipefy, em outra aba", 31.3, 33.9);
+  // onde atuar
+  [["Mais antigas primeiro", "ordem por dias de atraso"], ["Vence hoje", "o que vira atraso amanhã"], ["Para antecipar", "se sobrar tempo"]].forEach(([a, b], i) =>
+    nota(C.brd, meio(R.colH[i], 0.5, 0), [0, -66], a, b, 36.6 + i * 0.4, 39.7));
+  nota(C.tier, meio(R.itTier, 0.08, 0.5), [-60, 150], "Tier do cliente", "Diamante, Ouro, Prata e Bronze, da DB - BR NET", 41.6, 43);
+  // visão gerencial
+  nota(C.mx, meio(R.cel1, 0.5, 0), [80, -110], "Mais escura, mais atraso", "8 de 9 demandas atrasadas", 46.4, 47.9);
+  nota(C.mx, meio(R.crumbs, 0.08, 0.5), [-40, -110], "Trilha para voltar", "e o botão voltar do navegador", 49.8, 51.9);
+  // evolução
+  nota(C.mod, meio(R.ms1, 0, 0.5), [-180, 0], "Variação desde a edição anterior", "", 54.4, 57);
+  // e-mail
+  nota(C.pho, meio(R.subj, 0, 0.5), [-300, -30], "O assunto já traz os números", "", 63.8, 71.2);
+  nota(C.pho, meio(R.nums, 0, 0.45), [-300, 0], "Três números, sem lista", "", 64.8, 71.2);
+  nota(C.pho, meio(R.mcta, 0.02, 0.5), [-300, 30], "Um botão", "abre o painel já filtrado", 65.8, 71.2);
+
+  // ---------- abertura ----------
+  K($("intro"), [[0, { opacity: 1 }], [3.6, { opacity: 1 }], [4.4, { opacity: 0, visibility: "hidden" }]]);
+  K($("introLogo"), [[0.2, { opacity: 0, transform: "translateY(16px)" }], [1, { opacity: 1, transform: "none" }]]);
+  K($("introT"), [[0.5, { opacity: 0, transform: "translateY(30px) scale(.96)", filter: "blur(6px)" }], [1.5, { opacity: 1, transform: "none", filter: "blur(0)" }], [3.4, { opacity: 1, transform: "scale(1.04)" }], [4.2, { opacity: 0, transform: "scale(1.12)" }]]);
+  [["c1", 0.1], ["c2", 0.35], ["c3", 0.6]].forEach(([c, t]) => K(document.querySelector(`#intro .${c}`), [[t, { transform: "scale(0)" }], [t + 0.9, { transform: "scale(1)" }], [3.4, { transform: "scale(1)", opacity: 1 }], [4.2, { transform: "scale(4)", opacity: 0 }]], "cubic-bezier(.2,1.3,.4,1)"));
+
+  // ---------- montagem: contornos das peças, depois as peças voando até o encaixe ----------
+  const PECAS = [["p-teal", -900, -400, -9], ["p-navy", 1000, -200, 7], ["p-filtros", -1100, 120, -5], ["p-comece", 1100, 300, 6], ["p-board", -800, 900, -7], ["p-mx", 900, 1000, 8]];
+  const slots = $("slots");
+  PECAS.forEach(([id, dx, dy, rot], i) => {
+    const r = R[id], s = document.createElement("div"); s.className = "slot";
+    Object.assign(s.style, { left: `${r.x}px`, top: `${r.y}px`, width: `${r.w}px`, height: `${r.h}px` }); slots.append(s);
+    const t = 4.8 + i * 0.62, d = 1.5;
+    K(s, [[4, { opacity: 0 }], [4.7, { opacity: 1 }], [t + d - 0.2, { opacity: 1 }], [t + d, { opacity: 0 }]]);
+    K($(id), [[0, { opacity: 0, transform: `translate(${dx}px,${dy}px) rotate(${rot}deg) scale(.86)`, boxShadow: "0 40px 90px rgba(0,0,0,.45)" }], [t, { opacity: 0, transform: `translate(${dx}px,${dy}px) rotate(${rot}deg) scale(.86)` }], [t + 0.3, { opacity: 1 }],
+      [t + d, { transform: "none", boxShadow: "0 30px 70px rgba(0,0,0,.35)" }], [t + d + 0.7, { boxShadow: "0 0 0 rgba(0,0,0,0)" }]], "cubic-bezier(.3,1.12,.4,1)");
+  });
+  // fundo branco do miolo entra depois da última peça, para os vãos entre elas fecharem
+  K($("sheet"), [[0, { backgroundColor: "rgba(255,255,255,0)" }], [11.2, { backgroundColor: "rgba(255,255,255,0)" }], [11.8, { backgroundColor: "rgba(255,255,255,1)" }]]);
+  // flash suave de "encaixe" na tela inteira
+  const flash = document.createElement("div"); Object.assign(flash.style, { position: "absolute", left: "0", top: "0", width: `${R.all.w}px`, height: `${R.all.h - 40}px`, borderRadius: "8px", boxShadow: "0 0 0 4px #00AFAA, 0 0 80px rgba(0,175,170,.5)" });
+  $("overlay").append(flash);
+  K(flash, [[0, { opacity: 0 }], [11.6, { opacity: 0 }], [11.9, { opacity: 1 }], [12.9, { opacity: 0 }]]);
+
+  // ---------- bolhas ----------
+  [["bub1", 13.8], ["bub2", 14.2], ["bub3", 14.6]].forEach(([id, t]) => K($(id), [[0, { transform: "scale(0)" }], [t, { transform: "scale(0)" }], [t + 0.7, { transform: "scale(1)" }]], "cubic-bezier(.2,1.5,.4,1)"));
+
+  // ---------- cursor, cliques e menu do filtro ----------
+  const cur = $("cursor"), at = (r, fx = 0.5, fy = 0.5) => ({ transform: `translate(${r.x + r.w * fx}px,${r.y + r.h * fy}px)` });
+  const fora = { transform: `translate(${R.selG.x + 600}px,${R.selG.y + 240}px)` };
+  K(cur, [
+    [0, { ...fora, opacity: 0 }], [23, { ...fora, opacity: 0 }], [23.2, { ...fora, opacity: 1 }], [23.9, { ...at(R.selG, 0.7), opacity: 1 }], [24.2, { ...at(R.selG, 0.7) }],
+    [24.7, { ...at(R.dropAna, 0.4) }], [25.4, { ...at(R.dropAna, 0.4), opacity: 1 }], [25.7, { ...at(R.dropAna, 0.4), opacity: 0 }],
+    [30.2, { ...at(R.abrirCard, 1.4, 1.6), opacity: 0 }], [30.5, { ...at(R.abrirCard, 1.4, 1.6), opacity: 1 }], [31.2, { ...at(R.abrirCard, 0.55) }], [33.4, { ...at(R.abrirCard, 0.55), opacity: 1 }], [33.7, { ...at(R.abrirCard, 0.55), opacity: 0 }],
+    [47, { ...at(R.mxRow1, 1.2, 1.3), opacity: 0 }], [47.3, { ...at(R.mxRow1, 1.2, 1.3), opacity: 1 }], [48, { ...at(R.mxRow1, 0.25, 0.3) }], [49.2, { ...at(R.mxRow1, 0.25, 0.3), opacity: 1 }], [49.5, { ...at(R.mxRow1, 0.25, 0.3), opacity: 0 }],
+    [52, { ...at(R.evoBtn, 1.6, 2), opacity: 0 }], [52.3, { ...at(R.evoBtn, 1.6, 2), opacity: 1 }], [52.9, { ...at(R.evoBtn, 0.4) }], [53.3, { ...at(R.evoBtn, 0.4), opacity: 1 }], [53.6, { ...at(R.evoBtn, 0.4), opacity: 0 }],
+    [TOTAL, { ...at(R.evoBtn, 0.4), opacity: 0 }],
+  ]);
+  const clique = (r, fx, fy, t) => { const d = document.createElement("div"); d.className = "ripple"; d.style.left = `${r.x + r.w * fx}px`; d.style.top = `${r.y + r.h * fy}px`; $("overlay").append(d);
+    K(d, [[0, { opacity: 0, transform: "scale(.3)" }], [t, { opacity: 0, transform: "scale(.3)" }], [t + 0.05, { opacity: 1 }], [t + 0.6, { opacity: 0, transform: "scale(1.6)" }]]); };
+  clique(R.selG, 0.7, 0.5, 24.1); clique(R.dropAna, 0.4, 0.5, 25.1); clique(R.abrirCard, 0.55, 0.5, 32.2); clique(R.mxRow1, 0.25, 0.3, 48.5); clique(R.evoBtn, 0.4, 0.5, 53.1);
+  K(drop, [[0, { opacity: 0, transform: "translateY(-6px)" }], [24.2, { opacity: 0, transform: "translateY(-6px)" }], [24.45, { opacity: 1, transform: "none" }], [25.2, { opacity: 1 }], [25.5, { opacity: 0 }]]);
+  K($("dropAna"), [[24.6, { background: "#fff" }], [24.75, { background: "#E6F7F6" }]]);
+  K($("selG"), [[25.2, { boxShadow: "0 0 0 0 rgba(0,175,170,0)" }], [25.5, { boxShadow: "0 0 0 4px rgba(0,175,170,.35)" }], [26.8, { boxShadow: "0 0 0 0 rgba(0,175,170,0)" }]]);
+
+  // holofote: escurece o resto da tela e deixa só o elemento explicado aceso
+  const holofote = (r, t0, t1, pad = 12, raio = 18) => { const d = document.createElement("div"); d.className = "spot";
+    Object.assign(d.style, { left: `${r.x - pad}px`, top: `${r.y - pad}px`, width: `${r.w + 2 * pad}px`, height: `${r.h + 2 * pad}px`, borderRadius: `${raio}px` }); $("overlay").append(d);
+    K(d, [[0, { opacity: 0 }], [t0, { opacity: 0 }], [t0 + 0.6, { opacity: 1 }], [t1 - 0.5, { opacity: 1 }], [t1, { opacity: 0 }]]); };
+  holofote(R.bubbles, 15.2, 20.3, 14, 70);
+  holofote(R["p-filtros"], 21.8, 25.6, 4, 10);
+  holofote({ ...R.say, h: R.say.h * 0.42 }, 27.4, 29.5, 18, 16);
+  holofote(R["p-comece"], 30.7, 34.1, 10, 26);
+  holofote(R.grid, 36.3, 39.9, 12, 20);
+  holofote(R.itTier, 41.2, 43.1, 10, 14);
+  holofote(R.crumbs, 49.5, 52, 10, 12);
+
+  // anéis de destaque
+  const anel = (r, t0, t1, pad = 10) => { const d = document.createElement("div"); d.className = "ring";
+    Object.assign(d.style, { left: `${r.x - pad}px`, top: `${r.y - pad}px`, width: `${r.w + 2 * pad}px`, height: `${r.h + 2 * pad}px` }); $("overlay").append(d);
+    K(d, [[0, { opacity: 0 }], [t0, { opacity: 0, transform: "scale(1.04)" }], [t0 + 0.4, { opacity: 1, transform: "none" }], [t1 - 0.3, { opacity: 1 }], [t1, { opacity: 0 }]]); };
+  anel(R.itTier, 41.4, 43, 6); anel(R.crumbs, 49.6, 51.9, 8);
+
+  // ---------- onde atuar: itens chegando coluna a coluna ----------
+  const apagado = { background: "rgba(230,247,246,0)", boxShadow: "inset 3px 0 0 rgba(0,175,170,0)" }, aceso = { background: "rgba(230,247,246,1)", boxShadow: "inset 3px 0 0 #00AFAA" };
+  document.querySelectorAll("#board .col").forEach((col, c) => {
+    K(col.querySelector(".col-h"), [[0, { transform: "none" }], [35.9 + c * 0.6, { transform: "none" }], [36.15 + c * 0.6, { transform: "translateY(-6px) scale(1.03)" }], [36.5 + c * 0.6, { transform: "none" }]], "cubic-bezier(.3,1.4,.4,1)");
+    col.querySelectorAll(".it").forEach((it, i) => { const t = 36.2 + c * 0.6 + i * 0.28; K(it, [[0, apagado], [t, apagado], [t + 0.18, aceso], [t + 0.9, apagado]]); });
+  });
+
+  // ---------- visão gerencial: células ganham cor linha a linha; depois desce para o Grupo Atlântico ----------
+  document.querySelectorAll("#tbG .cell, #tbE .cell").forEach((cl) => { if (cl.dataset.bg) { cl.style.background = cl.dataset.bg; cl.style.color = cl.dataset.fg; } });
+  document.querySelectorAll("#tbG .row").forEach((row, i) => row.querySelectorAll(".cell").forEach((cl, j) => {
+    const t = 45.3 + i * 0.3 + j * 0.07;
+    K(cl, [[0, { transform: "none" }], [t, { transform: "none" }], [t + 0.2, { transform: "scale(1.07)" }], [t + 0.55, { transform: "none" }]], "cubic-bezier(.3,1.3,.4,1)");
+  }));
+  K($("tbG"), [[0, { opacity: 1, transform: "none" }], [48.6, { opacity: 1, transform: "none" }], [49, { opacity: 0, transform: "translateX(-30px)" }]]);
+  K($("tbE"), [[0, { opacity: 0 }], [48.9, { opacity: 0, transform: "translateX(30px)" }], [49.4, { opacity: 1, transform: "none" }]]);
+  K($("cr1"), [[0, { opacity: 1 }], [48.6, { opacity: 1 }], [48.8, { opacity: 0 }]]);
+  K($("cr2"), [[0, { opacity: 0 }], [48.8, { opacity: 0, transform: "translateY(6px)" }], [49.2, { opacity: 1, transform: "none" }]]);
+
+  // ---------- modal de evolução ----------
+  K($("dim"), [[0, { opacity: 0 }], [53.2, { opacity: 0 }], [53.7, { opacity: 1 }], [61.2, { opacity: 1 }], [61.7, { opacity: 0 }]]);
+  K(modal, [[0, { opacity: 0, transform: "translateY(30px) scale(.94)" }], [53.3, { opacity: 0, transform: "translateY(30px) scale(.94)" }], [53.9, { opacity: 1, transform: "none" }], [61.2, { opacity: 1, transform: "none" }], [61.7, { opacity: 0, transform: "scale(.96)" }]], "cubic-bezier(.2,1.1,.4,1)");
+  svg.querySelectorAll(".ln").forEach((p, i) => { const L = p.getTotalLength(); p.style.strokeDasharray = `${L}`; K(p, [[0, { strokeDashoffset: L }], [54.6 + i * 0.25, { strokeDashoffset: L }], [56.8 + i * 0.25, { strokeDashoffset: 0 }]], "cubic-bezier(.45,0,.2,1)"); });
+  svg.querySelectorAll(".fimdot, .fim").forEach((d) => K(d, [[0, { opacity: 0 }], [57, { opacity: 0 }], [57.4, { opacity: 1 }]]));
+  const cross = svg.querySelector("#cross"), tip = $("tip");
+  const px = (i) => chartR.x + cx(i) * (chartR.w / CW);
+  const passo = [[58, 5], [58.8, 6], [59.6, 7], [60.4, 8]];
+  K(cross, [[0, { opacity: 0, transform: `translateX(${cx(5)}px)` }], [57.7, { opacity: 0, transform: `translateX(${cx(5)}px)` }], ...passo.map(([t, i]) => [t, { opacity: 1, transform: `translateX(${cx(i)}px)` }]), [61, { opacity: 0, transform: `translateX(${cx(8)}px)` }]]);
+  K(tip, [[0, { opacity: 0, transform: `translateX(${px(5) + 14}px)` }], [57.7, { opacity: 0, transform: `translateX(${px(5) + 14}px)` }], ...passo.map(([t, i]) => [t, { opacity: 1, transform: `translateX(${px(i) + 14}px)` }]), [61, { opacity: 0, transform: `translateX(${px(8) + 14}px)` }]]);
+  const idxTip = (t) => (t < 58.4 ? 5 : t < 59.2 ? 6 : t < 60 ? 7 : 8);
+
+  // ---------- e-mail no celular; o painel ao fundo apaga para não competir ----------
+  K($("screen"), [[0, { opacity: 1 }], [61.6, { opacity: 1 }], [62.6, { opacity: 0.18 }], [71.6, { opacity: 0.18 }], [73, { opacity: 1 }]]);
+  K($("phone"), [[0, { opacity: 0, transform: "translateY(120px) rotate(4deg)" }], [61.8, { opacity: 0, transform: "translateY(120px) rotate(4deg)" }], [63, { opacity: 1, transform: "none" }]], "cubic-bezier(.2,1.1,.4,1)");
+  K($("subj"), [[0, { opacity: 0, transform: "translateY(10px)" }], [62.9, { opacity: 0, transform: "translateY(10px)" }], [63.3, { opacity: 1, transform: "none" }]]);
+  K($("mail"), [[0, { opacity: 0, transform: "translateY(24px)" }], [63, { opacity: 0, transform: "translateY(24px)" }], [63.7, { opacity: 1, transform: "none" }]]);
+  K($("mcta"), [[66.6, { transform: "none", boxShadow: "0 0 0 0 rgba(0,175,170,.5)" }], [67.2, { transform: "scale(1.06)", boxShadow: "0 0 0 12px rgba(0,175,170,0)" }], [67.7, { transform: "none" }], [68.3, { transform: "scale(1.06)", boxShadow: "0 0 0 0 rgba(0,175,170,.5)" }], [68.9, { transform: "none", boxShadow: "0 0 0 12px rgba(0,175,170,0)" }]]);
+
+  // ---------- encerramento ----------
+  K($("outro"), [[0, { opacity: 0, visibility: "hidden" }], [74.6, { opacity: 0, visibility: "visible" }], [75.6, { opacity: 1 }]]);
+  K(document.querySelector("#outro .ttl"), [[0, { opacity: 0 }], [74.8, { opacity: 0, transform: "translateY(24px)" }], [75.8, { opacity: 1, transform: "none" }]]);
+  document.querySelectorAll("#chips span").forEach((c, i) => K(c, [[0, { opacity: 0 }], [76.4 + i * 0.3, { opacity: 0, transform: "translateY(16px)" }], [77 + i * 0.3, { opacity: 1, transform: "none" }]], "cubic-bezier(.2,1.2,.4,1)"));
+  K(document.querySelector("#outro img"), [[0, { opacity: 0 }], [74.8, { opacity: 0 }], [75.6, { opacity: 1 }]]);
+
+  // ---------- legendas ----------
+  const CAPS = [
+    [5, 12.6, "Um painel montado a partir do Pipefy", "Duas vezes por dia útil, o job lê o pipe, calcula o prazo de cada demanda e guarda um retrato da edição."],
+    [13.4, 20.4, "Os números do dia", "Prazo vencido, vence hoje e próximos 2 dias, nas cores que se repetem no painel inteiro."],
+    [21.4, 29.5, "Cada gestor na sua carteira", "Filtre por gestor, grupo, empresa, área e tier. Quem abre o link do e-mail já cai na própria carteira."],
+    [30.3, 34.2, "Comece por aqui", "A demanda mais urgente do recorte, com link direto para o card no Pipefy."],
+    [35.2, 43.2, "Onde atuar", "Vencidas primeiro, depois o que vence hoje e o que dá para antecipar. Cada linha traz a área, o tier e o grupo."],
+    [44.4, 52.2, "Visão gerencial", "Quanto mais escura a célula, maior a parte atrasada. Clique no nome para descer um nível; a trilha leva de volta."],
+    [53.2, 61.4, "Evolução", "Os três números, edição a edição, no mesmo recorte dos filtros. Passe o mouse para ver cada dia."],
+    [62.6, 71.6, "Às 07:00, no e-mail", "Três números e um botão. O detalhe fica no painel."],
+  ];
+  const caps = $("caps");
+  CAPS.forEach(([t0, t1, h, p], i) => {
+    const c = document.createElement("div"); c.className = "cap";
+    c.innerHTML = `<div class="n">${String(i + 1).padStart(2, "0")} / ${String(CAPS.length).padStart(2, "0")}</div><h2></h2><p></p><i class="bar"></i>`;
+    c.querySelector("h2").textContent = h; c.querySelector("p").textContent = p; caps.append(c);
+    K(c, [[0, { opacity: 0, transform: "translateY(30px)" }], [t0, { opacity: 0, transform: "translateY(30px)" }], [t0 + 0.6, { opacity: 1, transform: "none" }], [t1 - 0.4, { opacity: 1, transform: "none" }], [t1, { opacity: 0, transform: "translateY(-14px)" }]], "cubic-bezier(.2,.9,.3,1)");
+    K(c.querySelector(".bar"), [[0, { transform: "scaleX(0)" }], [t0 + 0.6, { transform: "scaleX(0)" }], [t1 - 0.4, { transform: "scaleX(1)" }]], "linear");
+  });
+
+  // relógio-mestre: a posição da apresentação é o currentTime dele
+  const relogio = K(document.createElement("i"), [[0, { opacity: 0 }], [TOTAL, { opacity: 1 }]], "linear");
+
+  // ---------- textos que mudam com o tempo (contagens e digitação) ----------
+  const dd = (x) => (x < 10 ? "0" + x : String(x));
+  const ease = (x) => 1 - Math.pow(1 - Math.min(1, Math.max(0, x)), 3);
+  const conta = (de, para, t0, d) => (t) => Math.round(de + (para - de) * ease((t - t0) / d));
+  const B = [[47, 21], [12, 6], [18, 9]], TROCA = 25.8, DESCE = 26.9;
+  const TEXTOS = [
+    ...B.map(([time, ana], i) => [$(`bub${i + 1}`), (t) => dd(t < TROCA ? conta(0, time, 14 + i * 0.4, 1.4)(t) : conta(time, ana, DESCE, 1.1)(t))]),
+    ...B.map(([time, ana], i) => [$(`lg${i + 1}`), (t) => dd(t < TROCA ? time : conta(time, ana, DESCE, 1.1)(t))]),
+    [$("claim"), (t) => `${t < TROCA ? 59 : conta(59, 27, DESCE, 1.1)(t)} demandas pedem ação hoje.`],
+    [$("hello"), (t) => { if (t < DESCE) return "Bom dia, time."; const s = "Bom dia, Ana."; return s.slice(0, Math.round(s.length * Math.min(1, (t - DESCE) / 0.9))) || " "; }],
+    [$("selG"), (t) => (t < 25.2 ? "Todos os gestores" : "Ana Ribeiro")],
+    ...[...document.querySelectorAll("#board .col-h strong")].map((el, i) => [el, (t) => dd(conta(0, +el.dataset.n, 9.6 + i * 0.25, 1.2)(t))]),
+    ...[21, 6, 9].map((v, i) => [$(`ms${i + 1}`), (t) => String(conta(0, v, 53.9, 1)(t))]),
+    ...[21, 6, 9].map((v, i) => [$(`mn${i + 1}`), (t) => String(conta(0, v, 63.9 + i * 0.25, 1.1)(t))]),
+    [$("tipD"), (t) => `${DIAS[idxTip(t)]} ${DATAS[idxTip(t)]}, 07:00`],
+    ...[0, 1, 2].map((k) => [$(`tip${k + 1}`), (t) => String(SER[k][1][idxTip(t)])]),
+  ];
+
+  // ---------- controles ----------
+  const CENAS = [[0, "Abertura"], [4, "Montagem"], [12.8, "Números"], [20.8, "Filtros"], [29, "Comece"], [34.6, "Onde atuar"], [43.8, "Gerencial"], [52.4, "Evolução"], [61.8, "E-mail"], [72.4, "Fim"]];
+  const q = new URLSearchParams(location.search);
+  const repetir = q.get("loop") !== "0";
+  const trk = $("trk"), pg = $("pg"), tm = $("tm"), play = $("play");
+  const chips = CENAS.map(([t, nome]) => { const c = document.createElement("div"); c.className = "ch"; c.style.left = `${(t / TOTAL) * 100}%`; c.innerHTML = "<span></span>"; c.querySelector("span").textContent = nome; trk.append(c); return c; });
+  const mmss = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+  let tocando = false, reinicio = null;
+  const agora = () => (relogio.currentTime ?? 0) / 1000;
+  const desenhar = () => {
+    const t = Math.min(TOTAL, agora());
+    for (const [el, f] of TEXTOS) { const v = f(t); if (el.textContent !== v) el.textContent = v; }
+    pg.style.width = `${(t / TOTAL) * 100}%`; tm.textContent = `${mmss(t)} / ${mmss(TOTAL)}`;
+    chips.forEach((c, i) => c.classList.toggle("on", t >= CENAS[i][0] && (i === CENAS.length - 1 || t < CENAS[i + 1][0])));
+    if (t >= TOTAL && tocando) { pausar(); if (repetir) reinicio = setTimeout(() => { ir(0); tocar(); }, 1500); }
+  };
+  const laco = () => { desenhar(); if (tocando) requestAnimationFrame(laco); };
+  const ir = (t) => { for (const a of anims) a.currentTime = Math.max(0, Math.min(TOTAL, t)) * 1000; desenhar(); };
+  const tocar = () => { clearTimeout(reinicio); if (agora() >= TOTAL - 0.05) ir(0); anims.forEach((a) => a.play()); tocando = true; play.innerHTML = "❚❚ <span>Pausar</span>"; play.setAttribute("aria-label", "Pausar"); laco(); };
+  const pausar = () => { anims.forEach((a) => a.pause()); tocando = false; play.innerHTML = `▶ <span>${agora() >= TOTAL - 0.05 ? "Rever" : "Continuar"}</span>`; play.setAttribute("aria-label", "Reproduzir"); desenhar(); };
+  play.onclick = () => (tocando ? pausar() : tocar());
+  $("again").onclick = () => { ir(0); tocar(); };
+  trk.onclick = (e) => { const r = trk.getBoundingClientRect(); ir(((e.clientX - r.left) / r.width) * TOTAL); };
+  addEventListener("keydown", (e) => {
+    if (e.code === "Space") { e.preventDefault(); tocando ? pausar() : tocar(); }
+    const i = CENAS.findLastIndex(([t]) => t <= agora() + 0.01);
+    if (e.key === "ArrowRight" && i < CENAS.length - 1) ir(CENAS[i + 1][0]);
+    if (e.key === "ArrowLeft") ir(CENAS[Math.max(0, agora() - CENAS[i][0] < 1 ? i - 1 : i)][0]);
+  });
+  // os controles somem quando o mouse para; voltam ao mexer
+  const ctl = $("ctl"); let sumir;
+  const mostrar = () => { ctl.style.opacity = ".9"; clearTimeout(sumir); sumir = setTimeout(() => tocando && (ctl.style.opacity = "0"), 2500); };
+  addEventListener("pointermove", mostrar); mostrar();
+
+  // ?t=40 abre pausado num ponto da apresentação (para revisar uma cena)
+  const tq = Number(q.get("t"));
+  if (tq) { ir(tq); pausar(); }
+  else if (matchMedia("(prefers-reduced-motion: reduce)").matches) { ir(11.5); pausar(); }
+  else tocar();
+})();
+</script>
+</body>
+</html>

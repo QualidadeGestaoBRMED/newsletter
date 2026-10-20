@@ -4,6 +4,7 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { TIERS } from "@/jobs/config";
+import Evolucao from "./evolucao";
 import { ID_EDICAO, type EdicaoResumo, type Linha, type Periodo } from "@/lib/painel";
 
 type Row = Linha & { done: boolean; off: number };
@@ -139,6 +140,7 @@ export default function Painel() {
   const atualizando = carga?.status === "loading";
 
   const [q, setQ] = useState("");
+  const [evo, setEvo] = useState(false);
   const [open, setOpen] = useState<Record<string, boolean>>({});
 
   const docRef = useRef<HTMLElement>(null);
@@ -411,6 +413,12 @@ export default function Painel() {
             value={q}
             onChange={(e) => setQ(e.target.value)}
           />
+          <button type="button" className="evo-btn" onClick={() => setEvo(true)}>
+            <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M2 12.5 6 7.5l3 2.5 5-6" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            Evolução
+          </button>
           <button
             type="button"
             className="reset"
@@ -422,6 +430,12 @@ export default function Painel() {
             Limpar
           </button>
         </div>
+
+        <Evolucao
+          aberto={evo}
+          onFechar={() => setEvo(false)}
+          filtros={{ gestor: p.gestor, grupo: p.grupo, empresa: p.empresa, area: p.area, tier: p.tier }}
+        />
 
         <div className="sheet">
           <div className="next" id="comece">

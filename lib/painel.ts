@@ -25,3 +25,6 @@ export type Linha = {
 };
 
 export const ID_EDICAO = /^\d{4}-\d{2}-\d{2}-(manha|tarde)$/;
+
+/** Um ponto do gráfico de evolução: contagens de uma edição da manhã. */
+export type PontoSerie = { id: string; data: string; vencidas: number; hoje: number; radar: number };

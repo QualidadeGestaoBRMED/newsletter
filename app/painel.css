@@ -132,6 +132,46 @@ html,body{margin:0;background:#E9EDEF}
 .bm .foot .pg{font-family:var(--ws);font-weight:500;color:var(--gray-2)}
 .bm [data-dash-source-state=refreshing]{opacity:.5;transition:opacity var(--cds-dur-slow)}
 
+/* ===== evolução (modal) ===== */
+.bm .filters .evo-btn{display:inline-flex;align-items:center;gap:6px;color:var(--teal);background:#fff;border:1px solid var(--gray-3);border-radius:99px;padding:6px 13px;text-decoration:none}
+.bm .filters .evo-btn:hover{border-color:var(--teal)}
+.bm .evo{width:min(880px,calc(100% - 32px));max-height:calc(100% - 32px);border:0;border-radius:22px 22px 22px 4px;padding:30px 36px 28px;color:var(--navy);background:#fff;box-shadow:0 24px 80px rgba(25,59,79,.28);font-family:var(--rb);font-weight:300}
+.bm .evo::backdrop{background:rgba(25,59,79,.55)}
+.bm .evo .x{position:absolute;top:16px;right:16px;width:36px;height:36px;border-radius:50%;border:0;background:var(--gray-4);color:var(--navy);font-size:20px;line-height:1;cursor:pointer}
+.bm .evo .x:hover{background:var(--gray-3)}
+.bm .evo h2{margin:8px 0 0;font-weight:300;font-size:24px;line-height:1.25}
+.bm .evo h2 b{font-weight:600}
+.bm .evo .escopo{margin:6px 0 0;color:var(--ink);font-size:14px}
+.bm .evo .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:24px}
+.bm .evo .stat{border-top:1px solid var(--gray-3);padding-top:12px}
+.bm .evo .stat .lb{display:flex;align-items:center;gap:8px;font-family:var(--ws);font-size:13px;font-weight:500}
+.bm .evo .stat .lb i,.bm .evo .legenda i,.bm .evo .tip i{display:block;flex:0 0 auto;height:2px;border-radius:2px}
+.bm .evo .stat .lb i{width:14px}
+.bm .evo .stat strong{display:block;font-family:var(--ws);font-weight:300;font-size:40px;line-height:1.15;margin-top:4px}
+.bm .evo .stat small{color:var(--gray-1);font-size:12px}
+.bm .evo .legenda{display:flex;flex-wrap:wrap;gap:6px 18px;margin:26px 0 8px;font-size:12.5px;color:var(--ink)}
+.bm .evo .legenda span{display:inline-flex;align-items:center;gap:7px}
+.bm .evo .legenda i{width:16px}
+.bm .evo .graf{position:relative}
+.bm .evo .graf svg{display:block;overflow:visible;touch-action:pan-y}
+.bm .evo .graf svg:focus-visible{outline:2px solid var(--teal-vivid);outline-offset:4px;border-radius:4px}
+.bm .evo .graf .tk{font-family:var(--ws);font-size:11px;fill:var(--gray-1);font-variant-numeric:tabular-nums}
+.bm .evo .graf .fim{font-family:var(--ws);font-size:12px;fill:var(--gray-1)}
+.bm .evo .graf .fim .v{fill:var(--navy);font-weight:600}
+.bm .evo .tip{position:absolute;width:170px;pointer-events:none;background:#fff;border:1px solid var(--gray-3);border-radius:10px;padding:8px 12px;box-shadow:0 8px 24px rgba(25,59,79,.12);font-size:12.5px}
+.bm .evo .tip .dt{color:var(--gray-1);font-size:11.5px;margin-bottom:2px}
+.bm .evo .tip .r{display:flex;align-items:center;gap:8px;line-height:1.75}
+.bm .evo .tip i{width:12px}
+.bm .evo .tip b{font-family:var(--ws);font-weight:600;color:var(--navy);font-variant-numeric:tabular-nums;min-width:3.2ch}
+.bm .evo .tip span{color:var(--gray-1)}
+.bm .evo .rodape{display:flex;justify-content:space-between;align-items:baseline;gap:16px;margin-top:12px}
+.bm .evo .link{flex:0 0 auto;font-family:var(--ws);font-size:12.5px;color:var(--teal);background:none;border:0;padding:0;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.bm .evo .tab{width:100%;border-collapse:collapse;margin-top:12px;font-size:13px;font-variant-numeric:tabular-nums}
+.bm .evo .tab th{text-align:right;font-family:var(--ws);font-weight:500;font-size:12px;color:var(--gray-1);padding:6px 8px;border-bottom:1px solid var(--gray-3)}
+.bm .evo .tab td{text-align:right;padding:6px 8px;border-bottom:1px solid var(--gray-4)}
+.bm .evo .tab th:first-child,.bm .evo .tab td:first-child{text-align:left}
+.bm .evo [data-carregando]{opacity:.5;transition:opacity var(--cds-dur-slow)}
+
 @media(max-width:1000px){
   .bm .cover-navy{grid-template-columns:1fr;padding:72px 64px 56px;gap:24px}
   .bm .say{justify-self:start;width:min(420px,100%)}
@@ -170,4 +210,9 @@ html,body{margin:0;background:#E9EDEF}
   .bm .mx td{min-width:0;padding:8px 4px;font-size:17px}
   .bm .mx td::before{content:attr(data-l);display:block;font-size:10.5px;font-weight:600;letter-spacing:.04em;opacity:.75;margin-bottom:2px}
   .bm .mx td small{font-size:10px}
+  .bm .evo{padding:24px 18px 20px;width:calc(100% - 20px)}
+  .bm .evo .stats{gap:10px}
+  .bm .evo .stat .lb{font-size:11.5px;gap:6px}
+  .bm .evo .stat strong{font-size:28px}
+  .bm .evo .rodape{flex-direction:column;gap:6px}
 }

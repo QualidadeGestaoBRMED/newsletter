@@ -1,0 +1,79 @@
+# Gera a edição do Briefing Suporte e grava no Postgres (Neon). O envio dos e-mails entra no run.ts depois.
+name: Briefing Suporte
+
+on:
+  schedule:
+    # Manhã: 07:00 BRT = 10:00 UTC (o Brasil não tem horário de verão desde 2019).
+    # Agendado 15 min antes porque o cron do Actions pode atrasar.
+    - cron: "45 9 * * 1-5"
+    # Tarde (18:00 BRT = 21:00 UTC) entra quando a edição da tarde existir:
+    # - cron: "45 20 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      periodo:
+        description: Edição
+        type: choice
+        options: [manha, tarde]
+        default: manha
+      data:
+        description: Data da edição (AAAA-MM-DD). Vazio = hoje em São Paulo
+        type: string
+        required: false
+      dry_run:
+        description: Só gerar e imprimir, sem gravar nem enviar
+        type: boolean
+        default: false
+
+concurrency:
+  # nunca duas execuções do mesmo período ao mesmo tempo; a segunda espera a primeira
+  group: briefing-${{ github.event_name == 'schedule' && (github.event.schedule == '45 9 * * 1-5' && 'manha' || 'tarde') || inputs.periodo }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  edicao:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      PERIODO: ${{ github.event_name == 'schedule' && (github.event.schedule == '45 9 * * 1-5' && 'manha' || 'tarde') || inputs.periodo }}
+      DATA: ${{ inputs.data }}
+      DRY_RUN: ${{ inputs.dry_run && '1' || '' }}
+      PIPEFY_TOKEN: ${{ secrets.PIPEFY_TOKEN }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DATABASE_URL_UNPOOLED: ${{ secrets.DATABASE_URL_UNPOOLED }}
+      MANDRILL_API_KEY: ${{ secrets.MANDRILL_API_KEY }}
+      REMETENTE_EMAIL: ${{ secrets.REMETENTE_EMAIL }}
+      REMETENTE_NOME: ${{ secrets.REMETENTE_NOME }}
+      PAINEL_URL: ${{ secrets.PAINEL_URL }}
+      ALERTA_EMAIL: ${{ secrets.ALERTA_EMAIL }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Migrações do banco
+        run: npx drizzle-kit migrate
+
+      - name: Gerar edição
+        run: |
+          args=("$PERIODO")
+          if [ -n "$DATA" ]; then
+            [[ "$DATA" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] || { echo "::error::data inválida: $DATA"; exit 1; }
+            args+=("--data=$DATA")
+          fi
+          [ -n "$DRY_RUN" ] && args+=("--dry-run")
+          npx tsx --tsconfig tsconfig.jobs.json jobs/run.ts "${args[@]}"
+
+      - name: Avisar falha por e-mail
+        if: failure()
+        run: >
+          npx tsx --tsconfig tsconfig.jobs.json jobs/alerta.ts
+          "Edição $PERIODO falhou em ${{ github.run_started_at }}"
+          "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"

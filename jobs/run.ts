@@ -2,7 +2,7 @@
 // Por enquanto gera e grava a edição da manhã. Tarde entra na etapa 4 e o envio dos e-mails na etapa 7.
 import "./env";
 import { itensComCache } from "./cache";
-import type { Periodo } from "./config";
+import { FERIADOS, type Periodo } from "./config";
 import { carteiras, numeros } from "./edicao";
 import type { Aviso, CacheBrnet } from "./pipefy";
 import { hojeEmSP } from "./regras";
@@ -16,6 +16,8 @@ async function main() {
   if (periodo === "tarde") throw new Error("A edição da tarde ainda não foi implementada (etapa 4)");
 
   const data = arg("data") ?? hojeEmSP(new Date());
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(data)) throw new Error(`--data inválida: ${data} (use AAAA-MM-DD)`);
+  if (FERIADOS.includes(data) && !arg("data")) return console.log(`${data} é feriado: edição não gerada`);
   const avisos: Aviso[] = [];
   const { cacheBrnet, gravarEdicao, fecharBanco } = await import("./banco");
   try {
