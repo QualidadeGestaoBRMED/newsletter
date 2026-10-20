@@ -43,6 +43,7 @@ export type Item = {
   grupo: string;
   gestor_nome: string | null;
   gestor_email: string | null;
+  tier: string | null;
   campo_prazo: string;
   prazo: Dia;
   status: Status;
@@ -181,6 +182,8 @@ export type Databases = {
   coordenadorPorEmpresa: Map<string, string>;
   /** DB - BR NET: group_name normalizado → account_coordinator_name */
   coordenadorPorGrupo: Map<string, string>;
+  /** DB - BR NET: empresa_name normalizado → tier */
+  tierPorEmpresa: Map<string, string>;
 };
 
 function nomesDoConector(c: CampoCru | undefined): string[] {
@@ -208,9 +211,14 @@ export function resolverGestor(card: CardCru, db: Databases, empresa: string, gr
   return db.gestorPorNome.get(normalizar(nome)) ?? { nome, email: null };
 }
 
-// ---------- item ----------
-
 const texto = (c: CampoCru | undefined) => c?.value?.trim() ?? "";
+
+/** Tier da empresa na DB - BR NET; se ela não tiver, o campo [NEW] do card. */
+export function resolverTier(card: CardCru, db: Databases, empresa: string): string | null {
+  return db.tierPorEmpresa.get(normalizar(empresa)) || CAMPOS.tier.map((s) => texto(card.campos[s])).find(Boolean) || null;
+}
+
+// ---------- item ----------
 
 export const DEMANDA_SEM_TIPO = "Sem tipo de documento";
 
@@ -222,6 +230,7 @@ export function itensDoCard(card: CardCru, hoje: Dia, db: Databases): Item[] {
   const grupo = texto(card.campos[CAMPOS.grupo]);
   const demanda = texto(card.campos[CAMPOS.demanda]) || DEMANDA_SEM_TIPO;
   let gestor: Gestor | undefined;
+  let tier: string | null | undefined;
 
   const itens: Item[] = [];
   for (const area of Object.keys(AREA_NOME) as Area[]) {
@@ -230,6 +239,7 @@ export function itensDoCard(card: CardCru, hoje: Dia, db: Databases): Item[] {
     const s = statusDoPrazo(p.prazo, hoje);
     if (!s) continue;
     gestor ??= resolverGestor(card, db, empresa, grupo);
+    if (tier === undefined) tier = resolverTier(card, db, empresa);
     itens.push({
       item_id: `${card.id}-${area}`,
       card_id: card.id,
@@ -240,6 +250,7 @@ export function itensDoCard(card: CardCru, hoje: Dia, db: Databases): Item[] {
       grupo,
       gestor_nome: gestor.nome,
       gestor_email: gestor.email,
+      tier,
       campo_prazo: p.campo,
       prazo: p.prazo,
       ...s,

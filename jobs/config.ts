@@ -48,7 +48,16 @@ export const CAMPOS = {
   // Conector para a database "Equipe Comercial" (nome + e-mail)
   gestor: "informar_o_respons_vel_pela_sua_conta_na_br_med_restored",
   demanda: "tipo_de_documento",
+  // Tier no esquema novo ([NEW]), na fase e no formulário inicial. Reserva quando a DB - BR NET não traz o tier.
+  // Os campos antigos (Tier 1/2/3, Lighthouse) ficam de fora.
+  tier: ["new", "new_informar_o_tier_que_pertence_o_cliente_formul_rio_inicial"],
 } as const;
+
+// Por quantos dias o tier e o gestor de uma empresa, consultados na DB - BR NET, valem no cache do Postgres
+export const BRNET_VALIDADE_DIAS = 7;
+
+// Ordem dos tiers no painel (esquema novo, o mesmo da DB - BR NET)
+export const TIERS = ["Diamante", "Ouro", "Prata", "Bronze", "Bronze(-)", "RG", "Parceiros / Cortesia"];
 
 // Databases do Pipefy usadas para resolver o gestor
 export const TABELAS = {
@@ -60,6 +69,7 @@ export const TABELAS = {
     empresa: "empresa_name",
     grupo: "group_name",
     gestor: "account_coordinator_name",
+    tier: "tier",
   },
 } as const;
 

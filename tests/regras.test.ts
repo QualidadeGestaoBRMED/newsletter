@@ -8,6 +8,7 @@ import {
   parseDia,
   prazoDaArea,
   resolverGestor,
+  resolverTier,
   somarDias,
   statusDoPrazo,
 } from "../jobs/regras";
@@ -223,6 +224,29 @@ describe("itensDoCard", () => {
   it("sem tipo de documento usa o texto padrão", () => {
     const c = card({ tipo_de_documento: vazio, prazo_seguran_a_do_trabalho: dt("2026-10-20T15:00:00Z") });
     expect(itensDoCard(c, "2026-10-20", db)[0].demanda).toBe(DEMANDA_SEM_TIPO);
+  });
+});
+
+describe("resolverTier", () => {
+  const db = databases();
+  const tierNoCard = { new_informar_o_tier_que_pertence_o_cliente_formul_rio_inicial: { value: "Prata" } };
+
+  it("vem da DB - BR NET pela empresa, mesmo com o campo do card preenchido", () => {
+    expect(resolverTier(card(tierNoCard), db, "Edifício  Exemplo")).toBe("Ouro");
+  });
+
+  it("empresa fora da DB - BR NET: usa o campo [NEW] do card", () => {
+    expect(resolverTier(card(tierNoCard), db, "OUTRA EMPRESA")).toBe("Prata");
+  });
+
+  it("ignora o campo de tier do esquema antigo", () => {
+    expect(resolverTier(card({ informar_o_tier_que_pertence_o_cliente: { value: "Tier 1" } }), db, "OUTRA EMPRESA")).toBeNull();
+  });
+
+  it("o item leva o tier", () => {
+    const itens = itensDoCard(cardReal, "2025-02-14", db);
+    expect(itens.length).toBeGreaterThan(0);
+    expect(itens.every((i) => i.tier === "Ouro")).toBe(true);
   });
 });
 

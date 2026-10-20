@@ -36,7 +36,7 @@ const camposPrazo: string[] = [
   ...CAMPOS_PRAZO.SO.demais,
   ...CAMPOS_PRAZO.OG,
 ];
-const camposConfig = new Set<string>([...camposPrazo, ...Object.values(CAMPOS)]);
+const camposConfig = new Set<string>([...camposPrazo, ...Object.values(CAMPOS).flat()]);
 
 async function main() {
   const { pipe } = await gql<{

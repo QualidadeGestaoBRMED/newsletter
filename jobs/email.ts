@@ -1,10 +1,14 @@
 // Monta o e-mail de cada gestor e envia. O envio fica atrás de `Remetente` para trocar Mandrill por Gmail/SMTP.
+import { readFileSync } from "node:fs";
 import { render } from "@react-email/render";
-import NewsletterGestor, { dataPorExtenso } from "../emails/NewsletterGestor";
+import NewsletterGestor from "../emails/NewsletterGestor";
 import { HORARIO, type Periodo } from "./config";
-import { numeros, porUrgencia, type Carteira } from "./edicao";
+import { numeros, type Carteira } from "./edicao";
 import { exigir } from "./env";
 import type { Dia } from "./regras";
+
+/** Imagem embutida na mensagem, referenciada no HTML como `cid:${nome}`. */
+export type Imagem = { nome: string; tipo: string; base64: string };
 
 export type Mensagem = {
   para: { email: string; nome?: string };
@@ -12,7 +16,18 @@ export type Mensagem = {
   html: string;
   texto: string;
   tags?: string[];
+  imagens?: Imagem[];
 };
+
+const LOGO: Imagem = {
+  nome: "logo-brmed",
+  tipo: "image/png",
+  base64: readFileSync(new URL("../public/logo-brmed.png", import.meta.url)).toString("base64"),
+};
+
+/** HTML para abrir no navegador: troca as imagens `cid:` pelo conteúdo embutido. */
+export const htmlDePrevia = (m: Mensagem) =>
+  (m.imagens ?? []).reduce((h, i) => h.replaceAll(`cid:${i.nome}`, `data:${i.tipo};base64,${i.base64}`), m.html);
 
 export interface Remetente {
   enviar(m: Mensagem): Promise<{ id: string }>;
@@ -29,14 +44,12 @@ export async function montarEmail(c: Carteira, data: Dia, periodo: Periodo, para
   if (!para) throw new Error(`Gestor ${c.nome} sem e-mail`);
   const n = numeros(c.itens);
   const tarde = periodo === "tarde";
-  const aberto = c.itens.filter((i) => i.situacao_fim_dia !== "Concluído hoje");
-  const fila = (tarde ? aberto.filter((i) => i.status !== "No radar (até D+2)") : c.itens).slice().sort(porUrgencia).slice(0, 3);
 
-  const props = { nome: c.nome, periodo, data, horario: HORARIO[periodo], numeros: n, fila, linkPainel: linkPainel(data, periodo, c.nome) };
-  const quando = `${tarde ? "Edição da tarde" : "Edição da manhã"} · ${dataPorExtenso(data)}`;
+  const props = { nome: c.nome, periodo, data, horario: HORARIO[periodo], numeros: n, linkPainel: linkPainel(data, periodo, c.nome), logo: `cid:${LOGO.nome}` };
+  // sem data: o e-mail chega no próprio dia e horário da edição
   const assunto = tarde
-    ? `Prazos: ${n.concluidas} resolvidas, ${n.viramAtraso} viram atraso amanhã · ${quando}`
-    : `Prazos: ${n.vencidas} vencidas, ${n.hoje} vencem hoje · ${quando}`;
+    ? `Prazos: ${n.concluidas} resolvidas, ${n.viramAtraso} viram atraso amanhã · tarde`
+    : `Prazos: ${n.vencidas} vencidas, ${n.hoje} vencem hoje · manhã`;
 
   return {
     para: { email: para, nome: c.nome },
@@ -44,6 +57,7 @@ export async function montarEmail(c: Carteira, data: Dia, periodo: Periodo, para
     html: await render(NewsletterGestor(props)),
     texto: await render(NewsletterGestor(props), { plainText: true }),
     tags: ["newsletter-suporte", periodo],
+    imagens: [LOGO],
   };
 }
 
@@ -54,7 +68,7 @@ const MANDRILL_URL = "https://mandrillapp.com/api/1.0/messages/send";
 export class MandrillRemetente implements Remetente {
   private chave = exigir("MANDRILL_API_KEY");
   private de = exigir("REMETENTE_EMAIL");
-  private nome = process.env.REMETENTE_NOME?.trim() || "BR MED · Suporte";
+  private nome = process.env.REMETENTE_NOME?.trim() || "Briefing Suporte";
 
   async enviar(m: Mensagem) {
     const res = await fetch(MANDRILL_URL, {
@@ -70,6 +84,7 @@ export class MandrillRemetente implements Remetente {
           html: m.html,
           text: m.texto,
           tags: m.tags,
+          images: m.imagens?.map((i) => ({ type: i.tipo, name: i.nome, content: i.base64 })),
           track_opens: false,
           track_clicks: false, // links do Pipefy e do painel ficam intactos
           auto_text: false,

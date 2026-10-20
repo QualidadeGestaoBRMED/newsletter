@@ -116,9 +116,9 @@ export async function carregarCards(avisos: Aviso[]): Promise<CardCru[]> {
     { id: PIPE_ID },
   );
 
-  const cards: CardCru[] = [];
-  for (const fase of pipe.phases) {
-    if (!faseMonitorada(fase.id) || !fase.cards_count) continue;
+  const fases = pipe.phases.filter((f) => faseMonitorada(f.id) && f.cards_count);
+  const porFase = await emParalelo(fases, 4, async (fase) => {
+    const out: CardCru[] = [];
     const nodes = paginar<{ phase: { cards: Pagina<unknown> } }, unknown>(
       `query($id: ID!, $after: String) { phase(id: $id) { cards(first: 50, after: $after) {
         pageInfo { hasNextPage endCursor } edges { node { ${CARD_FRAG} } }
@@ -128,11 +128,41 @@ export async function carregarCards(avisos: Aviso[]): Promise<CardCru[]> {
     );
     for await (const node of nodes) {
       const ok = CardZ.safeParse(node);
-      if (ok.success) cards.push(paraCardCru(ok.data));
+      if (ok.success) out.push(paraCardCru(ok.data));
       else avisos.push({ card_id: (node as { id?: string })?.id, motivo: `schema: ${ok.error.issues[0]?.message}` });
     }
-  }
+    log(`fase ${fase.id} ${fase.name}: ${out.length} cards`);
+    return out;
+  });
+  const cards = semRepetidos(porFase.flat());
+  const repetidos = porFase.flat().length - cards.length;
+  if (repetidos) log(`${repetidos} cards mudaram de fase durante a leitura e vieram duas vezes; mantida uma cópia`);
   return cards;
+}
+
+/** As fases são lidas em paralelo: um card que muda de fase no meio da leitura aparece nas duas. Fica a primeira cópia. */
+export function semRepetidos(cards: CardCru[]): CardCru[] {
+  const vistos = new Set<string>();
+  return cards.filter((c) => !vistos.has(c.id) && vistos.add(c.id));
+}
+
+const log = (msg: string) => {
+  if (process.env.PIPEFY_LOG !== "0") console.error(`[pipefy] ${msg}`);
+};
+
+/** map assíncrono com no máximo `n` chamadas ao mesmo tempo, mantendo a ordem. */
+async function emParalelo<T, R>(xs: T[], n: number, f: (x: T) => Promise<R>): Promise<R[]> {
+  const out: R[] = new Array(xs.length);
+  let i = 0;
+  await Promise.all(
+    Array.from({ length: Math.min(n, xs.length) }, async () => {
+      while (i < xs.length) {
+        const k = i++;
+        out[k] = await f(xs[k]);
+      }
+    }),
+  );
+  return out;
 }
 
 const RegistroZ = z.object({
@@ -161,30 +191,91 @@ async function registros(tabelaId: string): Promise<{ id: string; title: string;
   return out;
 }
 
-/** Equipe Comercial (nome + e-mail) e DB - BR NET (empresa/grupo → gestor). */
+/** Equipe Comercial inteira (~150 registros). A DB - BR NET (~26 mil) é consultada sob demanda em `completarBrnet`. */
 export async function carregarDatabases(): Promise<Databases> {
-  const [gestores, brnet] = await Promise.all([registros(TABELAS.gestores.id), registros(TABELAS.brnet.id)]);
   const g = TABELAS.gestores;
-  const b = TABELAS.brnet;
-
   const db: Databases = {
     gestorPorRegistro: new Map(),
     gestorPorNome: new Map(),
     coordenadorPorEmpresa: new Map(),
     coordenadorPorGrupo: new Map(),
+    tierPorEmpresa: new Map(),
   };
-  for (const r of gestores) {
+  for (const r of await registros(g.id)) {
     const nome = r.v[g.nome] || r.title;
     if (!nome || nome === "Rascunho") continue;
     const gestor = { nome, email: r.v[g.email]?.toLowerCase() || null };
     db.gestorPorRegistro.set(r.id, gestor);
     db.gestorPorNome.set(normalizar(nome), gestor);
   }
-  for (const r of brnet) {
-    const coord = r.v[b.gestor];
-    if (!coord) continue;
-    if (r.v[b.empresa]) db.coordenadorPorEmpresa.set(normalizar(r.v[b.empresa]), coord);
-    if (r.v[b.grupo]) db.coordenadorPorGrupo.set(normalizar(r.v[b.grupo]), coord);
-  }
+  log(`Equipe Comercial: ${db.gestorPorRegistro.size} gestores`);
   return db;
+}
+
+const FindZ = z.object({
+  findRecords: z.object({
+    edges: z.array(z.object({ node: z.object({ fields: z.array(z.object({ field: z.object({ id: z.string() }), value: z.string().nullable() })) }) })),
+  }),
+});
+
+/** Primeiro registro da DB - BR NET com `campo` = `valor`, como mapa campo → valor. */
+async function registroNaBrnet(campo: string, valor: string): Promise<Record<string, string> | null> {
+  const r = FindZ.parse(
+    await gql(
+      `query($t: String!, $f: String!, $v: String!) { findRecords(tableId: $t, search: { fieldId: $f, fieldValue: $v }, first: 1) {
+        edges { node { fields { field { id } value } } }
+      } }`,
+      { t: TABELAS.brnet.id, f: campo, v: valor },
+    ),
+  );
+  const campos = r.findRecords.edges[0]?.node.fields;
+  return campos ? Object.fromEntries(campos.map((c) => [c.field.id, c.value?.trim() ?? ""])) : null;
+}
+
+/** O que a DB - BR NET diz de uma empresa. Empresa não encontrada fica com os dois campos nulos. */
+export type EmpresaBrnet = { empresa: string; coordenador: string | null; tier: string | null };
+
+/** Guarda as consultas por empresa entre execuções; `ler` devolve só as que ainda valem. */
+export interface CacheBrnet {
+  ler(empresas: string[]): Promise<EmpresaBrnet[]>;
+  gravar(consultadas: EmpresaBrnet[]): Promise<void>;
+}
+
+/**
+ * Busca na DB - BR NET o tier e o gestor de cada empresa dos itens (as que estão no cache não são consultadas)
+ * e, para os itens sem gestor cuja empresa não resolveu, o gestor do grupo.
+ */
+export async function completarBrnet(
+  db: Databases,
+  itens: { empresa: string; grupo: string; gestor_nome: string | null }[],
+  cache?: CacheBrnet,
+) {
+  const b = TABELAS.brnet;
+  const aplicar = (e: EmpresaBrnet) => {
+    if (e.coordenador) db.coordenadorPorEmpresa.set(normalizar(e.empresa), e.coordenador);
+    if (e.tier) db.tierPorEmpresa.set(normalizar(e.empresa), e.tier);
+  };
+
+  const empresas = [...new Set(itens.map((x) => x.empresa).filter(Boolean))];
+  const doCache = (await cache?.ler(empresas)) ?? [];
+  doCache.forEach(aplicar);
+  const conhecidas = new Set(doCache.map((e) => normalizar(e.empresa)));
+  const faltam = empresas.filter((e) => !conhecidas.has(normalizar(e)));
+
+  const consultadas = await emParalelo(faltam, 6, async (empresa): Promise<EmpresaBrnet> => {
+    const r = await registroNaBrnet(b.empresa, empresa);
+    return { empresa, coordenador: r?.[b.gestor] || null, tier: r?.[b.tier] || null };
+  });
+  consultadas.forEach(aplicar);
+  if (consultadas.length) await cache?.gravar(consultadas);
+
+  const semGestor = itens.filter((x) => !x.gestor_nome);
+  const grupos = [
+    ...new Set(semGestor.filter((x) => !db.coordenadorPorEmpresa.has(normalizar(x.empresa))).map((x) => x.grupo).filter(Boolean)),
+  ].filter((g) => !db.coordenadorPorGrupo.has(normalizar(g)));
+  await emParalelo(grupos, 4, async (g) => {
+    const c = (await registroNaBrnet(b.grupo, g))?.[b.gestor];
+    if (c) db.coordenadorPorGrupo.set(normalizar(g), c);
+  });
+  log(`DB - BR NET: ${doCache.length} empresas do cache, ${faltam.length} empresas e ${grupos.length} grupos consultados`);
 }

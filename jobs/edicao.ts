@@ -1,6 +1,6 @@
 // Monta a edição a partir dos cards. A comparação manhã × tarde entra na etapa 4.
 import type { Periodo } from "./config";
-import type { Aviso } from "./pipefy";
+import { carregarCards, carregarDatabases, completarBrnet, type Aviso, type CacheBrnet } from "./pipefy";
 import { DataInvalida, itensDoCard, type CardCru, type Databases, type Dia, type Item, type Status } from "./regras";
 
 export type Situacao = "Concluído hoje" | "Pendente";
@@ -17,6 +17,13 @@ export function gerarItens(cards: CardCru[], hoje: Dia, db: Databases, avisos: A
     }
   }
   return itens;
+}
+
+/** Lê o Pipefy e gera os itens do dia; a DB - BR NET dá o tier e o gestor que faltar no card. */
+export async function itensDoDia(hoje: Dia, avisos: Aviso[], cache?: CacheBrnet): Promise<ItemEdicao[]> {
+  const [cards, db] = await Promise.all([carregarCards(avisos), carregarDatabases()]);
+  await completarBrnet(db, gerarItens(cards, hoje, db, []), cache);
+  return gerarItens(cards, hoje, db, avisos);
 }
 
 const ORDEM: Record<Status, number> = { Atrasado: 0, "Próximo do vencimento": 1, "No radar (até D+2)": 2 };

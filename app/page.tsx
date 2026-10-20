@@ -1,4 +1,10 @@
-// Painel: port do painel-referencia.html na etapa 5.
+import { Suspense } from "react";
+import Painel from "./painel";
+
 export default function Page() {
-  return <main>Painel em construção.</main>;
+  return (
+    <Suspense>
+      <Painel />
+    </Suspense>
+  );
 }

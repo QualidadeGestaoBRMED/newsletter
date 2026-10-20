@@ -1,0 +1,276 @@
+{
+  "id": "ffe3262d-b720-47ce-bf93-8745263b0d4e",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.edicoes": {
+      "name": "edicoes",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "data": {
+          "name": "data",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "periodo": {
+          "name": "periodo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "gerada_em": {
+          "name": "gerada_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'gerada'"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "edicoes_data_periodo_unique": {
+          "name": "edicoes_data_periodo_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "data",
+            "periodo"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.envios": {
+      "name": "envios",
+      "schema": "",
+      "columns": {
+        "edicao_id": {
+          "name": "edicao_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "destinatario": {
+          "name": "destinatario",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "enviado_em": {
+          "name": "enviado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "message_id": {
+          "name": "message_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "envios_edicao_id_edicoes_id_fk": {
+          "name": "envios_edicao_id_edicoes_id_fk",
+          "tableFrom": "envios",
+          "tableTo": "edicoes",
+          "columnsFrom": [
+            "edicao_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "envios_edicao_id_destinatario_pk": {
+          "name": "envios_edicao_id_destinatario_pk",
+          "columns": [
+            "edicao_id",
+            "destinatario"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.itens_edicao": {
+      "name": "itens_edicao",
+      "schema": "",
+      "columns": {
+        "edicao_id": {
+          "name": "edicao_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "item_id": {
+          "name": "item_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "card_id": {
+          "name": "card_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "card": {
+          "name": "card",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "area": {
+          "name": "area",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "demanda": {
+          "name": "demanda",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "empresa": {
+          "name": "empresa",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "grupo": {
+          "name": "grupo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "gestor_nome": {
+          "name": "gestor_nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "gestor_email": {
+          "name": "gestor_email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "campo_prazo": {
+          "name": "campo_prazo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "prazo": {
+          "name": "prazo",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "dias_atraso": {
+          "name": "dias_atraso",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "fase_id": {
+          "name": "fase_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "fase_nome": {
+          "name": "fase_nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "link": {
+          "name": "link",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "situacao_fim_dia": {
+          "name": "situacao_fim_dia",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "itens_edicao_edicao_id_edicoes_id_fk": {
+          "name": "itens_edicao_edicao_id_edicoes_id_fk",
+          "tableFrom": "itens_edicao",
+          "tableTo": "edicoes",
+          "columnsFrom": [
+            "edicao_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "itens_edicao_edicao_id_item_id_pk": {
+          "name": "itens_edicao_edicao_id_item_id_pk",
+          "columns": [
+            "edicao_id",
+            "item_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
