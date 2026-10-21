@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@200;300;400;500;600;700&family=Roboto:wght@300;400;500&display=swap">
 <style>
 /* Apresentação animada do Briefing Suporte. Dados fictícios. Palco 1920×1080 escalado para a janela. */
-:root{--navy:#193B4F;--teal:#007891;--aqua:#00AFAA;--amber:#CC851E;--rust:#A05E1E;--g1:#767A7B;--g2:#BFC3C6;--g3:#DFE0E2;--g4:#F3F3F3;--ink:#4A555C;
+:root{--navy:#193B4F;--teal:#007891;--aqua:#00AFAA;--amber:#CC851E;--rust:#cc0000;--radar:#d9be53;--noprazo:#aad1b4;--g1:#767A7B;--g2:#BFC3C6;--g3:#DFE0E2;--g4:#F3F3F3;--ink:#4A555C;
   --ws:"Work Sans",system-ui,sans-serif;--rb:"Roboto",system-ui,sans-serif;--fundo:#0E2433}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
@@ -40,7 +40,7 @@ b,strong{font-weight:500}
 .bub+.bub{margin-left:-6px}
 .bub.b1{width:96px;height:96px;background:var(--rust);font-size:35px;z-index:3}
 .bub.b2{width:78px;height:78px;background:var(--amber);font-size:28px;z-index:2}
-.bub.b3{width:62px;height:62px;background:#fff;color:var(--navy);font-size:22px;z-index:1}
+.bub.b3{width:62px;height:62px;background:var(--radar);color:var(--navy);font-size:22px;z-index:1}
 #p-navy{background:var(--navy);color:#fff;padding:96px 64px 80px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:56px;align-items:center}
 .mast{margin:0;font-family:var(--ws);line-height:1}
 .mast .k{display:block;font-size:17px;font-weight:500;color:var(--aqua)}
@@ -76,8 +76,7 @@ b,strong{font-weight:500}
 .col-h strong{font-family:var(--ws);font-weight:200;font-size:50px;line-height:.9}
 .col-h span{text-align:right;font-family:var(--ws);font-weight:600;font-size:14px;line-height:1.3}
 .col-h small{display:block;font-weight:400;font-size:12px;opacity:.88}
-.col.soft .col-h{background:#fff;color:var(--navy);box-shadow:inset 0 0 0 1.5px var(--g3)}
-.col.soft .col-h strong{color:var(--c)}
+.col.soft .col-h{color:var(--navy)}
 .it{display:grid;grid-template-columns:1fr auto;gap:2px 14px;padding:14px 4px 14px 2px;border-bottom:1px solid var(--g3)}
 .it .t{font-family:var(--ws);font-weight:500;font-size:15px;line-height:1.3}
 .it .c{font-size:13.5px;color:var(--ink)}
@@ -150,7 +149,8 @@ b,strong{font-weight:500}
 .mail .top .h{margin:22px 0 0;font-family:var(--ws);font-weight:300;font-size:26px}
 .mail .top .c{margin:4px 0 0;font-family:var(--ws);font-weight:600;font-size:19px;line-height:1.3}
 .mail .nums{display:grid;grid-template-columns:repeat(3,1fr);padding:24px 10px 6px;text-align:center}
-.mail .nums strong{display:block;font-family:var(--ws);font-weight:300;font-size:38px;line-height:1.1}
+.mail .nums i{display:block;width:26px;height:4px;border-radius:2px;margin:0 auto 10px}
+.mail .nums strong{display:block;font-family:var(--ws);font-weight:300;font-size:38px;line-height:1.1;color:var(--navy)}
 .mail .nums span{font-size:11.5px;color:var(--g1)}
 .mail .cta{padding:20px 26px 28px;text-align:center}
 .mail .cta span{display:inline-block;background:var(--teal);color:#fff;border-radius:99px;padding:13px 26px;font-family:var(--ws);font-weight:600;font-size:14px}
@@ -241,7 +241,7 @@ b,strong{font-weight:500}
       <section class="pc" id="p-navy">
         <h1 class="mast"><span class="k">Edição da</span><span class="w">manhã</span><span class="d">07:00 · terça-feira, 20 de outubro</span></h1>
         <div id="say"><p id="hello">Bom dia, time.</p><p id="claim">59 demandas pedem ação hoje.</p>
-          <ul class="legend" id="legend"><li><i style="background:var(--rust)"></i><b id="lg1">47</b><span>com prazo vencido</span></li><li><i style="background:var(--amber)"></i><b id="lg2">12</b><span>vencem hoje</span></li><li><i style="background:#fff"></i><b id="lg3">18</b><span>nos próximos 2 dias</span></li></ul></div>
+          <ul class="legend" id="legend"><li><i style="background:var(--rust)"></i><b id="lg1">47</b><span>com prazo vencido</span></li><li><i style="background:var(--amber)"></i><b id="lg2">12</b><span>vencem hoje</span></li><li><i style="background:var(--radar)"></i><b id="lg3">18</b><span>nos próximos 2 dias</span></li></ul></div>
       </section>
       <section class="pc" id="p-filtros">
         <span class="kicker" style="margin-right:6px">Filtrar</span>
@@ -270,13 +270,13 @@ b,strong{font-weight:500}
       <div id="modal">
         <span class="kicker">Evolução</span><h3>Prazos <b>edição a edição</b></h3><p class="esc">Carteira de Ana Ribeiro. Uma edição da manhã por dia útil.</p>
         <div class="stats">
-          <div class="stat"><span class="lb"><i class="key" style="background:#8A4A14"></i>Prazo vencido</span><strong id="ms1">0</strong><small>+0 desde 19/10</small></div>
-          <div class="stat"><span class="lb"><i class="key" style="background:#D99A2B"></i>Vence hoje</span><strong id="ms2">0</strong><small>−1 desde 19/10</small></div>
-          <div class="stat"><span class="lb"><i class="key" style="background:#00AFAA"></i>Próximos 2 dias</span><strong id="ms3">0</strong><small>igual a 19/10</small></div>
+          <div class="stat"><span class="lb"><i class="key" style="background:#cc0000"></i>Prazo vencido</span><strong id="ms1">0</strong><small>+0 desde 19/10</small></div>
+          <div class="stat"><span class="lb"><i class="key" style="background:#cc851e"></i>Vence hoje</span><strong id="ms2">0</strong><small>−1 desde 19/10</small></div>
+          <div class="stat"><span class="lb"><i class="key" style="background:#d9be53"></i>Próximos 2 dias</span><strong id="ms3">0</strong><small>igual a 19/10</small></div>
         </div>
         <svg id="chart" width="808" height="250" viewBox="0 0 808 250"></svg>
       </div>
-      <div id="tip"><div class="dt" id="tipD">qui 15/10, 07:00</div><div class="r"><i class="key" style="background:#8A4A14"></i><b id="tip1">19</b><span>Prazo vencido</span></div><div class="r"><i class="key" style="background:#D99A2B"></i><b id="tip2">6</b><span>Vence hoje</span></div><div class="r"><i class="key" style="background:#00AFAA"></i><b id="tip3">10</b><span>Próximos 2 dias</span></div></div>
+      <div id="tip"><div class="dt" id="tipD">qui 15/10, 07:00</div><div class="r"><i class="key" style="background:#cc0000"></i><b id="tip1">19</b><span>Prazo vencido</span></div><div class="r"><i class="key" style="background:#cc851e"></i><b id="tip2">6</b><span>Vence hoje</span></div><div class="r"><i class="key" style="background:#d9be53"></i><b id="tip3">10</b><span>Próximos 2 dias</span></div></div>
       <div id="drop"><div>Todos os gestores</div><div id="dropAna">Ana Ribeiro</div><div>Bruno Tavares</div><div>Carla Mendes</div><div>Diego Moura</div></div>
       <svg id="cursor" viewBox="0 0 26 26"><path d="M3 2l17 9.5-7.4 1.6L9.4 21z" fill="#fff" stroke="#193B4F" stroke-width="1.6" stroke-linejoin="round"/></svg>
     </div>
@@ -285,7 +285,7 @@ b,strong{font-weight:500}
       <div class="subj" id="subj">Prazos: 21 vencidas, 6 vencem hoje · manhã</div>
       <div class="mail" id="mail">
         <div class="top"><img src="logo-brmed.png" alt="BR MED"><p class="h" id="mh">Bom dia, Ana.</p><p class="c">27 demandas pedem sua ação hoje.</p></div>
-        <div class="nums"><div><strong id="mn1" style="color:#A05E1E">0</strong><span>com prazo vencido</span></div><div><strong id="mn2" style="color:#CC851E">0</strong><span>vencem hoje</span></div><div><strong id="mn3" style="color:#007891">0</strong><span>nos próximos 2 dias</span></div></div>
+        <div class="nums"><div><i style="background:#cc0000"></i><strong id="mn1">0</strong><span>com prazo vencido</span></div><div><i style="background:#cc851e"></i><strong id="mn2">0</strong><span>vencem hoje</span></div><div><i style="background:#d9be53"></i><strong id="mn3">0</strong><span>nos próximos 2 dias</span></div></div>
         <div class="cta"><span id="mcta">Ver minha carteira no painel</span></div>
       </div>
       <div class="mail-foot">Briefing Suporte · enviado automaticamente às 07:00</div>
@@ -307,7 +307,7 @@ b,strong{font-weight:500}
         <div class="card"><svg viewBox="0 0 24 24"><path d="M3 7l6 6 4-4 8 8M15 17h6v-6"/></svg><b>Risco de churn</b><p>Sinais de que um cliente pode sair, antes que ele avise.</p></div></div>
     </div></div></div>
   <div class="full" id="outro" style="background:rgba(14,36,51,.86)"><div><img src="logo-brmed.png" alt="BR MED"><div class="ttl" style="font-size:120px">Briefing Suporte<small>Prazos do cliente, todo dia útil às 07:00.</small></div>
-    <div class="chips" id="chips"><span><i style="background:#A05E1E"></i>Onde atuar hoje</span><span><i style="background:#2EC4E6"></i>Cada carteira e tier</span><span><i style="background:#00AFAA"></i>Evolução edição a edição</span></div></div></div>
+    <div class="chips" id="chips"><span><i style="background:#cc0000"></i>Onde atuar hoje</span><span><i style="background:#2EC4E6"></i>Cada carteira e tier</span><span><i style="background:#00AFAA"></i>Evolução edição a edição</span></div></div></div>
   <svg id="linhas" viewBox="0 0 1920 1080"></svg><div id="notas"></div>
   <div id="caps"></div>
 
@@ -328,7 +328,7 @@ b,strong{font-weight:500}
     { c: "var(--amber)", t: "Vence hoje", s: "resolver até o fim do dia", n: 6, mais: 3, soft: false, itens: [
       ["Exames periódicos", "Atlântico Portos", "SO", "Diamante", "Grupo Atlântico", "20/10", "prazo no dia"], ["Entrega pós-visita", "Serra Verde Alimentos", "ST", "Ouro", "Grupo Serra Verde", "20/10", "prazo no dia"],
       ["LTCAT", "Atlântico Portos", "ST", "Diamante", "Grupo Atlântico", "20/10", "prazo no dia"]] },
-    { c: "var(--teal)", t: "Próximos 2 dias", s: "para antecipar", n: 9, mais: 6, soft: true, itens: [
+    { c: "var(--radar)", t: "Próximos 2 dias", s: "para antecipar", n: 9, mais: 6, soft: true, itens: [
       ["Laudo de insalubridade", "Atlântico Portos", "ST", "Diamante", "Grupo Atlântico", "21/10", "em 1 dia"], ["Relatório Anual", "Serra Verde Alimentos", "SO", "Ouro", "Grupo Serra Verde", "22/10", "em 2 dias"],
       ["Manutenção BR NET (OP)", "Atlântico Logística", "OG", "Prata", "Grupo Atlântico", "22/10", "em 2 dias"]] },
   ];
@@ -337,8 +337,8 @@ b,strong{font-weight:500}
       <div>${col.itens.map(([t, e, a, ti, g, d, sub]) => `<div class="it"><div class="t">${t}</div><div class="d">${typeof d === "number" ? `<b class="crit">${d}</b><small>dias de atraso</small>` : `<b>${d}</b><small>${sub}</small>`}</div><div class="c">${e}</div><div class="m">${a} · ${tier(ti)} · ${g}</div></div>`).join("")}</div>
       <div class="more">Ver mais ${col.mais}</div></div>`).join("");
 
-  const ramp = (s) => { const a = [241, 225, 210], b = [160, 94, 30], t = 0.2 + 0.8 * s; return `rgb(${a.map((x, i) => Math.round(x + (b[i] - x) * t)).join(",")})`; };
-  const cor = ([v, at]) => (!v ? null : at ? { bg: ramp(at / v), fg: at / v > 0.5 ? "#fff" : "#193B4F" } : { bg: "#E1F0F2", fg: "#193B4F" });
+  const ramp = (s) => { const a = [247, 217, 217], b = [204, 0, 0], t = 0.2 + 0.8 * s; return `rgb(${a.map((x, i) => Math.round(x + (b[i] - x) * t)).join(",")})`; };
+  const cor = ([v, at]) => (!v ? null : at ? { bg: ramp(at / v), fg: at / v > 0.5 ? "#fff" : "#193B4F" } : { bg: "#aad1b4", fg: "#193B4F" });
   const cel = (x, tot) => `<div class="cell${tot ? " tot" : ""}" data-bg="${cor(x)?.bg ?? ""}" data-fg="${cor(x)?.fg ?? ""}">${x[0]}<small>${!x[0] ? "&nbsp;" : x[1] ? `${x[1]} ${x[1] === 1 ? "atrasada" : "atrasadas"}` : "no prazo"}</small></div>`;
   const tabela = (rows) => `<div class="hd"><span></span><span>Segurança (ST)</span><span>Saúde (SO)</span><span>On-Going (OG)</span><span>Total</span></div>` +
     rows.map(([nome, sub, tiers, st, so, og]) => { const tot = [st[0] + so[0] + og[0], st[1] + so[1] + og[1]];
@@ -355,7 +355,7 @@ b,strong{font-weight:500}
   // série fictícia da Ana para o modal de evolução
   const DATAS = ["05/10", "06/10", "07/10", "08/10", "09/10", "12/10", "13/10", "14/10", "15/10", "16/10", "19/10", "20/10"];
   const DIAS = ["seg", "ter", "qua", "qui", "sex", "seg", "ter", "qua", "qui", "sex", "seg", "ter"];
-  const SER = [["#8A4A14", [14, 16, 15, 18, 17, 19, 18, 20, 19, 22, 21, 21]], ["#D99A2B", [5, 7, 4, 6, 8, 5, 7, 4, 6, 9, 7, 6]], ["#00AFAA", [8, 9, 11, 7, 10, 9, 12, 8, 10, 11, 9, 9]]];
+  const SER = [["#cc0000", [14, 16, 15, 18, 17, 19, 18, 20, 19, 22, 21, 21]], ["#cc851e", [5, 7, 4, 6, 8, 5, 7, 4, 6, 9, 7, 6]], ["#d9be53", [8, 9, 11, 7, 10, 9, 12, 8, 10, 11, 9, 9]]];
   const svg = document.getElementById("chart"), CW = 808, CH = 250, ML = 36, MR = 120, MT = 10, IH = CH - MT - 26, IW = CW - ML - MR;
   const cx = (i) => ML + (i * IW) / (DATAS.length - 1), cy = (v) => MT + IH - (v / 25) * IH;
   let g = "";
