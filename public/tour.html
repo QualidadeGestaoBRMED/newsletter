@@ -387,6 +387,7 @@ b,strong{font-weight:500}
   const uniao = (els) => { const rs = [...els].map(ret), x = Math.min(...rs.map((r) => r.x)), y = Math.min(...rs.map((r) => r.y));
     return { x, y, w: Math.max(...rs.map((r) => r.x + r.w)) - x, h: Math.max(...rs.map((r) => r.y + r.h)) - y }; };
   R.mxRow1 = ret(document.querySelector("#tbP .row .rh"));
+  R.areaHd = [...document.querySelectorAll("#tbP .hd span")].slice(1, 4).map(ret);
   R.areas = uniao([...document.querySelectorAll("#tbP .hd span")].slice(1, 4));
   R.gestores = uniao(document.querySelectorAll("#tbP .rh"));
   R.celEscura = ret(document.querySelectorAll("#tbP .row")[1].querySelectorAll(".cell")[1]);
@@ -487,21 +488,26 @@ b,strong{font-weight:500}
 
   // ---------- etiquetas com linha guia (em coordenadas do palco, com a câmera parada) ----------
   const linhas = $("linhas"), notas = $("notas");
-  // nota(câmera, ponto no mundo, deslocamento do rótulo no palco, título, subtítulo, entra, sai)
-  const nota = (c, [wx, wy], [dx, dy], titulo, sub, t0, t1) => {
+  // nota(câmera, ponto no mundo (ou lista de pontos), deslocamento do rótulo no palco, título, subtítulo, entra, sai)
+  // com vários pontos, o rótulo fica em relação ao centro deles e cada ponto puxa sua linha até ele
+  const nota = (c, pontos, [dx, dy], titulo, sub, t0, t1) => {
     t1 = Math.max(t1, ds(t0, 1.3));
-    const ax = c.tx + wx * c.s, ay = c.ty + wy * c.s, lx = ax + dx, ly = ay + dy;
-    const pt = document.createElement("i"); pt.className = "pt"; pt.style.left = `${ax}px`; pt.style.top = `${ay}px`;
-    const ln = document.createElementNS("http://www.w3.org/2000/svg", "line");
-    Object.entries({ x1: ax, y1: ay, x2: lx, y2: ly, pathLength: 1, "stroke-dasharray": 1 }).forEach(([k, v]) => ln.setAttribute(k, v));
+    const ps = (Array.isArray(pontos[0]) ? pontos : [pontos]).map(([wx, wy]) => [c.tx + wx * c.s, c.ty + wy * c.s]);
+    const ax = ps.reduce((a, p) => a + p[0], 0) / ps.length, ay = ps.reduce((a, p) => a + p[1], 0) / ps.length, lx = ax + dx, ly = ay + dy;
+    for (const [px, py] of ps) {
+      const pt = document.createElement("i"); pt.className = "pt"; pt.style.left = `${px}px`; pt.style.top = `${py}px`;
+      const ln = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      Object.entries({ x1: px, y1: py, x2: lx, y2: ly, pathLength: 1, "stroke-dasharray": 1 }).forEach(([k, v]) => ln.setAttribute(k, v));
+      notas.append(pt); linhas.append(ln);
+      K(pt, [[0, { transform: "scale(0)" }], [t0, { transform: "scale(0)" }], [ds(t0, 0.35), { transform: "scale(1)" }], [ds(t1, -0.25), { transform: "scale(1)" }], [t1, { transform: "scale(0)" }]], "cubic-bezier(.2,1.5,.4,1)");
+      K(ln, [[0, { strokeDashoffset: 1, opacity: 1 }], [ds(t0, 0.15), { strokeDashoffset: 1 }], [ds(t0, 0.6), { strokeDashoffset: 0 }], [ds(t1, -0.25), { opacity: 1 }], [t1, { opacity: 0 }]]);
+    }
     const lb = document.createElement("div"); lb.className = "lbl"; lb.textContent = titulo;
     if (sub) { const sm = document.createElement("small"); sm.textContent = sub; lb.append(sm); }
     const hx = Math.abs(dx) >= Math.abs(dy) ? (dx < 0 ? "-100%" : "0") : "-50%", hy = Math.abs(dx) >= Math.abs(dy) ? "-50%" : dy < 0 ? "-100%" : "0";
     const gx = Math.abs(dx) >= Math.abs(dy) ? (dx < 0 ? -10 : 10) : 0, gy = Math.abs(dx) >= Math.abs(dy) ? 0 : dy < 0 ? -10 : 10;
     lb.style.left = `${lx + gx}px`; lb.style.top = `${ly + gy}px`;
-    notas.append(pt, lb); linhas.append(ln);
-    K(pt, [[0, { transform: "scale(0)" }], [t0, { transform: "scale(0)" }], [ds(t0, 0.35), { transform: "scale(1)" }], [ds(t1, -0.25), { transform: "scale(1)" }], [t1, { transform: "scale(0)" }]], "cubic-bezier(.2,1.5,.4,1)");
-    K(ln, [[0, { strokeDashoffset: 1, opacity: 1 }], [ds(t0, 0.15), { strokeDashoffset: 1 }], [ds(t0, 0.6), { strokeDashoffset: 0 }], [ds(t1, -0.25), { opacity: 1 }], [t1, { opacity: 0 }]]);
+    notas.append(lb);
     K(lb, [[0, { opacity: 0, transform: `translate(${hx},${hy}) scale(.92)` }], [ds(t0, 0.45), { opacity: 0, transform: `translate(${hx},${hy}) scale(.92)` }], [ds(t0, 0.8), { opacity: 1, transform: `translate(${hx},${hy})` }], [ds(t1, -0.25), { opacity: 1 }], [t1, { opacity: 0 }]], "cubic-bezier(.2,1.2,.4,1)");
   };
   const meio = (r, fx = 0.5, fy = 0.5) => [r.x + r.w * fx, r.y + r.h * fy];
@@ -513,7 +519,7 @@ b,strong{font-weight:500}
   // filtros
   ["Gestor", "Grupo", "Empresa", "Área", "Tier"].forEach((f, i) => nota(C.fil, meio(R.sels[i], 0.5, 0), [0, -70 - (i % 2) * 52], f, "", 21.9 + i * 0.15, 23.7));
   // capa já filtrada
-  nota(C.cov, meio(R.hello, 0.02, 0.5), [-120, -120], "Saudação pelo nome", "o link do e-mail já abre na carteira", 27.6, 29.4);
+  nota(C.cov, [R.hello.x - 12, R.hello.y + R.hello.h * 0.5], [-110, -120], "Saudação pelo nome", "o link do e-mail já abre na carteira", 27.6, 29.4);
   // comece por aqui
   nota(C.com, meio(R.abrirCard, 0.3, 1), [-260, 130], "Link direto para o card", "abre no Pipefy, em outra aba", 31.3, 33.9);
   // onde atuar
@@ -521,9 +527,10 @@ b,strong{font-weight:500}
     nota(C.brd, meio(R.colH[i], 0.5, 0), [0, -66], a, b, 36.6 + i * 0.4, 39.7));
   nota(C.tier, meio(R.itTier, 0.08, 0.5), [-60, 150], "Tier do cliente", "Diamante, Ouro, Prata e Bronze, da DB - BR NET", 41.6, 43);
   // visão gerencial
-  nota(C.mx, meio(R.areas, 0.17, 0), [0, -84], "Onde está: a área", "Segurança, Saúde e On-Going", tArea, ds(tC1, -0.6));
+  nota(C.mx, R.areaHd.map((r) => [r.x + r.w / 2, r.y - 12]), [0, -72], "Onde está: a área", "Segurança, Saúde e On-Going", tArea, ds(tC1, -0.6));
   nota(C.mx, meio(R.gestores, 0, 0.5), [-110, 0], "Com quem está", "cada linha é um gestor", tLinhas, ds(tC1, -0.6));
-  nota(C.mx, meio(R.celEscura, 0.5, 0), [150, -120], "Mais escura, mais atraso", "7 de 8 demandas atrasadas", tEscura, ds(tC1, -0.6));
+  // o ponto fica no vão à direita da célula, e a linha desce pelo vão entre as colunas sem cruzar números
+  nota(C.mx, [R.celEscura.x + R.celEscura.w + 3, R.celEscura.y + R.celEscura.h / 2], [0, 250], "Mais escura, mais atraso", "7 de 8 demandas atrasadas", tEscura, ds(tC1, -0.6));
   // evolução
   nota(C.mod, meio(R.ms1, 0, 0.5), [-180, 0], "Variação desde a edição anterior", "", 54.4, 57);
   // e-mail
