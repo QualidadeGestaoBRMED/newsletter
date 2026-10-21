@@ -334,6 +334,10 @@ export default function Painel({ gestorInicial, usuario, sair }: Props) {
 
   return (
     <div className="bm">
+      <form className="conta" action={sair} aria-label="Conta">
+        <span>{usuario}</span>
+        <button type="submit">Sair</button>
+      </form>
       <article className="doc" ref={docRef} data-dash-source-state={atualizando ? "refreshing" : undefined}>
         <header className="cover" id="topo">
           <div className="cover-teal">
@@ -366,10 +370,6 @@ export default function Painel({ gestorInicial, usuario, sair }: Props) {
                     );
                   })}
                 </select>
-                <form className="conta" action={sair}>
-                  <span>{usuario}</span>
-                  <button type="submit">Sair</button>
-                </form>
               </div>
             </div>
             <div className="bubbles" role="img" aria-label={ok ? bolhas.map((x) => `${x[0]} ${x[1]}`).join(", ") : undefined}>
