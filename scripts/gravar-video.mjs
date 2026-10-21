@@ -55,8 +55,9 @@ const ff = spawn(FFMPEG, [
   ...entradas,
   "-filter_complex", mistura,
   "-map", "0:v", "-map", "[voz]",
-  "-c:v", "libx264", "-preset", "slow", "-crf", "14", "-pix_fmt", "yuv420p", "-profile:v", "high", "-r", String(FPS),
-  "-c:a", "aac", "-b:a", "192k", "-ar", "48000",
+  // High@4.2 com 4 quadros de referência: o perfil que todo reprodutor e decodificador de hardware aceita em 1080p60
+  "-c:v", "libx264", "-preset", "slow", "-crf", "15", "-pix_fmt", "yuv420p", "-profile:v", "high", "-level:v", ESCALA > 1 ? "5.1" : "4.2", "-refs", "4", "-g", String(FPS * 2), "-tag:v", "avc1", "-r", String(FPS),
+  "-c:a", "aac", "-b:a", "192k", "-ac", "2", "-ar", "48000",
   "-movflags", "+faststart", "-t", total.toFixed(3), saida,
 ], { stdio: ["pipe", "inherit", "inherit"] });
 const fim = new Promise((r, j) => ff.on("close", (c) => (c === 0 ? r() : j(new Error(`ffmpeg saiu com ${c}`)))));
