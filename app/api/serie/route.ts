@@ -1,6 +1,7 @@
 // Série das edições da manhã para o gráfico de evolução, com os mesmos filtros do painel (sem a busca).
 import { and, desc, eq, isNull, ne, sql, type SQL } from "drizzle-orm";
 import { NextResponse } from "next/server";
+import { auth } from "@/auth";
 import { db, schema } from "@/db";
 import { AREA_NOME, type Area } from "@/jobs/config";
 import type { PontoSerie } from "@/lib/painel";
@@ -10,6 +11,7 @@ export const dynamic = "force-dynamic";
 const LIMITE = 90; // edições mais recentes
 
 export async function GET(req: Request) {
+  if (!(await auth())) return NextResponse.json({ erro: "faça login" }, { status: 401 });
   const p = new URL(req.url).searchParams;
   const e = schema.edicoes;
   const i = schema.itensEdicao;

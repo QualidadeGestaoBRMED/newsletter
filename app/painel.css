@@ -216,3 +216,18 @@ html,body{margin:0;background:#E9EDEF}
   .bm .evo .stat strong{font-size:28px}
   .bm .evo .rodape{flex-direction:column;gap:6px}
 }
+
+/* ---------- tela de entrada e conta no cabeçalho ---------- */
+.entrar{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:32px;padding:24px 16px;background:#193B4F;font-family:var(--font-rb),system-ui,sans-serif}
+.entrar-logo{height:36px;display:block}
+.entrar-card{width:100%;max-width:420px;background:#fff;color:#193B4F;border-radius:24px 24px 24px 4px;padding:40px 36px 32px;box-shadow:0 30px 70px rgba(0,0,0,.35);text-align:center}
+.entrar-card h1{margin:0;font-family:var(--font-ws),system-ui,sans-serif;font-weight:600;font-size:30px;letter-spacing:-.01em}
+.entrar-card p{margin:8px 0 0;color:#4A555C;font-weight:300}
+.entrar-card .entrar-erro{margin-top:20px;padding:10px 14px;border-radius:10px;background:#F7EAD4;color:#7A4614;font-weight:400;font-size:14px}
+.entrar-card form{margin-top:28px}
+.entrar-card button{width:100%;font:600 15px var(--font-ws),system-ui,sans-serif;color:#fff;background:#007891;border:0;border-radius:99px;padding:14px 20px;cursor:pointer}
+.entrar-card button:hover{background:#00687E}
+.entrar-card button:focus-visible{outline:2px solid #00AFAA;outline-offset:3px}
+.entrar-card small{display:block;margin-top:16px;color:#767A7B;font-size:12.5px}
+.bm .conta{display:flex;align-items:center;gap:10px;font-family:var(--ws);font-size:12px;color:rgba(255,255,255,.8)}
+.bm .conta button{font:inherit;color:#fff;background:transparent;border:0;padding:0;text-decoration:underline;text-underline-offset:3px;cursor:pointer}

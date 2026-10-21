@@ -1,11 +1,13 @@
 import { desc, ne } from "drizzle-orm";
 import { NextResponse } from "next/server";
+import { auth } from "@/auth";
 import { db, schema } from "@/db";
 import type { EdicaoResumo } from "@/lib/painel";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
+  if (!(await auth())) return NextResponse.json({ erro: "faça login" }, { status: 401 });
   const e = schema.edicoes;
   const rows = await db
     .select()

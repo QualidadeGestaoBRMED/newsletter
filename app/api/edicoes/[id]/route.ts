@@ -1,5 +1,6 @@
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
+import { auth } from "@/auth";
 import { db, schema } from "@/db";
 import { AREA_NOME } from "@/jobs/config";
 import { ID_EDICAO, type Linha } from "@/lib/painel";
@@ -7,6 +8,7 @@ import { ID_EDICAO, type Linha } from "@/lib/painel";
 export const dynamic = "force-dynamic";
 
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+  if (!(await auth())) return NextResponse.json({ erro: "faça login" }, { status: 401 });
   const { id } = await params;
   if (!ID_EDICAO.test(id)) return NextResponse.json({ erro: "id de edição inválido" }, { status: 400 });
 

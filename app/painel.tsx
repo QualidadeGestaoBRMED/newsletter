@@ -58,7 +58,9 @@ const COR_TIER: Record<string, string> = {
 };
 const ordemTier = (t: string) => (TIERS.includes(t) ? TIERS.indexOf(t) : t === "Sem tier" ? TIERS.length + 1 : TIERS.length);
 
-export default function Painel() {
+type Props = { gestorInicial: string | null; usuario: string; sair: () => Promise<void> };
+
+export default function Painel({ gestorInicial, usuario, sair }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const search = useSearchParams();
@@ -83,15 +85,18 @@ export default function Painel() {
   const [pref, setPref] = useState<Periodo | null>(null);
   useEffect(() => {
     const h = decodeURIComponent(location.hash.slice(1));
-    if (!h) return;
     const up: Partial<Params> = {};
-    h.split("&").forEach((kv) => {
-      const [k, v] = kv.split("=");
-      if (k === "manha" || k === "tarde") setPref(k);
-      if (k === "ed" && ID_EDICAO.test(v || "")) up.ed = v;
-      if (k === "gestor" && v) up.gestor = v;
-    });
-    history.replaceState(null, "", location.pathname + location.search);
+    if (h) {
+      h.split("&").forEach((kv) => {
+        const [k, v] = kv.split("=");
+        if (k === "manha" || k === "tarde") setPref(k);
+        if (k === "ed" && ID_EDICAO.test(v || "")) up.ed = v;
+        if (k === "gestor" && v) up.gestor = v;
+      });
+      history.replaceState(null, "", location.pathname + location.search);
+    }
+    // sem recorte de carteira no link, o gestor que entrou abre na própria carteira (só na abertura)
+    if (gestorInicial && !up.gestor && !p.gestor && !p.grupo && !p.empresa) up.gestor = gestorInicial;
     if (Object.keys(up).length) setParams(up);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -361,6 +366,10 @@ export default function Painel() {
                     );
                   })}
                 </select>
+                <form className="conta" action={sair}>
+                  <span>{usuario}</span>
+                  <button type="submit">Sair</button>
+                </form>
               </div>
             </div>
             <div className="bubbles" role="img" aria-label={ok ? bolhas.map((x) => `${x[0]} ${x[1]}`).join(", ") : undefined}>
