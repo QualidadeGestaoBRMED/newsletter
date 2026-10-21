@@ -29,7 +29,11 @@ const FALAS = [
   "Dá para filtrar por gestor, grupo, empresa, área e tíer. E quem chega pelo e-mail já abre na própria carteira.",
   "Em destaque, a demanda mais urgente, com um link direto para o card no Paipefai.",
   "Em Onde atuar, tudo aparece por urgência: primeiro o que venceu, depois o que vence hoje, e o que dá para antecipar.",
-  "A visão gerencial compara as carteiras. Quanto mais escura a célula, maior o atraso. E um clique desce de nível.",
+  {
+    texto:
+      "Na visão gerencial, você vê onde cada demanda está, e com quem. Nas colunas, a área: Segurança, Saúde e On-Going. Nas linhas, o gestor. Quanto mais escura a célula, maior o atraso. Um clique no gestor abre a carteira dele; outro clique, as empresas de cada grupo.",
+    marcas: { onde: "onde", area: "área", linhas: "linhas", escura: "escura", clique: "clique", outro: "outro" },
+  },
   "Em Evolução, você acompanha esses números, edição a edição.",
   "Às sete da manhã, cada gestor recebe um e-mail curto: três números, e um botão que abre o painel.",
   {

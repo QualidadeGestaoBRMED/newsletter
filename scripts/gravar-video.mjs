@@ -1,7 +1,7 @@
 // Grava public/tour.html em MP4: quadro a quadro (no tempo exato de cada quadro, então sai liso mesmo se a captura for lenta)
-// e com a narração de tour/narracao.json posicionada em cada cena.
+// com a narração de tour/narracao.json posicionada em cada cena e a música de fundo por baixo.
 // Uso: FFMPEG=/caminho/do/ffmpeg node scripts/gravar-video.mjs [saida.mp4] [--fps=60] [--escala=1] [--ate=SEGUNDOS]
-//   --escala=2 grava em 3840×2160. Precisa do Google Chrome instalado.
+//   --escala=1.3333333333 grava em 2560×1440; --escala=2 em 3840×2160. Precisa do Google Chrome instalado.
 import { spawn } from "node:child_process";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -40,15 +40,25 @@ for (let i = 0; i < 200 && !(await ev("window.tour?.pronto === true")); i++) awa
 await dormir(800); // fontes e imagens assentarem
 
 const total = ATE || (await ev("tour.TOTAL_REAL"));
-const falas = (await ev("JSON.stringify(tour.falas.map((f) => f && { src: f.a.getAttribute('src'), ini: f.ini }))")) ?? "[]";
-const trilha = JSON.parse(falas).filter((f) => f && f.ini < total);
+const falas = (await ev("JSON.stringify(tour.falas.map((f) => f && { src: f.a.getAttribute('src'), ini: f.ini, dur: f.dur }))")) ?? "[]";
+const todas = JSON.parse(falas).filter(Boolean), trilha = todas.filter((f) => f.ini < total);
+const musica = await ev("tour.musica");
 const quadros = Math.round(total * FPS);
-console.log(`${quadros} quadros (${total.toFixed(1)}s a ${FPS} q/s, ${1920 * ESCALA}×${1080 * ESCALA}), ${trilha.length} falas`);
+console.log(`${quadros} quadros (${total.toFixed(1)}s a ${FPS} q/s, ${Math.round(1920 * ESCALA)}×${Math.round(1080 * ESCALA)}), ${trilha.length} falas${musica ? " e música" : ""}`);
 
-// vídeo pela entrada padrão (PNG por quadro) + uma entrada de áudio por fala, cada uma atrasada até a sua cena
-const entradas = trilha.flatMap((f) => ["-i", join(PUBLICO, f.src)]);
+// vídeo pela entrada padrão (PNG por quadro) + uma entrada de áudio por fala, cada uma atrasada até a sua cena (+ a música)
+const entradas = [...trilha, ...(musica ? [musica] : [])].flatMap((f) => ["-i", join(PUBLICO, f.src)]);
 const atrasos = trilha.map((f, i) => `[${i + 1}:a]adelay=${Math.round(f.ini * 1000)}:all=1[a${i}]`).join(";");
-const mistura = `${atrasos};${trilha.map((_, i) => `[a${i}]`).join("")}amix=inputs=${trilha.length}:normalize=0,loudnorm=I=-16:TP=-1.5:LRA=11,apad,atrim=0:${total.toFixed(3)}[voz]`;
+// voz em −21 LUFS, o mesmo nível com que os MP3 da ElevenLabs tocam na apresentação
+let mistura = `${atrasos};${trilha.map((_, i) => `[a${i}]`).join("")}amix=inputs=${trilha.length}:normalize=0,loudnorm=I=-21:TP=-2:LRA=11`;
+if (musica) {
+  // a mesma curva de ganhoMusica() do tour.html: abaixa em volta de cada fala, entra em 1,5s e sai nos 3s finais
+  const TT = (await ev("tour.TOTAL_REAL")).toFixed(3);
+  const abaixar = todas.reduce((e, f) => `max(${e},clip(min((t-${(f.ini - 0.3).toFixed(3)})/0.3,(${(f.ini + f.dur + 0.5).toFixed(3)}-t)/0.5),0,1))`, "0");
+  const ganho = `pow(10,(${musica.db}+${musica.abaixa}*${abaixar})/20)*clip(min(t/1.5,(${TT}-t)/3),0,1)`;
+  mistura += `[vz];[${trilha.length + 1}:a]volume='${ganho}':eval=frame[mu];[vz][mu]amix=inputs=2:normalize=0,alimiter=limit=0.95`;
+}
+mistura += `,apad,atrim=0:${total.toFixed(3)}[voz]`;
 const ff = spawn(FFMPEG, [
   "-y", "-hide_banner", "-loglevel", "error",
   "-f", "image2pipe", "-framerate", String(FPS), "-c:v", "png", "-i", "-",

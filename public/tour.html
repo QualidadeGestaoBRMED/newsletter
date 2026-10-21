@@ -91,6 +91,7 @@ b,strong{font-weight:500}
 .more{margin-top:10px;font-family:var(--ws);font-size:12.5px;color:var(--teal);text-decoration:underline;text-underline-offset:3px}
 .rule{height:1px;background:var(--g3);margin:56px 0}
 
+.nv{display:grid}.nv>span{grid-area:1/1}
 .crumbs{margin-top:22px;font-family:var(--ws);font-size:13px;height:20px;position:relative}
 .crumbs>div{position:absolute;left:0;top:0;white-space:nowrap}
 .crumbs u{color:var(--teal);text-underline-offset:3px}
@@ -257,9 +258,9 @@ b,strong{font-weight:500}
         </section>
         <div class="rule"></div>
         <section id="p-mx" class="pc">
-          <div class="sec-h"><div><span class="kicker">Visão gerencial</span><h2>Carteira de <b>Ana Ribeiro</b></h2><p>Clique no nome para descer um nível.</p></div><aside class="note">Cada célula conta as demandas na área. Quanto mais escura, maior a parte atrasada.</aside></div>
+          <div class="sec-h"><div><span class="kicker">Visão gerencial</span><h2 class="nv"><span id="h0">Carteiras <b>lado a lado</b></span><span id="h1">Carteira de <b>Ana Ribeiro</b></span><span id="h2"><b>Grupo Atlântico</b>, por empresa</span></h2><p class="nv"><span id="s0">Quem tem mais atraso aparece primeiro. Clique no nome do gestor para abrir só a carteira dele.</span><span id="s1">Clique no nome para descer um nível.</span></p></div><aside class="note">Cada célula conta as demandas na área. Quanto mais escura, maior a parte atrasada.</aside></div>
           <div class="crumbs"><div id="cr1"><u>← Todos os gestores</u><i>›</i><b>Ana Ribeiro</b></div><div id="cr2"><u>← Todos os gestores</u><i>›</i><u>Ana Ribeiro</u><i>›</i><b>Grupo Atlântico</b></div></div>
-          <div class="mx"><div class="tb" id="tbG"></div><div class="tb" id="tbE"></div></div>
+          <div class="mx"><div class="tb" id="tbP"></div><div class="tb" id="tbG"></div><div class="tb" id="tbE"></div></div>
         </section>
       </div>
     </div>
@@ -310,7 +311,7 @@ b,strong{font-weight:500}
   <svg id="linhas" viewBox="0 0 1920 1080"></svg><div id="notas"></div>
   <div id="caps"></div>
 
-  <div class="full" id="inicio" hidden><div><img src="logo-brmed.png" alt="BR MED"><div class="ttl" style="font-size:110px">Briefing Suporte<small>Uma visita guiada de 1 minuto e meio.</small></div>
+  <div class="full" id="inicio" hidden><div><img src="logo-brmed.png" alt="BR MED"><div class="ttl" style="font-size:110px">Briefing Suporte<small>Uma visita guiada de 2 minutos.</small></div>
     <div class="inicio-acoes"><button type="button" id="comSom">▶&ensp;Assistir com som</button><button type="button" id="semSom">Assistir sem som</button></div></div></div>
   <div id="ctl"><button type="button" id="play" aria-label="Pausar">❚❚ <span>Pausar</span></button><button type="button" id="again" aria-label="Recomeçar">↺</button><button type="button" id="som" hidden></button><div id="trk"><div class="ln"></div><div class="pg" id="pg"></div></div><span id="tm">0:00 / 1:30</span></div>
 </div></div>
@@ -342,9 +343,12 @@ b,strong{font-weight:500}
   const tabela = (rows) => `<div class="hd"><span></span><span>Segurança (ST)</span><span>Saúde (SO)</span><span>On-Going (OG)</span><span>Total</span></div>` +
     rows.map(([nome, sub, tiers, st, so, og]) => { const tot = [st[0] + so[0] + og[0], st[1] + so[1] + og[1]];
       return `<div class="row"><div class="rh"><span><span class="dots">${tiers.map((t) => `<i style="background:${TIER[t]}"></i>`).join("")}</span>${nome}</span><small>${sub}</small></div>${cel(st)}${cel(so)}${cel(og)}${cel(tot, true)}</div>`; }).join("");
+  document.getElementById("tbP").innerHTML = tabela([
+    ["Ana Ribeiro", "8 empresas", [], [14, 8], [16, 10], [6, 3]], ["Bruno Tavares", "6 empresas", [], [6, 5], [8, 7], [3, 2]],
+    ["Carla Mendes", "5 empresas", [], [4, 2], [6, 4], [2, 1]], ["Diego Moura", "4 empresas", [], [3, 1], [5, 3], [4, 1]]]);
   document.getElementById("tbG").innerHTML = tabela([
     ["Grupo Atlântico", "3 empresas", ["Diamante", "Prata"], [6, 5], [9, 8], [4, 3]], ["Grupo Serra Verde", "2 empresas", ["Ouro"], [5, 3], [3, 2], [2, 0]],
-    ["Grupo Litoral", "2 empresas", ["Prata"], [2, 0], [3, 1], [0, 0]], ["Grupo Pampa", "1 empresa", ["Bronze"], [1, 0], [1, 0], [0, 0]]]);
+    ["Grupo Litoral", "2 empresas", ["Prata"], [2, 0], [3, 0], [0, 0]], ["Grupo Pampa", "1 empresa", ["Bronze"], [1, 0], [1, 0], [0, 0]]]);
   document.getElementById("tbE").innerHTML = tabela([
     ["Atlântico Portos", "", ["Diamante"], [4, 4], [7, 6], [2, 1]], ["Atlântico Logística", "", ["Prata"], [2, 1], [2, 2], [2, 2]], ["Atlântico Terminais", "", ["Diamante"], [0, 0], [0, 0], [0, 0]]]);
 
@@ -379,8 +383,14 @@ b,strong{font-weight:500}
   const ret = (el) => { const w = world.getBoundingClientRect(), r = el.getBoundingClientRect(), k = w.width / world.offsetWidth; return { x: (r.left - w.left) / k, y: (r.top - w.top) / k, w: r.width / k, h: r.height / k }; };
   const R = {};
   for (const id of ["p-teal", "p-navy", "p-filtros", "p-comece", "p-board", "p-mx", "bubbles", "bub1", "bub2", "bub3", "say", "hello", "selG", "selT", "evoBtn", "abrirCard", "phone", "subj", "mcta", "mail"]) R[id] = ret($(id));
-  R.mxRow1 = ret(document.querySelector("#tbG .row .rh"));
-  R.cel1 = ret(document.querySelectorAll("#tbG .row .cell")[1]);
+  // as tabelas dos três níveis ficam empilhadas: a 1ª linha de uma é a 1ª linha das outras
+  const uniao = (els) => { const rs = [...els].map(ret), x = Math.min(...rs.map((r) => r.x)), y = Math.min(...rs.map((r) => r.y));
+    return { x, y, w: Math.max(...rs.map((r) => r.x + r.w)) - x, h: Math.max(...rs.map((r) => r.y + r.h)) - y }; };
+  R.mxRow1 = ret(document.querySelector("#tbP .row .rh"));
+  R.areas = uniao([...document.querySelectorAll("#tbP .hd span")].slice(1, 4));
+  R.gestores = uniao(document.querySelectorAll("#tbP .rh"));
+  R.celEscura = ret(document.querySelectorAll("#tbP .row")[1].querySelectorAll(".cell")[1]);
+  R.voltar = ret(document.querySelector("#cr1 u"));
   R.itTier = ret(document.querySelector("#board .it .tier"));
   R.grid = ret($("board"));
   R.colH = [...document.querySelectorAll("#board .col-h")].map(ret);
@@ -416,6 +426,15 @@ b,strong{font-weight:500}
   const trecho = (arr, v) => Math.min(CENAS.length - 1, Math.max(0, arr.findLastIndex((b) => b <= v)));
   const W = (t) => { const i = trecho(LIM, t); return REAL[i] + ((t - LIM[i]) / (LIM[i + 1] - LIM[i])) * (REAL[i + 1] - REAL[i]); };
   const Winv = (r) => { const i = trecho(REAL, r); return LIM[i] + ((r - REAL[i]) / (REAL[i + 1] - REAL[i])) * (LIM[i + 1] - LIM[i]); };
+  // segundo de roteiro em que a narração da cena s0 diz a palavra k (sem narração: s0 + reserva)
+  const marcaEm = (s0, k, reserva) => { const i = CENAS.findIndex(([t]) => t === s0), m = NARR?.falas?.[i]?.marcas;
+    return m?.[k] != null ? Winv(REAL[i] + ANTES + m[k]) : s0 + reserva; };
+  // visão gerencial: sobe para todos os gestores, mostra área (colunas) e gestor (linhas), depois desce gestor → grupo → empresa
+  const S7 = 43.8;
+  const [tArea, tLinhas, tEscura, tC1, tC2] = [["area", 2.4], ["linhas", 4.1], ["escura", 5], ["clique", 6.1], ["outro", 7]].map(([k, r]) => marcaEm(S7, k, r));
+  const tUp = Math.min(45.2, tArea - 0.6);
+  // t + d segundos reais, em segundos de roteiro: entradas e saídas têm a mesma duração mesmo numa cena esticada pela fala
+  const ds = (t, d) => Winv(W(t) + d * RITMO);
   const anims = [];
   // K(el, [[t, quadro], ...]): uma animação por elemento, com os quadros em segundos absolutos
   const K = (el, quadros, easing = "cubic-bezier(.4,0,.2,1)") => {
@@ -470,7 +489,7 @@ b,strong{font-weight:500}
   const linhas = $("linhas"), notas = $("notas");
   // nota(câmera, ponto no mundo, deslocamento do rótulo no palco, título, subtítulo, entra, sai)
   const nota = (c, [wx, wy], [dx, dy], titulo, sub, t0, t1) => {
-    t1 = Math.max(t1, t0 + 1.3);
+    t1 = Math.max(t1, ds(t0, 1.3));
     const ax = c.tx + wx * c.s, ay = c.ty + wy * c.s, lx = ax + dx, ly = ay + dy;
     const pt = document.createElement("i"); pt.className = "pt"; pt.style.left = `${ax}px`; pt.style.top = `${ay}px`;
     const ln = document.createElementNS("http://www.w3.org/2000/svg", "line");
@@ -481,9 +500,9 @@ b,strong{font-weight:500}
     const gx = Math.abs(dx) >= Math.abs(dy) ? (dx < 0 ? -10 : 10) : 0, gy = Math.abs(dx) >= Math.abs(dy) ? 0 : dy < 0 ? -10 : 10;
     lb.style.left = `${lx + gx}px`; lb.style.top = `${ly + gy}px`;
     notas.append(pt, lb); linhas.append(ln);
-    K(pt, [[0, { transform: "scale(0)" }], [t0, { transform: "scale(0)" }], [t0 + 0.35, { transform: "scale(1)" }], [t1 - 0.25, { transform: "scale(1)" }], [t1, { transform: "scale(0)" }]], "cubic-bezier(.2,1.5,.4,1)");
-    K(ln, [[0, { strokeDashoffset: 1, opacity: 1 }], [t0 + 0.15, { strokeDashoffset: 1 }], [t0 + 0.6, { strokeDashoffset: 0 }], [t1 - 0.25, { opacity: 1 }], [t1, { opacity: 0 }]]);
-    K(lb, [[0, { opacity: 0, transform: `translate(${hx},${hy}) scale(.92)` }], [t0 + 0.45, { opacity: 0, transform: `translate(${hx},${hy}) scale(.92)` }], [t0 + 0.8, { opacity: 1, transform: `translate(${hx},${hy})` }], [t1 - 0.25, { opacity: 1 }], [t1, { opacity: 0 }]], "cubic-bezier(.2,1.2,.4,1)");
+    K(pt, [[0, { transform: "scale(0)" }], [t0, { transform: "scale(0)" }], [ds(t0, 0.35), { transform: "scale(1)" }], [ds(t1, -0.25), { transform: "scale(1)" }], [t1, { transform: "scale(0)" }]], "cubic-bezier(.2,1.5,.4,1)");
+    K(ln, [[0, { strokeDashoffset: 1, opacity: 1 }], [ds(t0, 0.15), { strokeDashoffset: 1 }], [ds(t0, 0.6), { strokeDashoffset: 0 }], [ds(t1, -0.25), { opacity: 1 }], [t1, { opacity: 0 }]]);
+    K(lb, [[0, { opacity: 0, transform: `translate(${hx},${hy}) scale(.92)` }], [ds(t0, 0.45), { opacity: 0, transform: `translate(${hx},${hy}) scale(.92)` }], [ds(t0, 0.8), { opacity: 1, transform: `translate(${hx},${hy})` }], [ds(t1, -0.25), { opacity: 1 }], [t1, { opacity: 0 }]], "cubic-bezier(.2,1.2,.4,1)");
   };
   const meio = (r, fx = 0.5, fy = 0.5) => [r.x + r.w * fx, r.y + r.h * fy];
 
@@ -502,8 +521,9 @@ b,strong{font-weight:500}
     nota(C.brd, meio(R.colH[i], 0.5, 0), [0, -66], a, b, 36.6 + i * 0.4, 39.7));
   nota(C.tier, meio(R.itTier, 0.08, 0.5), [-60, 150], "Tier do cliente", "Diamante, Ouro, Prata e Bronze, da DB - BR NET", 41.6, 43);
   // visão gerencial
-  nota(C.mx, meio(R.cel1, 0.5, 0), [80, -110], "Mais escura, mais atraso", "8 de 9 demandas atrasadas", 46.4, 47.9);
-  nota(C.mx, meio(R.crumbs, 0.08, 0.5), [-40, -110], "Trilha para voltar", "e o botão voltar do navegador", 49.8, 51.9);
+  nota(C.mx, meio(R.areas, 0.17, 0), [0, -84], "Onde está: a área", "Segurança, Saúde e On-Going", tArea, ds(tC1, -0.6));
+  nota(C.mx, meio(R.gestores, 0, 0.5), [-110, 0], "Com quem está", "cada linha é um gestor", tLinhas, ds(tC1, -0.6));
+  nota(C.mx, meio(R.celEscura, 0.5, 0), [150, -120], "Mais escura, mais atraso", "7 de 8 demandas atrasadas", tEscura, ds(tC1, -0.6));
   // evolução
   nota(C.mod, meio(R.ms1, 0, 0.5), [-180, 0], "Variação desde a edição anterior", "", 54.4, 57);
   // e-mail
@@ -545,13 +565,15 @@ b,strong{font-weight:500}
     [0, { ...fora, opacity: 0 }], [23, { ...fora, opacity: 0 }], [23.2, { ...fora, opacity: 1 }], [23.9, { ...at(R.selG, 0.7), opacity: 1 }], [24.2, { ...at(R.selG, 0.7) }],
     [24.7, { ...at(R.dropAna, 0.4) }], [25.4, { ...at(R.dropAna, 0.4), opacity: 1 }], [25.7, { ...at(R.dropAna, 0.4), opacity: 0 }],
     [30.2, { ...at(R.abrirCard, 1.4, 1.6), opacity: 0 }], [30.5, { ...at(R.abrirCard, 1.4, 1.6), opacity: 1 }], [31.2, { ...at(R.abrirCard, 0.55) }], [33.4, { ...at(R.abrirCard, 0.55), opacity: 1 }], [33.7, { ...at(R.abrirCard, 0.55), opacity: 0 }],
-    [47, { ...at(R.mxRow1, 1.2, 1.3), opacity: 0 }], [47.3, { ...at(R.mxRow1, 1.2, 1.3), opacity: 1 }], [48, { ...at(R.mxRow1, 0.25, 0.3) }], [49.2, { ...at(R.mxRow1, 0.25, 0.3), opacity: 1 }], [49.5, { ...at(R.mxRow1, 0.25, 0.3), opacity: 0 }],
+    [ds(tUp, -1.2), { ...at(R.voltar, 1.8, 2.4), opacity: 0 }], [ds(tUp, -1), { ...at(R.voltar, 1.8, 2.4), opacity: 1 }], [ds(tUp, -0.15), { ...at(R.voltar, 0.5) }], [ds(tUp, 0.4), { ...at(R.voltar, 0.5), opacity: 1 }], [ds(tUp, 0.7), { ...at(R.voltar, 0.5), opacity: 0 }],
+    [ds(tC1, -1.2), { ...at(R.mxRow1, 1.2, 1.3), opacity: 0 }], [ds(tC1, -1), { ...at(R.mxRow1, 1.2, 1.3), opacity: 1 }], [ds(tC1, -0.15), { ...at(R.mxRow1, 0.25, 0.3) }],
+    [ds(tC2, -0.6), { ...at(R.mxRow1, 0.25, 0.3) }], [ds(tC2, -0.15), { ...at(R.mxRow1, 0.3, 0.42) }], [ds(tC2, 0.5), { ...at(R.mxRow1, 0.3, 0.42), opacity: 1 }], [ds(tC2, 0.8), { ...at(R.mxRow1, 0.3, 0.42), opacity: 0 }],
     [52, { ...at(R.evoBtn, 1.6, 2), opacity: 0 }], [52.3, { ...at(R.evoBtn, 1.6, 2), opacity: 1 }], [52.9, { ...at(R.evoBtn, 0.4) }], [53.3, { ...at(R.evoBtn, 0.4), opacity: 1 }], [53.6, { ...at(R.evoBtn, 0.4), opacity: 0 }],
     [TOTAL, { ...at(R.evoBtn, 0.4), opacity: 0 }],
   ]);
   const clique = (r, fx, fy, t) => { const d = document.createElement("div"); d.className = "ripple"; d.style.left = `${r.x + r.w * fx}px`; d.style.top = `${r.y + r.h * fy}px`; $("overlay").append(d);
-    K(d, [[0, { opacity: 0, transform: "scale(.3)" }], [t, { opacity: 0, transform: "scale(.3)" }], [t + 0.05, { opacity: 1 }], [t + 0.6, { opacity: 0, transform: "scale(1.6)" }]]); };
-  clique(R.selG, 0.7, 0.5, 24.1); clique(R.dropAna, 0.4, 0.5, 25.1); clique(R.abrirCard, 0.55, 0.5, 32.2); clique(R.mxRow1, 0.25, 0.3, 48.5); clique(R.evoBtn, 0.4, 0.5, 53.1);
+    K(d, [[0, { opacity: 0, transform: "scale(.3)" }], [t, { opacity: 0, transform: "scale(.3)" }], [ds(t, 0.05), { opacity: 1 }], [ds(t, 0.6), { opacity: 0, transform: "scale(1.6)" }]]); };
+  clique(R.selG, 0.7, 0.5, 24.1); clique(R.dropAna, 0.4, 0.5, 25.1); clique(R.abrirCard, 0.55, 0.5, 32.2); clique(R.voltar, 0.5, 0.5, tUp); clique(R.mxRow1, 0.25, 0.3, tC1); clique(R.mxRow1, 0.3, 0.42, tC2); clique(R.evoBtn, 0.4, 0.5, 53.1);
   K(drop, [[0, { opacity: 0, transform: "translateY(-6px)" }], [24.2, { opacity: 0, transform: "translateY(-6px)" }], [24.45, { opacity: 1, transform: "none" }], [25.2, { opacity: 1 }], [25.5, { opacity: 0 }]]);
   K($("dropAna"), [[24.6, { background: "#fff" }], [24.75, { background: "#E6F7F6" }]]);
   K($("selG"), [[25.2, { boxShadow: "0 0 0 0 rgba(0,175,170,0)" }], [25.5, { boxShadow: "0 0 0 4px rgba(0,175,170,.35)" }], [26.8, { boxShadow: "0 0 0 0 rgba(0,175,170,0)" }]]);
@@ -559,20 +581,21 @@ b,strong{font-weight:500}
   // holofote: escurece o resto da tela e deixa só o elemento explicado aceso
   const holofote = (r, t0, t1, pad = 12, raio = 18) => { const d = document.createElement("div"); d.className = "spot";
     Object.assign(d.style, { left: `${r.x - pad}px`, top: `${r.y - pad}px`, width: `${r.w + 2 * pad}px`, height: `${r.h + 2 * pad}px`, borderRadius: `${raio}px` }); $("overlay").append(d);
-    K(d, [[0, { opacity: 0 }], [t0, { opacity: 0 }], [t0 + 0.6, { opacity: 1 }], [t1 - 0.5, { opacity: 1 }], [t1, { opacity: 0 }]]); };
+    K(d, [[0, { opacity: 0 }], [t0, { opacity: 0 }], [ds(t0, 0.6), { opacity: 1 }], [ds(t1, -0.5), { opacity: 1 }], [t1, { opacity: 0 }]]); };
   holofote(R.bubbles, 15.2, 20.3, 14, 70);
   holofote(R["p-filtros"], 21.8, 25.6, 4, 10);
   holofote({ ...R.say, h: R.say.h * 0.42 }, 27.4, 29.5, 18, 16);
   holofote(R["p-comece"], 30.7, 34.1, 10, 26);
   holofote(R.grid, 36.3, 39.9, 12, 20);
   holofote(R.itTier, 41.2, 43.1, 10, 14);
-  holofote(R.crumbs, 49.5, 52, 10, 12);
+  holofote(R.areas, ds(tArea, -0.3), ds(tLinhas, 0.4), 10, 12);
+  holofote(R.gestores, tLinhas, ds(tEscura, 0.3), 10, 12);
 
   // anéis de destaque
   const anel = (r, t0, t1, pad = 10) => { const d = document.createElement("div"); d.className = "ring";
     Object.assign(d.style, { left: `${r.x - pad}px`, top: `${r.y - pad}px`, width: `${r.w + 2 * pad}px`, height: `${r.h + 2 * pad}px` }); $("overlay").append(d);
-    K(d, [[0, { opacity: 0 }], [t0, { opacity: 0, transform: "scale(1.04)" }], [t0 + 0.4, { opacity: 1, transform: "none" }], [t1 - 0.3, { opacity: 1 }], [t1, { opacity: 0 }]]); };
-  anel(R.itTier, 41.4, 43, 6); anel(R.crumbs, 49.6, 51.9, 8);
+    K(d, [[0, { opacity: 0 }], [t0, { opacity: 0, transform: "scale(1.04)" }], [ds(t0, 0.4), { opacity: 1, transform: "none" }], [ds(t1, -0.3), { opacity: 1 }], [t1, { opacity: 0 }]]); };
+  anel(R.itTier, 41.4, 43, 6); anel(R.voltar, ds(tUp, -0.9), ds(tUp, 0.6), 8); anel(R.celEscura, tEscura, ds(tC1, -0.6), 6);
 
   // ---------- onde atuar: itens chegando coluna a coluna ----------
   const apagado = { background: "rgba(230,247,246,0)", boxShadow: "inset 3px 0 0 rgba(0,175,170,0)" }, aceso = { background: "rgba(230,247,246,1)", boxShadow: "inset 3px 0 0 #00AFAA" };
@@ -581,16 +604,23 @@ b,strong{font-weight:500}
     col.querySelectorAll(".it").forEach((it, i) => { const t = 36.2 + c * 0.6 + i * 0.28; K(it, [[0, apagado], [t, apagado], [t + 0.18, aceso], [t + 0.9, apagado]]); });
   });
 
-  // ---------- visão gerencial: células ganham cor linha a linha; depois desce para o Grupo Atlântico ----------
-  document.querySelectorAll("#tbG .cell, #tbE .cell").forEach((cl) => { if (cl.dataset.bg) { cl.style.background = cl.dataset.bg; cl.style.color = cl.dataset.fg; } });
-  document.querySelectorAll("#tbG .row").forEach((row, i) => row.querySelectorAll(".cell").forEach((cl, j) => {
-    const t = 45.3 + i * 0.3 + j * 0.07;
-    K(cl, [[0, { transform: "none" }], [t, { transform: "none" }], [t + 0.2, { transform: "scale(1.07)" }], [t + 0.55, { transform: "none" }]], "cubic-bezier(.3,1.3,.4,1)");
+  // ---------- visão gerencial: todos os gestores → carteira da Ana → Grupo Atlântico ----------
+  document.querySelectorAll(".mx .cell").forEach((cl) => { if (cl.dataset.bg) { cl.style.background = cl.dataset.bg; cl.style.color = cl.dataset.fg; } });
+  // nível visível ao longo do tempo; o filtro da Ana (25.6, fora de quadro) já abre a carteira dela
+  const NIV = [[0, 0], [25.6, 1], [tUp, 0], [tC1, 1], [tC2, 2]];
+  // el aparece nos níveis `n`; fora deles, sai para a esquerda (desceu) ou para a direita (subiu)
+  const porNivel = (el, n, desliza = 0) => {
+    const em = [n].flat(), q = (v, ant) => (em.includes(v) ? { opacity: 1, transform: "none" } : { opacity: 0, transform: `translateX(${(v > em[0] || ant > em[0] ? -1 : 1) * desliza}px)` });
+    K(el, [[0, q(NIV[0][1])], ...NIV.slice(1).flatMap(([t, v], i) => [[t, q(NIV[i][1])], [ds(t, 0.45), q(v, NIV[i][1])]])]);
+  };
+  ["tbP", "tbG", "tbE"].forEach((id, n) => porNivel($(id), n, 30));
+  ["h0", "h1", "h2"].forEach((id, n) => porNivel($(id), n));
+  porNivel($("s0"), 0); porNivel($("s1"), [1, 2]);
+  porNivel($("cr1"), 1); porNivel($("cr2"), 2);
+  document.querySelectorAll("#tbP .row").forEach((row, i) => row.querySelectorAll(".cell").forEach((cl, j) => {
+    const t = ds(tUp, 0.5 + i * 0.3 + j * 0.07);
+    K(cl, [[0, { transform: "none" }], [t, { transform: "none" }], [ds(t, 0.2), { transform: "scale(1.07)" }], [ds(t, 0.55), { transform: "none" }]], "cubic-bezier(.3,1.3,.4,1)");
   }));
-  K($("tbG"), [[0, { opacity: 1, transform: "none" }], [48.6, { opacity: 1, transform: "none" }], [49, { opacity: 0, transform: "translateX(-30px)" }]]);
-  K($("tbE"), [[0, { opacity: 0 }], [48.9, { opacity: 0, transform: "translateX(30px)" }], [49.4, { opacity: 1, transform: "none" }]]);
-  K($("cr1"), [[0, { opacity: 1 }], [48.6, { opacity: 1 }], [48.8, { opacity: 0 }]]);
-  K($("cr2"), [[0, { opacity: 0 }], [48.8, { opacity: 0, transform: "translateY(6px)" }], [49.2, { opacity: 1, transform: "none" }]]);
 
   // ---------- modal de evolução ----------
   K($("dim"), [[0, { opacity: 0 }], [53.2, { opacity: 0 }], [53.7, { opacity: 1 }], [61.2, { opacity: 1 }], [61.7, { opacity: 0 }]]);
@@ -618,9 +648,8 @@ b,strong{font-weight:500}
   K(document.querySelector("#outro img"), [[0, { opacity: 0 }], [90.4, { opacity: 0 }], [91.2, { opacity: 1 }]]);
 
   // ---------- próximos passos: cada marco surge quando a narração diz o nome dele ----------
-  const S9 = 72.4, iRota = CENAS.findIndex(([t]) => t === S9);
-  const marca = NARR?.falas?.[iRota]?.marcas;
-  const quando = (k, reserva) => (marca?.[k] != null ? Winv(REAL[iRota] + ANTES + marca[k]) : S9 + reserva);
+  const S9 = 72.4;
+  const quando = (k, reserva) => marcaEm(S9, k, reserva);
   const tm0 = [quando("prazos", 4), quando("resumo", 7), quando("nps", 10.5), quando("churn", 13)];
   const FIM9 = 88.4;
   K($("rota"), [[0, { opacity: 0, visibility: "hidden" }], [S9 + 0.1, { opacity: 0, visibility: "visible" }], [S9 + 0.9, { opacity: 1 }], [FIM9 + 0.2, { opacity: 1 }], [FIM9 + 1, { opacity: 0, visibility: "hidden" }]]);
@@ -647,7 +676,7 @@ b,strong{font-weight:500}
     [21.4, 29.5, "Cada gestor na sua carteira", "Filtre por gestor, grupo, empresa, área e tier. Quem abre o link do e-mail já cai na própria carteira."],
     [30.3, 34.2, "Comece por aqui", "A demanda mais urgente do recorte, com link direto para o card no Pipefy."],
     [35.2, 43.2, "Onde atuar", "Vencidas primeiro, depois o que vence hoje e o que dá para antecipar. Cada linha traz a área, o tier e o grupo."],
-    [44.4, 52.2, "Visão gerencial", "Quanto mais escura a célula, maior a parte atrasada. Clique no nome para descer um nível; a trilha leva de volta."],
+    [44.4, 52.2, "Onde está e com quem", "Cada coluna é uma área; cada linha, um gestor. Um clique desce para os grupos e as empresas, e a trilha leva de volta."],
     [53.2, 61.4, "Evolução", "Os três números, edição a edição, no mesmo recorte dos filtros. Passe o mouse para ver cada dia."],
     [62.6, 71.6, "Às 07:00, no e-mail", "Três números e um botão. O detalhe fica no painel."],
   ];
@@ -689,8 +718,23 @@ b,strong{font-weight:500}
   let tocando = false, reinicio = null;
   const falas = (NARR?.falas ?? []).map((f, i) => f && { a: Object.assign(new Audio(`tour/${f.arquivo}`), { preload: "auto" }), ini: REAL[i] + ANTES, dur: f.duracao });
   let som = !!NARR;
+  // música de fundo (scripts/trilha.mjs): db abaixo do arquivo, e mais `abaixa` dB enquanto alguém fala.
+  // scripts/gravar-video.mjs repete esta curva no ffmpeg.
+  const MUSICA = { src: "tour/trilha.mp3", db: -14, abaixa: -6 };
+  const musica = NARR && Object.assign(new Audio(MUSICA.src), { preload: "auto" });
+  const ganhoMusica = (r) => {
+    const fala = Math.max(0, ...falas.map((f) => (f ? Math.min(1, Math.max(0, Math.min((r - f.ini + 0.3) / 0.3, (f.ini + f.dur + 0.5 - r) / 0.5))) : 0)));
+    return 10 ** ((MUSICA.db + MUSICA.abaixa * fala) / 20) * Math.min(1, Math.max(0, Math.min(r / 1.5, (TOTAL_REAL - r) / 3)));
+  };
   const sincronizar = () => {
     const r = W(Math.min(TOTAL, agora()));
+    if (musica) {
+      if (tocando && som && r < TOTAL_REAL) {
+        if (musica.paused) { musica.currentTime = r; musica.play().catch(() => {}); }
+        else if (Math.abs(musica.currentTime - r) > 0.3) musica.currentTime = r;
+        musica.volume = ganhoMusica(r);
+      } else if (!musica.paused) musica.pause();
+    }
     for (const f of falas) {
       if (!f) continue;
       if (tocando && som && r >= f.ini && r < f.ini + f.dur) {
@@ -703,7 +747,7 @@ b,strong{font-weight:500}
   const botaoSom = $("som");
   const rotularSom = () => { botaoSom.innerHTML = som ? "🔊 <span>Som</span>" : "🔇 <span>Sem som</span>"; botaoSom.setAttribute("aria-pressed", String(som)); };
   // inspeção e gravação em vídeo: irReal posiciona a apresentação num segundo real exato
-  window.tour = { falas, REAL, W, TOTAL_REAL, agora: () => agora(), irReal: (r) => ir(Winv(r)) };
+  window.tour = { falas, musica: musica && MUSICA, REAL, W, TOTAL_REAL, agora: () => agora(), irReal: (r) => ir(Winv(r)) };
   if (NARR) { botaoSom.hidden = false; rotularSom(); botaoSom.onclick = () => { som = !som; rotularSom(); sincronizar(); }; }
   const agora = () => Winv((relogio.currentTime ?? 0) / 1000);
   const desenhar = () => {
