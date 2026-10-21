@@ -1,7 +1,7 @@
 {
   "voz": "XrExE9yKIg1WjnnlVkGX",
   "modelo": "eleven_multilingual_v2",
-  "gerado_em": "2026-10-21T14:11:17.527Z",
+  "gerado_em": "2026-10-21T14:17:02.392Z",
   "falas": [
     {
       "arquivo": "narracao-01.mp3",
@@ -9,9 +9,9 @@
       "texto": "Este é o Briefing Suporte."
     },
     {
-      "arquivo": "narracao-02.mp3",
-      "duracao": 6.88,
-      "texto": "Duas vezes por dia útil, ele lê o Pipefy, calcula o prazo de cada demanda e monta o painel."
+      "arquivo": "fala-c1a6697a93.mp3",
+      "duracao": 7.72,
+      "texto": "Duas vezes por dia útil, ele lê o Paipefai, calcula o prazo de cada demanda e monta o painel."
     },
     {
       "arquivo": "narracao-03.mp3",
@@ -19,14 +19,14 @@
       "texto": "No topo, os números do dia: o que já venceu, o que vence hoje, e o que vence nos próximos dois dias."
     },
     {
-      "arquivo": "narracao-04.mp3",
+      "arquivo": "fala-1aaba08e26.mp3",
       "duracao": 9.35,
-      "texto": "Dá para filtrar por gestor, grupo, empresa, área e tier. E quem chega pelo e-mail já abre na própria carteira."
+      "texto": "Dá para filtrar por gestor, grupo, empresa, área e tíer. E quem chega pelo e-mail já abre na própria carteira."
     },
     {
-      "arquivo": "narracao-05.mp3",
-      "duracao": 5.86,
-      "texto": "Em destaque, a demanda mais urgente, com um link direto para o card no Pipefy."
+      "arquivo": "fala-8d7b0abaaa.mp3",
+      "duracao": 6.19,
+      "texto": "Em destaque, a demanda mais urgente, com um link direto para o card no Paipefai."
     },
     {
       "arquivo": "narracao-06.mp3",

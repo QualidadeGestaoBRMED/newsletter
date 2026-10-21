@@ -7,3 +7,4 @@ tmp/
 *.tsbuildinfo
 next-env.d.ts
 .neon
+video/

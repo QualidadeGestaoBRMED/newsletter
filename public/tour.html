@@ -702,7 +702,8 @@ b,strong{font-weight:500}
   };
   const botaoSom = $("som");
   const rotularSom = () => { botaoSom.innerHTML = som ? "🔊 <span>Som</span>" : "🔇 <span>Sem som</span>"; botaoSom.setAttribute("aria-pressed", String(som)); };
-  window.tour = { falas, REAL, W, agora: () => agora() }; // inspeção (testes)
+  // inspeção e gravação em vídeo: irReal posiciona a apresentação num segundo real exato
+  window.tour = { falas, REAL, W, TOTAL_REAL, agora: () => agora(), irReal: (r) => ir(Winv(r)) };
   if (NARR) { botaoSom.hidden = false; rotularSom(); botaoSom.onclick = () => { som = !som; rotularSom(); sincronizar(); }; }
   const agora = () => Winv((relogio.currentTime ?? 0) / 1000);
   const desenhar = () => {
@@ -735,7 +736,9 @@ b,strong{font-weight:500}
 
   // ?t=40 abre pausado num ponto da apresentação (para revisar uma cena)
   const tq = Number(q.get("t"));
-  if (tq) { ir(tq); pausar(); }
+  // ?gravar=1: sem controles nem tela inicial; o gravador (scripts/gravar-video.mjs) avança quadro a quadro
+  if (q.has("gravar")) { $("ctl").hidden = true; ir(0); pausar(); window.tour.pronto = true; }
+  else if (tq) { ir(tq); pausar(); }
   else if (matchMedia("(prefers-reduced-motion: reduce)").matches) { ir(11.5); pausar(); }
   else if (NARR) {
     // o navegador só libera o áudio depois de um clique: a primeira reprodução começa por aqui

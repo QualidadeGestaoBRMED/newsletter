@@ -20,13 +20,14 @@ const VOZ_PADRAO = "XrExE9yKIg1WjnnlVkGX";
 const SAIDA = new URL("../public/tour/", import.meta.url);
 
 // Uma fala por cena, na ordem das cenas do tour.html. Frases curtas, para soar conversado.
+// Palavras escritas como se falam: "Paipefai" (Pipefy) e "tíer" (tier); a tela mantém a grafia certa.
 // Uma fala com `marcas` registra quando cada palavra começa, para a cena sincronizar a animação com a voz.
 const FALAS = [
   "Este é o Briefing Suporte.",
-  "Duas vezes por dia útil, ele lê o Pipefy, calcula o prazo de cada demanda e monta o painel.",
+  "Duas vezes por dia útil, ele lê o Paipefai, calcula o prazo de cada demanda e monta o painel.",
   "No topo, os números do dia: o que já venceu, o que vence hoje, e o que vence nos próximos dois dias.",
-  "Dá para filtrar por gestor, grupo, empresa, área e tier. E quem chega pelo e-mail já abre na própria carteira.",
-  "Em destaque, a demanda mais urgente, com um link direto para o card no Pipefy.",
+  "Dá para filtrar por gestor, grupo, empresa, área e tíer. E quem chega pelo e-mail já abre na própria carteira.",
+  "Em destaque, a demanda mais urgente, com um link direto para o card no Paipefai.",
   "Em Onde atuar, tudo aparece por urgência: primeiro o que venceu, depois o que vence hoje, e o que dá para antecipar.",
   "A visão gerencial compara as carteiras. Quanto mais escura a célula, maior o atraso. E um clique desce de nível.",
   "Em Evolução, você acompanha esses números, edição a edição.",
