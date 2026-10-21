@@ -13,8 +13,8 @@ const C = {
   cinza3: "#DFE0E2",
   fundo: "#E9EDEF",
 };
-// Cores de status, as mesmas do painel (escala de severidade: Catastrófico, Alto, Moderado, Baixo)
-const STATUS = { vencido: "#cc0000", hoje: "#cc851e", radar: "#d9be53", resolvido: "#2cad6e" };
+// Cores de status, as mesmas do painel (escala de severidade); "próximos 2 dias" é um cinza claro neutro
+const STATUS = { vencido: "#cc0000", hoje: "#cc851e", radar: "#A3AAAE", resolvido: "#2cad6e" };
 const WS = "'Work Sans', Arial, sans-serif";
 const RB = "Roboto, Arial, sans-serif";
 
@@ -32,7 +32,7 @@ export type NewsletterProps = {
   logo: string;
 };
 
-// a cor do status vai na barrinha, como o ponto da legenda do painel; o número fica navy (o amarelo não se lê em texto)
+// a cor do status vai na barrinha, como o ponto da legenda do painel; o número fica navy, legível em qualquer status
 function Numero({ valor, rotulo, cor }: { valor: number; rotulo: string; cor: string }) {
   return (
     <Column align="center" style={{ width: "33%", padding: "0 6px", verticalAlign: "top" }}>
