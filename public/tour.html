@@ -12,6 +12,7 @@
 :root{--navy:#193B4F;--teal:#007891;--aqua:#00AFAA;--amber:#CC851E;--rust:#A05E1E;--g1:#767A7B;--g2:#BFC3C6;--g3:#DFE0E2;--g4:#F3F3F3;--ink:#4A555C;
   --ws:"Work Sans",system-ui,sans-serif;--rb:"Roboto",system-ui,sans-serif;--fundo:#0E2433}
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html,body{margin:0;height:100%;background:var(--fundo);overflow:hidden;font-family:var(--rb);color:var(--navy)}
 #wrap{position:fixed;inset:0;display:grid;place-items:center}
 #stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;overflow:hidden;background:radial-gradient(1200px 800px at 70% 40%,#16384B 0%,var(--fundo) 70%);transform-origin:0 0}
@@ -660,6 +661,8 @@ b,strong{font-weight:500}
   const tocar = () => { clearTimeout(reinicio); if (agora() >= TOTAL - 0.05) ir(0); anims.forEach((a) => a.play()); tocando = true; play.innerHTML = "❚❚ <span>Pausar</span>"; play.setAttribute("aria-label", "Pausar"); laco(); };
   const pausar = () => { anims.forEach((a) => a.pause()); tocando = false; play.innerHTML = `▶ <span>${agora() >= TOTAL - 0.05 ? "Rever" : "Continuar"}</span>`; play.setAttribute("aria-label", "Reproduzir"); desenhar(); };
   play.onclick = () => (tocando ? pausar() : tocar());
+  // aba escondida (trocou de aba, minimizou): pausa tudo, voz incluída
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) return; clearTimeout(reinicio); if (tocando) pausar(); });
   $("again").onclick = () => { ir(0); tocar(); };
   trk.onclick = (e) => { const r = trk.getBoundingClientRect(); ir(Winv(((e.clientX - r.left) / r.width) * TOTAL_REAL)); };
   addEventListener("keydown", (e) => {
