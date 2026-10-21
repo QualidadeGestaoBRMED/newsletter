@@ -1,6 +1,6 @@
 import { desc, sql } from "drizzle-orm";
 import { Suspense } from "react";
-import { auth, signOut } from "@/auth";
+import { auth } from "@/auth";
 import { db, schema } from "@/db";
 import { listaGestao } from "@/lib/acesso";
 import Painel from "./painel";
@@ -23,13 +23,9 @@ async function gestorDe(email: string) {
 export default async function Page() {
   const sessao = await auth();
   const email = sessao?.user?.email?.toLowerCase() ?? "";
-  const sair = async () => {
-    "use server";
-    await signOut({ redirectTo: "/entrar" });
-  };
   return (
     <Suspense>
-      <Painel gestorInicial={await gestorDe(email)} usuario={sessao?.user?.name || email} sair={sair} />
+      <Painel gestorInicial={await gestorDe(email)} />
     </Suspense>
   );
 }

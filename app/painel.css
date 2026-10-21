@@ -217,7 +217,7 @@ html,body{margin:0;background:#E9EDEF}
   .bm .evo .rodape{flex-direction:column;gap:6px}
 }
 
-/* ---------- tela de entrada e conta no cabeçalho ---------- */
+/* ---------- tela de entrada ---------- */
 .entrar{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:32px;padding:24px 16px;background:#193B4F;font-family:var(--font-rb),system-ui,sans-serif}
 .entrar-logo{height:36px;display:block}
 .entrar-card{width:100%;max-width:420px;background:#fff;color:#193B4F;border-radius:24px 24px 24px 4px;padding:40px 36px 32px;box-shadow:0 30px 70px rgba(0,0,0,.35);text-align:center}
@@ -229,9 +229,4 @@ html,body{margin:0;background:#E9EDEF}
 .entrar-card button:hover{background:#00687E}
 .entrar-card button:focus-visible{outline:2px solid #00AFAA;outline-offset:3px}
 .entrar-card small{display:block;margin-top:16px;color:#767A7B;font-size:12.5px}
-/* conta: faixa fora do documento, alinhada à direita dele; não disputa espaço com o cabeçalho */
-.bm .conta{width:min(1440px,calc(100% - 48px));margin:-14px auto 10px;display:flex;justify-content:flex-end;align-items:center;gap:14px;font-family:var(--ws);font-size:12.5px;color:var(--gray-1)}
-.bm .conta span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.bm .conta button{font:inherit;font-weight:500;color:var(--teal);background:transparent;border:0;padding:0;text-decoration:underline;text-underline-offset:3px;cursor:pointer;flex:none}
-.bm .conta button:hover{color:var(--navy)}
-@media(max-width:760px){.bm .conta{width:100%;margin:0;padding:10px 16px}}
+

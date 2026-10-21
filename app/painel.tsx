@@ -58,9 +58,7 @@ const COR_TIER: Record<string, string> = {
 };
 const ordemTier = (t: string) => (TIERS.includes(t) ? TIERS.indexOf(t) : t === "Sem tier" ? TIERS.length + 1 : TIERS.length);
 
-type Props = { gestorInicial: string | null; usuario: string; sair: () => Promise<void> };
-
-export default function Painel({ gestorInicial, usuario, sair }: Props) {
+export default function Painel({ gestorInicial }: { gestorInicial: string | null }) {
   const router = useRouter();
   const pathname = usePathname();
   const search = useSearchParams();
@@ -334,10 +332,6 @@ export default function Painel({ gestorInicial, usuario, sair }: Props) {
 
   return (
     <div className="bm">
-      <form className="conta" action={sair} aria-label="Conta">
-        <span>{usuario}</span>
-        <button type="submit">Sair</button>
-      </form>
       <article className="doc" ref={docRef} data-dash-source-state={atualizando ? "refreshing" : undefined}>
         <header className="cover" id="topo">
           <div className="cover-teal">
