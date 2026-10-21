@@ -1,76 +1,87 @@
 {
-  "voz": "XrExE9yKIg1WjnnlVkGX",
+  "voz": "SVgp5d1fyFQRW1eQbwkq",
   "modelo": "eleven_multilingual_v2",
-  "gerado_em": "2026-10-21T17:15:33.950Z",
+  "gerado_em": "2026-10-21T17:37:01.221Z",
   "falas": [
     {
-      "arquivo": "narracao-01.mp3",
-      "duracao": 2.29,
-      "texto": "Este é o Briefing Suporte."
+      "arquivo": "fala-a57169dd9f.mp3",
+      "duracao": 2.15,
+      "texto": "Este é o Briefing Suporte.",
+      "lufs": -21
     },
     {
-      "arquivo": "fala-c1a6697a93.mp3",
-      "duracao": 7.72,
-      "texto": "Duas vezes por dia útil, ele lê o Paipefai, calcula o prazo de cada demanda e monta o painel."
+      "arquivo": "fala-5470311893.mp3",
+      "duracao": 7.63,
+      "texto": "Duas vezes por dia útil, ele lê o Paipefai, calcula o prazo de cada demanda e monta o painel.",
+      "lufs": -21
     },
     {
-      "arquivo": "narracao-03.mp3",
-      "duracao": 7.81,
-      "texto": "No topo, os números do dia: o que já venceu, o que vence hoje, e o que vence nos próximos dois dias."
+      "arquivo": "fala-1a919932a0.mp3",
+      "duracao": 8.37,
+      "texto": "No topo, os números do dia: o que já venceu, o que vence hoje, e o que vence nos próximos dois dias.",
+      "lufs": -21
     },
     {
-      "arquivo": "fala-1aaba08e26.mp3",
-      "duracao": 9.35,
-      "texto": "Dá para filtrar por gestor, grupo, empresa, área e tíer. E quem chega pelo e-mail já abre na própria carteira."
+      "arquivo": "fala-0a832184a1.mp3",
+      "duracao": 9.72,
+      "texto": "Dá para filtrar por gestor, grupo, empresa, área e tíer. E quem chega pelo e-mail já abre na própria carteira.",
+      "lufs": -21
     },
     {
-      "arquivo": "fala-8d7b0abaaa.mp3",
-      "duracao": 6.19,
-      "texto": "Em destaque, a demanda mais urgente, com um link direto para o card no Paipefai."
+      "arquivo": "fala-32dbb77a4e.mp3",
+      "duracao": 6.09,
+      "texto": "Em destaque, a demanda mais urgente, com um link direto para o card no Paipefai.",
+      "lufs": -21
     },
     {
-      "arquivo": "narracao-06.mp3",
-      "duracao": 8.7,
-      "texto": "Em Onde atuar, tudo aparece por urgência: primeiro o que venceu, depois o que vence hoje, e o que dá para antecipar."
+      "arquivo": "fala-b0be5ed8d0.mp3",
+      "duracao": 9.76,
+      "texto": "Em Onde atuar, tudo aparece por urgência: primeiro o que venceu, depois o que vence hoje, e o que dá para antecipar.",
+      "lufs": -21
     },
     {
-      "arquivo": "fala-d0bf6db35e.mp3",
-      "duracao": 21.19,
+      "arquivo": "fala-5d09c7b5ae.mp3",
+      "duracao": 20.96,
       "texto": "Na visão gerencial, você vê onde cada demanda está, e com quem. Nas colunas, a área: Segurança, Saúde e On-Going. Nas linhas, o gestor. Quanto mais escura a célula, maior o atraso. Um clique no gestor abre a carteira dele; outro clique, as empresas de cada grupo.",
       "marcas": {
-        "onde": 1.939,
-        "area": 6.002,
-        "linhas": 10.426,
-        "escura": 12.852,
-        "clique": 15.674,
-        "outro": 17.996
-      }
+        "onde": 1.846,
+        "area": 5.526,
+        "linhas": 9.683,
+        "escura": 12.016,
+        "clique": 14.977,
+        "outro": 17.613
+      },
+      "lufs": -21
     },
     {
-      "arquivo": "narracao-08.mp3",
-      "duracao": 4.66,
-      "texto": "Em Evolução, você acompanha esses números, edição a edição."
+      "arquivo": "fala-c1c03ac703.mp3",
+      "duracao": 5.12,
+      "texto": "Em Evolução, você acompanha esses números, edição a edição.",
+      "lufs": -21
     },
     {
-      "arquivo": "narracao-09.mp3",
-      "duracao": 7.77,
-      "texto": "Às sete da manhã, cada gestor recebe um e-mail curto: três números, e um botão que abre o painel."
+      "arquivo": "fala-28df4dcdd9.mp3",
+      "duracao": 7.44,
+      "texto": "Às sete da manhã, cada gestor recebe um e-mail curto: três números, e um botão que abre o painel.",
+      "lufs": -21
     },
     {
-      "arquivo": "fala-09c05f6668.mp3",
-      "duracao": 22.3,
+      "arquivo": "fala-edd857edae.mp3",
+      "duracao": 23.74,
       "texto": "E isso é só o começo. Hoje, no piloto, o Briefing cuida dos prazos. Os próximos passos são o resumo do cliente, com notícias e movimentos, para o gestor chegar informado; e a satisfação da carteira, ao lado dos prazos. Depois, o risco de churn: sinais de que um cliente pode sair, antes que ele avise.",
       "marcas": {
-        "prazos": 4.574,
-        "resumo": 7.361,
-        "nps": 13.015,
-        "churn": 17.426
-      }
+        "prazos": 4.737,
+        "resumo": 7.396,
+        "nps": 13.305,
+        "churn": 18.251
+      },
+      "lufs": -21
     },
     {
-      "arquivo": "narracao-10.mp3",
-      "duracao": 5.35,
-      "texto": "Briefing Suporte. Os prazos dos clientes, todo dia útil, às sete."
+      "arquivo": "fala-f8314a8d9a.mp3",
+      "duracao": 5.72,
+      "texto": "Briefing Suporte. Os prazos dos clientes, todo dia útil, às sete.",
+      "lufs": -21
     }
   ]
 }

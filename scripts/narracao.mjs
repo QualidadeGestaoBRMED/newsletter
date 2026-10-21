@@ -1,11 +1,13 @@
 // Gera a narração da apresentação (public/tour.html) com a ElevenLabs: um MP3 por cena + tour/narracao.json.
 // Uso:
 //   node scripts/narracao.mjs vozes            → lista vozes em pt-BR (da sua conta e da biblioteca)
-//   node scripts/narracao.mjs gerar [--voz=ID] → gera os áudios (sem --voz: ELEVENLABS_VOICE_ID ou a Matilda)
-// Precisa de ELEVENLABS_API_KEY no .env.
+//   node scripts/narracao.mjs gerar [--voz=ID] → gera os áudios (sem --voz: ELEVENLABS_VOICE_ID ou o Lucas)
+// Precisa de ELEVENLABS_API_KEY no .env e de ffmpeg (variável FFMPEG ou no PATH) para nivelar o volume das falas.
+import { execFileSync, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { existsSync } from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
 
 try {
   process.loadEnvFile();
@@ -15,9 +17,12 @@ try {
 
 const API = "https://api.elevenlabs.io/v1";
 const MODELO = "eleven_multilingual_v2";
-// Matilda (voz padrão da ElevenLabs, usável no plano gratuito), escolhida em 2026-10-21
-const VOZ_PADRAO = "XrExE9yKIg1WjnnlVkGX";
+// Lucas, voz brasileira da biblioteca (exige plano pago), escolhida em 2026-10-21. Matilda: XrExE9yKIg1WjnnlVkGX
+const VOZ_PADRAO = "SVgp5d1fyFQRW1eQbwkq";
 const SAIDA = new URL("../public/tour/", import.meta.url);
+// cada voz sai num volume; todas as falas são niveladas para este alvo (o vídeo usa o mesmo)
+const LUFS = -21;
+const FFMPEG = process.env.FFMPEG || "ffmpeg";
 
 // Uma fala por cena, na ordem das cenas do tour.html. Frases curtas, para soar conversado.
 // Palavras escritas como se falam: "Paipefai" (Pipefy) e "tíer" (tier); a tela mantém a grafia certa.
@@ -72,6 +77,18 @@ async function adicionar() {
   console.log(`Voz adicionada à conta: ${r.voice_id}`);
 }
 
+// loudnorm em duas passadas (medir, depois ganho linear): muda só o volume, sem comprimir a fala
+function nivelar(arquivo) {
+  const caminho = fileURLToPath(new URL(arquivo, SAIDA)), alvo = `I=${LUFS}:TP=-1.5:LRA=11`;
+  const log = spawnSync(FFMPEG, ["-hide_banner", "-i", caminho, "-af", `loudnorm=${alvo}:print_format=json`, "-f", "null", "-"], { encoding: "utf8" }).stderr;
+  const m = JSON.parse(log.slice(log.lastIndexOf("{")));
+  const tmp = caminho.replace(/\.mp3$/, ".nivel.mp3");
+  execFileSync(FFMPEG, ["-y", "-hide_banner", "-loglevel", "error", "-i", caminho, "-af",
+    `loudnorm=${alvo}:measured_I=${m.input_i}:measured_TP=${m.input_tp}:measured_LRA=${m.input_lra}:measured_thresh=${m.input_thresh}:offset=${m.target_offset}:linear=true`,
+    "-ar", "44100", "-c:a", "libmp3lame", "-b:a", "128k", tmp]);
+  execFileSync("mv", [tmp, caminho]);
+}
+
 async function gerar() {
   const voz = arg("voz") ?? process.env.ELEVENLABS_VOICE_ID?.trim() ?? VOZ_PADRAO;
   await mkdir(SAIDA, { recursive: true });
@@ -83,6 +100,7 @@ async function gerar() {
     const texto = textos[i], marcasPedidas = typeof fala === "string" ? null : fala.marcas;
     const pronta = anterior?.voz === voz && anterior.falas.find((f) => f.texto === texto && existsSync(new URL(f.arquivo, SAIDA)));
     if (pronta && (!marcasPedidas || pronta.marcas)) {
+      if (pronta.lufs !== LUFS) { nivelar(pronta.arquivo); pronta.lufs = LUFS; }
       falas.push(pronta);
       console.log(`${pronta.arquivo}  reaproveitada`);
       continue;
@@ -101,9 +119,10 @@ async function gerar() {
     });
     const arquivo = `fala-${createHash("sha1").update(voz + texto).digest("hex").slice(0, 10)}.mp3`;
     await writeFile(new URL(arquivo, SAIDA), Buffer.from(r.audio_base64, "base64"));
+    nivelar(arquivo);
     const al = r.alignment;
     const fim = al?.character_end_times_seconds?.at(-1) ?? 0;
-    const item = { arquivo, duracao: Math.round((fim + 0.15) * 100) / 100, texto };
+    const item = { arquivo, duracao: Math.round((fim + 0.15) * 100) / 100, texto, lufs: LUFS };
     if (marcasPedidas && al) {
       // segundo em que cada palavra marcada começa a ser dita
       const dito = al.characters.join("");
