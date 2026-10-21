@@ -49,8 +49,9 @@ console.log(`${quadros} quadros (${total.toFixed(1)}s a ${FPS} q/s, ${Math.round
 // vídeo pela entrada padrão (PNG por quadro) + uma entrada de áudio por fala, cada uma atrasada até a sua cena (+ a música)
 const entradas = [...trilha, ...(musica ? [musica] : [])].flatMap((f) => ["-i", join(PUBLICO, f.src)]);
 const atrasos = trilha.map((f, i) => `[${i + 1}:a]adelay=${Math.round(f.ini * 1000)}:all=1[a${i}]`).join(";");
-// voz em −21 LUFS, o mesmo nível com que os MP3 da ElevenLabs tocam na apresentação
-let mistura = `${atrasos};${trilha.map((_, i) => `[a${i}]`).join("")}amix=inputs=${trilha.length}:normalize=0,loudnorm=I=-21:TP=-2:LRA=11`;
+// voz em −21 LUFS, o mesmo nível das falas na apresentação. O silêncio até o fim (apad) vem antes do loudnorm:
+// ele trabalha com uma janela de 3s à frente e descartava o fim da última fala quando a trilha de voz acabava ali.
+let mistura = `${atrasos};${trilha.map((_, i) => `[a${i}]`).join("")}amix=inputs=${trilha.length}:normalize=0,apad=whole_dur=${(total + 3).toFixed(3)},loudnorm=I=-21:TP=-2:LRA=11`;
 if (musica) {
   // a mesma curva de ganhoMusica() do tour.html: abaixa em volta de cada fala, entra em 1,5s e sai nos 3s finais
   const TT = (await ev("tour.TOTAL_REAL")).toFixed(3);

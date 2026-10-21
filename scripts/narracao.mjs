@@ -35,7 +35,11 @@ const FALAS = [
   "No topo, os números do dia: o que já venceu, o que vence hoje, e o que vence nos próximos dois dias.",
   "Dá para filtrar por gestor, grupo, empresa, área e tíer. E quem chega pelo e-mail já abre na própria carteira.",
   "Em destaque, a demanda mais urgente, com um link direto para o card no Pipefy.",
-  "Em Onde atuar, tudo aparece por urgência: primeiro o que venceu, depois o que vence hoje, e o que dá para antecipar.",
+  {
+    texto:
+      "Em Onde atuar, as demandas vêm em três colunas: primeiro, o que já venceu, das mais antigas para as mais novas; depois, o que vence hoje; e por fim, o que dá para antecipar. Cada linha mostra a área, o grupo e o tíer do cliente: Diamante, Ouro, Prata ou Bronze.",
+    marcas: { c1: "primeiro", c2: "depois", c3: "por fim", tier: "tíer" },
+  },
   {
     texto:
       "Na visão gerencial, você vê onde cada demanda está, e com quem. Nas colunas, a área: Segurança, Saúde e On-Going. Nas linhas, o gestor. Quanto mais escura a célula, maior o atraso. Um clique no gestor abre a carteira dele; outro clique, as empresas de cada grupo.",

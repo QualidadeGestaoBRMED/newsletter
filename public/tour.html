@@ -436,6 +436,9 @@ b,strong{font-weight:500}
   const tUp = Math.min(45.2, tArea - 0.6);
   // t + d segundos reais, em segundos de roteiro: entradas e saídas têm a mesma duração mesmo numa cena esticada pela fala
   const ds = (t, d) => Winv(W(t) + d * RITMO);
+  // onde atuar: cada coluna acende quando a narração chega nela; a câmera vai ao tier quando ele é dito
+  const S6 = 34.6;
+  const tCol = [["c1", 1.6], ["c2", 2.2], ["c3", 2.8]].map(([k, r]) => marcaEm(S6, k, r)), tTier = marcaEm(S6, "tier", 6.4);
   const anims = [];
   // K(el, [[t, quadro], ...]): uma animação por elemento, com os quadros em segundos absolutos
   const K = (el, quadros, easing = "cubic-bezier(.4,0,.2,1)") => {
@@ -475,14 +478,14 @@ b,strong{font-weight:500}
     [13.2, tr(C.bub)], [20.2, tr(deriva(C.bub, 1.03))],
     [21.6, tr(C.fil)], [25.4, tr(C.fil)], [26.8, tr(C.cov)], [29.5, tr(deriva(C.cov))],
     [30.7, tr(C.com)], [34, tr(deriva(C.com))],
-    [35.4, tr(C.brd)], [39.8, tr(deriva(C.brd, 1.025))], [41, tr(C.tier)], [43, tr(deriva(C.tier, 1.03))],
+    [35.4, tr(C.brd)], [ds(tTier, -1.4), tr(deriva(C.brd, 1.025))], [ds(tTier, -0.1), tr(C.tier)], [43.7, tr(deriva(C.tier, 1.03))],
     [44.6, tr(C.mx)], [52, tr(deriva(C.mx, 1.03))],
     [53.4, tr(C.mod)], [61.2, tr(deriva(C.mod, 1.03))],
     [62.8, tr(C.pho)], [71.4, tr(deriva(C.pho, 1.04))],
     [73.6, tr(C.mun)], [TOTAL, tr(C.mun)],
   ], "cubic-bezier(.65,0,.35,1)");
   // a camada das etiquetas acompanha a aproximação lenta, para os pontos não se descolarem dos elementos
-  const DERIVAS = [[13.2, 20.2, 1.03], [26.8, 29.5, 1.035], [30.7, 34, 1.035], [35.4, 39.8, 1.025], [41, 43, 1.03], [44.6, 52, 1.03], [53.4, 61.2, 1.03], [62.8, 71.4, 1.04]];
+  const DERIVAS = [[13.2, 20.2, 1.03], [26.8, 29.5, 1.035], [30.7, 34, 1.035], [35.4, ds(tTier, -1.4), 1.025], [ds(tTier, -0.1), 43.7, 1.03], [44.6, 52, 1.03], [53.4, 61.2, 1.03], [62.8, 71.4, 1.04]];
   const quadrosDeriva = [[0, { transform: "none" }], ...DERIVAS.flatMap(([a, b, f]) => [[a, { transform: "none" }], [b, { transform: `scale(${f})` }], [b + 0.01, { transform: "none" }]])];
   for (const id of ["notas", "linhas"]) { $(id).style.transformOrigin = `${BOX.x + BOX.w / 2}px ${BOX.y + BOX.h / 2}px`; K($(id), quadrosDeriva, "cubic-bezier(.65,0,.35,1)"); }
 
@@ -524,8 +527,8 @@ b,strong{font-weight:500}
   nota(C.com, meio(R.abrirCard, 0.3, 1), [-260, 130], "Link direto para o card", "abre no Pipefy, em outra aba", 31.3, 33.9);
   // onde atuar
   [["Mais antigas primeiro", "ordem por dias de atraso"], ["Vence hoje", "o que vira atraso amanhã"], ["Para antecipar", "se sobrar tempo"]].forEach(([a, b], i) =>
-    nota(C.brd, meio(R.colH[i], 0.5, 0), [0, -66], a, b, 36.6 + i * 0.4, 39.7));
-  nota(C.tier, meio(R.itTier, 0.08, 0.5), [-60, 150], "Tier do cliente", "Diamante, Ouro, Prata e Bronze, da DB - BR NET", 41.6, 43);
+    nota(C.brd, meio(R.colH[i], 0.5, 0), [0, -66], a, b, tCol[i], ds(tTier, -1.5)));
+  nota(C.tier, meio(R.itTier, 0.08, 0.5), [-60, 150], "Tier do cliente", "Diamante, Ouro, Prata e Bronze, da DB - BR NET", ds(tTier, 0.2), 43.7);
   // visão gerencial
   nota(C.mx, R.areaHd.map((r) => [r.x + r.w / 2, r.y - 12]), [0, -72], "Onde está: a área", "Segurança, Saúde e On-Going", tArea, ds(tC1, -0.6));
   nota(C.mx, meio(R.gestores, 0, 0.5), [-110, 0], "Com quem está", "cada linha é um gestor", tLinhas, ds(tC1, -0.6));
@@ -593,8 +596,8 @@ b,strong{font-weight:500}
   holofote(R["p-filtros"], 21.8, 25.6, 4, 10);
   holofote({ ...R.say, h: R.say.h * 0.42 }, 27.4, 29.5, 18, 16);
   holofote(R["p-comece"], 30.7, 34.1, 10, 26);
-  holofote(R.grid, 36.3, 39.9, 12, 20);
-  holofote(R.itTier, 41.2, 43.1, 10, 14);
+  holofote(R.grid, ds(tCol[0], -0.6), ds(tTier, -1.3), 12, 20);
+  holofote(R.itTier, ds(tTier, -0.1), 43.75, 10, 14);
   holofote(R.areas, ds(tArea, -0.3), ds(tLinhas, 0.4), 10, 12);
   holofote(R.gestores, tLinhas, ds(tEscura, 0.3), 10, 12);
 
@@ -602,13 +605,13 @@ b,strong{font-weight:500}
   const anel = (r, t0, t1, pad = 10) => { const d = document.createElement("div"); d.className = "ring";
     Object.assign(d.style, { left: `${r.x - pad}px`, top: `${r.y - pad}px`, width: `${r.w + 2 * pad}px`, height: `${r.h + 2 * pad}px` }); $("overlay").append(d);
     K(d, [[0, { opacity: 0 }], [t0, { opacity: 0, transform: "scale(1.04)" }], [ds(t0, 0.4), { opacity: 1, transform: "none" }], [ds(t1, -0.3), { opacity: 1 }], [t1, { opacity: 0 }]]); };
-  anel(R.itTier, 41.4, 43, 6); anel(R.voltar, ds(tUp, -0.9), ds(tUp, 0.6), 8); anel(R.celEscura, tEscura, ds(tC1, -0.6), 6);
+  anel(R.itTier, tTier, 43.7, 6); anel(R.voltar, ds(tUp, -0.9), ds(tUp, 0.6), 8); anel(R.celEscura, tEscura, ds(tC1, -0.6), 6);
 
   // ---------- onde atuar: itens chegando coluna a coluna ----------
   const apagado = { background: "rgba(230,247,246,0)", boxShadow: "inset 3px 0 0 rgba(0,175,170,0)" }, aceso = { background: "rgba(230,247,246,1)", boxShadow: "inset 3px 0 0 #00AFAA" };
   document.querySelectorAll("#board .col").forEach((col, c) => {
-    K(col.querySelector(".col-h"), [[0, { transform: "none" }], [35.9 + c * 0.6, { transform: "none" }], [36.15 + c * 0.6, { transform: "translateY(-6px) scale(1.03)" }], [36.5 + c * 0.6, { transform: "none" }]], "cubic-bezier(.3,1.4,.4,1)");
-    col.querySelectorAll(".it").forEach((it, i) => { const t = 36.2 + c * 0.6 + i * 0.28; K(it, [[0, apagado], [t, apagado], [t + 0.18, aceso], [t + 0.9, apagado]]); });
+    K(col.querySelector(".col-h"), [[0, { transform: "none" }], [ds(tCol[c], -0.3), { transform: "none" }], [ds(tCol[c], -0.05), { transform: "translateY(-6px) scale(1.03)" }], [ds(tCol[c], 0.3), { transform: "none" }]], "cubic-bezier(.3,1.4,.4,1)");
+    col.querySelectorAll(".it").forEach((it, i) => { const t = ds(tCol[c], 0.1 + i * 0.3); K(it, [[0, apagado], [t, apagado], [ds(t, 0.18), aceso], [ds(t, 1.2), apagado]]); });
   });
 
   // ---------- visão gerencial: todos os gestores → carteira da Ana → Grupo Atlântico ----------

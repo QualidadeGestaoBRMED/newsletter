@@ -2,7 +2,7 @@
   "voz": "m151rjrbWXbBqyq56tly",
   "velocidade": 1.1,
   "modelo": "eleven_multilingual_v2",
-  "gerado_em": "2026-10-21T17:47:41.724Z",
+  "gerado_em": "2026-10-21T18:32:24.641Z",
   "falas": [
     {
       "arquivo": "fala-59183914d7.mp3",
@@ -35,10 +35,16 @@
       "lufs": -21
     },
     {
-      "arquivo": "fala-1f27fbb093.mp3",
-      "duracao": 9.44,
-      "texto": "Em Onde atuar, tudo aparece por urgência: primeiro o que venceu, depois o que vence hoje, e o que dá para antecipar.",
-      "lufs": -21
+      "arquivo": "fala-c1a1dd1b6c.mp3",
+      "duracao": 22.02,
+      "texto": "Em Onde atuar, as demandas vêm em três colunas: primeiro, o que já venceu, das mais antigas para as mais novas; depois, o que vence hoje; e por fim, o que dá para antecipar. Cada linha mostra a área, o grupo e o tíer do cliente: Diamante, Ouro, Prata ou Bronze.",
+      "lufs": -21,
+      "marcas": {
+        "c1": 3.413,
+        "c2": 7.732,
+        "c3": 10.182,
+        "tier": 15.789
+      }
     },
     {
       "arquivo": "fala-5d4ad21983.mp3",
