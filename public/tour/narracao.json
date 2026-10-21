@@ -1,85 +1,86 @@
 {
-  "voz": "SVgp5d1fyFQRW1eQbwkq",
+  "voz": "m151rjrbWXbBqyq56tly",
+  "velocidade": 1.1,
   "modelo": "eleven_multilingual_v2",
-  "gerado_em": "2026-10-21T17:37:01.221Z",
+  "gerado_em": "2026-10-21T17:47:41.724Z",
   "falas": [
     {
-      "arquivo": "fala-a57169dd9f.mp3",
-      "duracao": 2.15,
+      "arquivo": "fala-59183914d7.mp3",
+      "duracao": 2.19,
       "texto": "Este é o Briefing Suporte.",
       "lufs": -21
     },
     {
-      "arquivo": "fala-5470311893.mp3",
-      "duracao": 7.63,
-      "texto": "Duas vezes por dia útil, ele lê o Paipefai, calcula o prazo de cada demanda e monta o painel.",
+      "arquivo": "fala-b40da64c1f.mp3",
+      "duracao": 7.77,
+      "texto": "Duas vezes por dia útil, ele lê o Pipefy, calcula o prazo de cada demanda e monta o painel.",
       "lufs": -21
     },
     {
-      "arquivo": "fala-1a919932a0.mp3",
-      "duracao": 8.37,
+      "arquivo": "fala-24cf2df158.mp3",
+      "duracao": 9.21,
       "texto": "No topo, os números do dia: o que já venceu, o que vence hoje, e o que vence nos próximos dois dias.",
       "lufs": -21
     },
     {
-      "arquivo": "fala-0a832184a1.mp3",
-      "duracao": 9.72,
+      "arquivo": "fala-ecc9a5424f.mp3",
+      "duracao": 11.2,
       "texto": "Dá para filtrar por gestor, grupo, empresa, área e tíer. E quem chega pelo e-mail já abre na própria carteira.",
       "lufs": -21
     },
     {
-      "arquivo": "fala-32dbb77a4e.mp3",
-      "duracao": 6.09,
-      "texto": "Em destaque, a demanda mais urgente, com um link direto para o card no Paipefai.",
+      "arquivo": "fala-e058a28a61.mp3",
+      "duracao": 6.37,
+      "texto": "Em destaque, a demanda mais urgente, com um link direto para o card no Pipefy.",
       "lufs": -21
     },
     {
-      "arquivo": "fala-b0be5ed8d0.mp3",
-      "duracao": 9.76,
+      "arquivo": "fala-1f27fbb093.mp3",
+      "duracao": 9.44,
       "texto": "Em Onde atuar, tudo aparece por urgência: primeiro o que venceu, depois o que vence hoje, e o que dá para antecipar.",
       "lufs": -21
     },
     {
-      "arquivo": "fala-5d09c7b5ae.mp3",
-      "duracao": 20.96,
+      "arquivo": "fala-5d4ad21983.mp3",
+      "duracao": 21.7,
       "texto": "Na visão gerencial, você vê onde cada demanda está, e com quem. Nas colunas, a área: Segurança, Saúde e On-Going. Nas linhas, o gestor. Quanto mais escura a célula, maior o atraso. Um clique no gestor abre a carteira dele; outro clique, as empresas de cada grupo.",
+      "lufs": -21,
       "marcas": {
-        "onde": 1.846,
-        "area": 5.526,
-        "linhas": 9.683,
-        "escura": 12.016,
-        "clique": 14.977,
-        "outro": 17.613
-      },
-      "lufs": -21
+        "onde": 1.916,
+        "area": 6.211,
+        "linhas": 10.24,
+        "escura": 12.365,
+        "clique": 15.36,
+        "outro": 18.158
+      }
     },
     {
-      "arquivo": "fala-c1c03ac703.mp3",
-      "duracao": 5.12,
+      "arquivo": "fala-3e48c12f7a.mp3",
+      "duracao": 5.49,
       "texto": "Em Evolução, você acompanha esses números, edição a edição.",
       "lufs": -21
     },
     {
-      "arquivo": "fala-28df4dcdd9.mp3",
-      "duracao": 7.44,
+      "arquivo": "fala-4d13c65e39.mp3",
+      "duracao": 8.51,
       "texto": "Às sete da manhã, cada gestor recebe um e-mail curto: três números, e um botão que abre o painel.",
       "lufs": -21
     },
     {
-      "arquivo": "fala-edd857edae.mp3",
-      "duracao": 23.74,
+      "arquivo": "fala-132551d4b5.mp3",
+      "duracao": 25.04,
       "texto": "E isso é só o começo. Hoje, no piloto, o Briefing cuida dos prazos. Os próximos passos são o resumo do cliente, com notícias e movimentos, para o gestor chegar informado; e a satisfação da carteira, ao lado dos prazos. Depois, o risco de churn: sinais de que um cliente pode sair, antes que ele avise.",
+      "lufs": -21,
       "marcas": {
-        "prazos": 4.737,
-        "resumo": 7.396,
-        "nps": 13.305,
-        "churn": 18.251
-      },
-      "lufs": -21
+        "prazos": 5.666,
+        "resumo": 8.394,
+        "nps": 14.048,
+        "churn": 19.528
+      }
     },
     {
-      "arquivo": "fala-f8314a8d9a.mp3",
-      "duracao": 5.72,
+      "arquivo": "fala-9ac9f45cc9.mp3",
+      "duracao": 6.05,
       "texto": "Briefing Suporte. Os prazos dos clientes, todo dia útil, às sete.",
       "lufs": -21
     }

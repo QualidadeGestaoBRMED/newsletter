@@ -1,7 +1,7 @@
 // Gera a narração da apresentação (public/tour.html) com a ElevenLabs: um MP3 por cena + tour/narracao.json.
 // Uso:
 //   node scripts/narracao.mjs vozes            → lista vozes em pt-BR (da sua conta e da biblioteca)
-//   node scripts/narracao.mjs gerar [--voz=ID] → gera os áudios (sem --voz: ELEVENLABS_VOICE_ID ou o Lucas)
+//   node scripts/narracao.mjs gerar [--voz=ID] → gera os áudios (sem --voz: ELEVENLABS_VOICE_ID ou a Carla)
 // Precisa de ELEVENLABS_API_KEY no .env e de ffmpeg (variável FFMPEG ou no PATH) para nivelar o volume das falas.
 import { execFileSync, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
@@ -17,22 +17,24 @@ try {
 
 const API = "https://api.elevenlabs.io/v1";
 const MODELO = "eleven_multilingual_v2";
-// Lucas, voz brasileira da biblioteca (exige plano pago), escolhida em 2026-10-21. Matilda: XrExE9yKIg1WjnnlVkGX
-const VOZ_PADRAO = "SVgp5d1fyFQRW1eQbwkq";
+// Carla ("Inviting, Warm and Helpful"), voz brasileira da biblioteca (exige plano pago), escolhida em 2026-10-21.
+// Anteriores: Lucas SVgp5d1fyFQRW1eQbwkq (0.95), Matilda XrExE9yKIg1WjnnlVkGX (0.95)
+const VOZ_PADRAO = "m151rjrbWXbBqyq56tly";
+const VELOCIDADE = 1.1; // a ElevenLabs aceita de 0.7 a 1.2
 const SAIDA = new URL("../public/tour/", import.meta.url);
 // cada voz sai num volume; todas as falas são niveladas para este alvo (o vídeo usa o mesmo)
 const LUFS = -21;
 const FFMPEG = process.env.FFMPEG || "ffmpeg";
 
 // Uma fala por cena, na ordem das cenas do tour.html. Frases curtas, para soar conversado.
-// Palavras escritas como se falam: "Paipefai" (Pipefy) e "tíer" (tier); a tela mantém a grafia certa.
+// Palavras escritas como se falam: "tíer" (tier); a tela mantém a grafia certa. ("Paipefai" servia para a Matilda; a Carla já diz "Pipefy".)
 // Uma fala com `marcas` registra quando cada palavra começa, para a cena sincronizar a animação com a voz.
 const FALAS = [
   "Este é o Briefing Suporte.",
-  "Duas vezes por dia útil, ele lê o Paipefai, calcula o prazo de cada demanda e monta o painel.",
+  "Duas vezes por dia útil, ele lê o Pipefy, calcula o prazo de cada demanda e monta o painel.",
   "No topo, os números do dia: o que já venceu, o que vence hoje, e o que vence nos próximos dois dias.",
   "Dá para filtrar por gestor, grupo, empresa, área e tíer. E quem chega pelo e-mail já abre na própria carteira.",
-  "Em destaque, a demanda mais urgente, com um link direto para o card no Paipefai.",
+  "Em destaque, a demanda mais urgente, com um link direto para o card no Pipefy.",
   "Em Onde atuar, tudo aparece por urgência: primeiro o que venceu, depois o que vence hoje, e o que dá para antecipar.",
   {
     texto:
@@ -98,7 +100,7 @@ async function gerar() {
   const falas = [];
   for (const [i, fala] of FALAS.entries()) {
     const texto = textos[i], marcasPedidas = typeof fala === "string" ? null : fala.marcas;
-    const pronta = anterior?.voz === voz && anterior.falas.find((f) => f.texto === texto && existsSync(new URL(f.arquivo, SAIDA)));
+    const pronta = anterior?.voz === voz && (anterior.velocidade ?? 0.95) === VELOCIDADE && anterior.falas.find((f) => f.texto === texto && existsSync(new URL(f.arquivo, SAIDA)));
     if (pronta && (!marcasPedidas || pronta.marcas)) {
       if (pronta.lufs !== LUFS) { nivelar(pronta.arquivo); pronta.lufs = LUFS; }
       falas.push(pronta);
@@ -114,10 +116,10 @@ async function gerar() {
         // texto vizinho deixa a entonação contínua entre as cenas
         previous_text: textos[i - 1],
         next_text: textos[i + 1],
-        voice_settings: { stability: 0.5, similarity_boost: 0.8, style: 0.2, use_speaker_boost: true, speed: 0.95 },
+        voice_settings: { stability: 0.5, similarity_boost: 0.8, style: 0.2, use_speaker_boost: true, speed: VELOCIDADE },
       }),
     });
-    const arquivo = `fala-${createHash("sha1").update(voz + texto).digest("hex").slice(0, 10)}.mp3`;
+    const arquivo = `fala-${createHash("sha1").update(voz + VELOCIDADE + texto).digest("hex").slice(0, 10)}.mp3`;
     await writeFile(new URL(arquivo, SAIDA), Buffer.from(r.audio_base64, "base64"));
     nivelar(arquivo);
     const al = r.alignment;
@@ -131,7 +133,7 @@ async function gerar() {
     falas.push(item);
     console.log(`${arquivo}  ${fim.toFixed(2)}s  ${texto}`);
   }
-  await writeFile(new URL("narracao.json", SAIDA), JSON.stringify({ voz, modelo: MODELO, gerado_em: new Date().toISOString(), falas }, null, 2));
+  await writeFile(new URL("narracao.json", SAIDA), JSON.stringify({ voz, velocidade: VELOCIDADE, modelo: MODELO, gerado_em: new Date().toISOString(), falas }, null, 2));
   console.log(`\n${falas.length} falas em public/tour/. Rode npm run build para o servidor de produção servir os arquivos novos.`);
 }
 
