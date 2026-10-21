@@ -39,9 +39,9 @@ function agrupar<T>(v: T[], chave: (x: T) => string): [string, T[]][] {
   return [...m];
 }
 
-// Cores de status, da escala de severidade: Catastrófico, Alto, Baixo e Leve. "Próximos 2 dias" fica neutro, perto do branco,
-// para não se confundir com o laranja: branco sobre o navy do cabeçalho, cinza claro em linhas sobre fundo branco.
-const COR = { vencido: "#cc0000", hoje: "#cc851e", radar: "#FFFFFF", radarLinha: "#A3AAAE", resolvido: "#2cad6e", noPrazo: "#aad1b4" };
+// Cores de status, da escala de severidade: vencido Catastrófico, vence hoje Alto, próximos 2 dias Leve (verde claro, longe do laranja),
+// resolvidas Baixo. Linhas finas sobre branco usam o verde Baixo, porque o Leve some no fundo branco.
+const COR = { vencido: "#cc0000", hoje: "#cc851e", radar: "#aad1b4", resolvido: "#2cad6e", noPrazo: "#aad1b4" };
 // mapa de calor: de um tom claro do vencido até o vencido, pela parte atrasada (como d3.interpolateRgb)
 const rgb = (h: string) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
 const [R0, R1] = [rgb("#F7D9D9"), rgb(COR.vencido)];
@@ -268,7 +268,7 @@ export default function Painel({ gestorInicial }: { gestorInicial: string | null
     : [
         ["atr", COR.vencido, "Prazo vencido", "mais antigas primeiro", atr, false],
         ["hoje", COR.hoje, "Vence hoje", "resolver até o fim do dia", hj, false],
-        ["rad", "var(--navy)", "Próximos 2 dias", "para antecipar", rad, true],
+        ["rad", COR.radar, "Próximos 2 dias", "para antecipar", rad, true],
       ];
 
   // ---------- carteiras ----------

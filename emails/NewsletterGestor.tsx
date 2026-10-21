@@ -13,8 +13,8 @@ const C = {
   cinza3: "#DFE0E2",
   fundo: "#E9EDEF",
 };
-// Cores de status, as mesmas do painel (escala de severidade); "próximos 2 dias" é um cinza claro neutro
-const STATUS = { vencido: "#cc0000", hoje: "#cc851e", radar: "#A3AAAE", resolvido: "#2cad6e" };
+// Cores de status, as mesmas do painel (escala de severidade: Catastrófico, Alto, Leve e Baixo)
+const STATUS = { vencido: "#cc0000", hoje: "#cc851e", radar: "#aad1b4", resolvido: "#2cad6e" };
 const WS = "'Work Sans', Arial, sans-serif";
 const RB = "Roboto, Arial, sans-serif";
 

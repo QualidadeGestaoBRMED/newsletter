@@ -84,9 +84,8 @@ html,body{margin:0;background:#E9EDEF}
 .bm .col-h strong{font-family:var(--ws);font-weight:200;font-size:50px;line-height:.9;font-variant-numeric:tabular-nums}
 .bm .col-h span{text-align:right;font-family:var(--ws);font-weight:600;font-size:14px;line-height:1.3}
 .bm .col-h span small{display:block;font-weight:400;font-size:12px;opacity:.88}
-/* 3ª coluna: "Próximos 2 dias" é um cartão branco com contorno; na tarde, "Concluídas" fica verde com texto navy */
+/* 3ª coluna (verde claro ou verde): texto navy para ficar legível */
 .bm .col.soft .col-h{color:var(--navy)}
-.bm .col.rad .col-h{background:transparent;box-shadow:inset 0 0 0 1.5px var(--gray-3)}
 .bm .items{margin-top:4px}
 .bm .it{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 14px;padding:14px 4px 14px 2px;border-bottom:1px solid var(--gray-3);text-decoration:none;color:inherit;border-radius:4px}
 .bm .it:hover{background:var(--gray-4)}

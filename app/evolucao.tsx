@@ -11,7 +11,7 @@ type Carga = { qs: string; status: "loading" | "ok" | "error"; serie: PontoSerie
 const SERIES = [
   { k: "vencidas", nome: "Prazo vencido", cor: "#cc0000" },
   { k: "hoje", nome: "Vence hoje", cor: "#cc851e" },
-  { k: "radar", nome: "Próximos 2 dias", cor: "#A3AAAE" },
+  { k: "radar", nome: "Próximos 2 dias", cor: "#2cad6e" },
 ] as const;
 
 const DIA = ["dom", "seg", "ter", "qua", "qui", "sex", "sáb"];
