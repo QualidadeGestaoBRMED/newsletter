@@ -39,9 +39,11 @@ function agrupar<T>(v: T[], chave: (x: T) => string): [string, T[]][] {
   return [...m];
 }
 
-// Igual ao d3.interpolateRgb('#F1E1D2', '#A05E1E')
+// Cores de status, da escala de severidade: Catastrófico, Alto, Moderado, Baixo e Leve
+const COR = { vencido: "#cc0000", hoje: "#cc851e", radar: "#d9be53", resolvido: "#2cad6e", noPrazo: "#aad1b4" };
+// mapa de calor: de um tom claro do vencido até o vencido, pela parte atrasada (como d3.interpolateRgb)
 const rgb = (h: string) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
-const [R0, R1] = [rgb("#F1E1D2"), rgb("#A05E1E")];
+const [R0, R1] = [rgb("#F7D9D9"), rgb(COR.vencido)];
 const ramp = (t: number) => `rgb(${R0.map((a, i) => Math.round(a + (R1[i] - a) * t)).join(", ")})`;
 
 const PARAMS = ["ed", "gestor", "grupo", "empresa", "area", "tier"] as const;
@@ -219,9 +221,9 @@ export default function Painel({ gestorInicial }: { gestorInicial: string | null
     const crit = agrupar(atr.filter((r) => r.empresa), (r) => r.empresa).sort((a, b) => b[1].length - a[1].length)[0];
     lead = legend(
       [
-        [atr.length, "com prazo vencido", "#A05E1E"],
-        [hj.length, pl(hj.length, "vence hoje", "vencem hoje"), "#CC851E"],
-        [rad.length, "nos próximos 2 dias", "#fff"],
+        [atr.length, "com prazo vencido", COR.vencido],
+        [hj.length, pl(hj.length, "vence hoje", "vencem hoje"), COR.hoje],
+        [rad.length, "nos próximos 2 dias", COR.radar],
       ],
       crit && crit[1].length > 1 ? `${crit[0]} concentra ${n(crit[1].length)} dos atrasos.` : "",
     );
@@ -229,9 +231,9 @@ export default function Painel({ gestorInicial }: { gestorInicial: string | null
     claim = `${n(conc.length)} de ${n(f.length)} ${pl(f.length, "demanda resolvida", "demandas resolvidas")} no dia.`;
     lead = legend(
       [
-        [atrP.length, pl(atrP.length, "atrasada em aberto", "atrasadas em aberto"), "#A05E1E"],
-        [hjP.length, pl(hjP.length, "vira atraso amanhã", "viram atraso amanhã"), "#CC851E"],
-        [conc.length, pl(conc.length, "resolvida no dia", "resolvidas no dia"), "#fff"],
+        [atrP.length, pl(atrP.length, "atrasada em aberto", "atrasadas em aberto"), COR.vencido],
+        [hjP.length, pl(hjP.length, "vira atraso amanhã", "viram atraso amanhã"), COR.hoje],
+        [conc.length, pl(conc.length, "resolvida no dia", "resolvidas no dia"), COR.resolvido],
       ],
       "",
     );
@@ -240,14 +242,14 @@ export default function Painel({ gestorInicial }: { gestorInicial: string | null
   // os círculos da marca viram os números do dia: tamanho pela prioridade, número pela contagem
   const bolhas: [number, string, string][] = tarde
     ? [
-        [atrP.length, "atrasadas em aberto", "#A05E1E"],
-        [hjP.length, "viram atraso amanhã", "#CC851E"],
-        [conc.length, "resolvidas no dia", "#00AFAA"],
+        [atrP.length, "atrasadas em aberto", COR.vencido],
+        [hjP.length, "viram atraso amanhã", COR.hoje],
+        [conc.length, "resolvidas no dia", COR.resolvido],
       ]
     : [
-        [atr.length, "prazo vencido", "#A05E1E"],
-        [hj.length, "vence hoje", "#CC851E"],
-        [rad.length, "próximos 2 dias", "#00AFAA"],
+        [atr.length, "prazo vencido", COR.vencido],
+        [hj.length, "vence hoje", COR.hoje],
+        [rad.length, "próximos 2 dias", COR.radar],
       ];
   const k = largura < 760 ? 0.8 : 1;
 
@@ -258,14 +260,14 @@ export default function Painel({ gestorInicial }: { gestorInicial: string | null
   // ---------- onde atuar ----------
   const cols: [string, string, string, string, Row[], boolean][] = tarde
     ? [
-        ["hoje", "var(--amber)", "Viram atraso amanhã", "venciam no dia", hjP, false],
-        ["atr", "var(--rust)", "Atrasadas em aberto", "sem conclusão às 18:00", atrP, false],
-        ["done", "var(--teal)", "Concluídas no dia", "desde as 07:00", conc, true],
+        ["hoje", COR.hoje, "Viram atraso amanhã", "venciam no dia", hjP, false],
+        ["atr", COR.vencido, "Atrasadas em aberto", "sem conclusão às 18:00", atrP, false],
+        ["done", COR.resolvido, "Concluídas no dia", "desde as 07:00", conc, true],
       ]
     : [
-        ["atr", "var(--rust)", "Prazo vencido", "mais antigas primeiro", atr, false],
-        ["hoje", "var(--amber)", "Vence hoje", "resolver até o fim do dia", hj, false],
-        ["rad", "var(--teal)", "Próximos 2 dias", "para antecipar", rad, true],
+        ["atr", COR.vencido, "Prazo vencido", "mais antigas primeiro", atr, false],
+        ["hoje", COR.hoje, "Vence hoje", "resolver até o fim do dia", hj, false],
+        ["rad", COR.radar, "Próximos 2 dias", "para antecipar", rad, true],
       ];
 
   // ---------- carteiras ----------
@@ -284,7 +286,7 @@ export default function Painel({ gestorInicial }: { gestorInicial: string | null
     const a = atrasadas(v),
       s = a / v.length;
     const style: CSSProperties = {
-      background: a ? ramp(0.2 + 0.8 * s) : v.some((r) => r.status === "Próximo do vencimento") ? "#F7EAD4" : "#E1F0F2",
+      background: a ? ramp(0.2 + 0.8 * s) : v.some((r) => r.status === "Próximo do vencimento") ? "#F7EAD4" : COR.noPrazo,
       color: a && s > 0.5 ? "#fff" : "#193B4F",
     };
     return (

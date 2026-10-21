@@ -9,9 +9,9 @@ type Carga = { qs: string; status: "loading" | "ok" | "error"; serie: PontoSerie
 // Ferrugem, âmbar e aqua da marca, ajustados para as três linhas se distinguirem (validado, inclusive daltonismo).
 // Âmbar e aqua têm pouco contraste com o branco: por isso há legenda, rótulos em texto e a tabela.
 const SERIES = [
-  { k: "vencidas", nome: "Prazo vencido", cor: "#8A4A14" },
-  { k: "hoje", nome: "Vence hoje", cor: "#D99A2B" },
-  { k: "radar", nome: "Próximos 2 dias", cor: "#00AFAA" },
+  { k: "vencidas", nome: "Prazo vencido", cor: "#cc0000" },
+  { k: "hoje", nome: "Vence hoje", cor: "#cc851e" },
+  { k: "radar", nome: "Próximos 2 dias", cor: "#d9be53" },
 ] as const;
 
 const DIA = ["dom", "seg", "ter", "qua", "qui", "sex", "sáb"];
