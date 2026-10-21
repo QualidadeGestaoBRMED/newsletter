@@ -5,7 +5,7 @@ import "./painel.css";
 const workSans = Work_Sans({ subsets: ["latin"], variable: "--font-ws", display: "swap" });
 const roboto = Roboto({ subsets: ["latin"], weight: ["300", "400", "500", "700"], variable: "--font-rb", display: "swap" });
 
-export const metadata = { title: "Acompanhamento de prazos – Suporte" };
+export const metadata = { title: "Briefing Suporte" };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
