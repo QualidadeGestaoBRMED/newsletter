@@ -183,6 +183,28 @@ b,strong{font-weight:500}
 .chips span{font-family:var(--ws);font-size:19px;font-weight:500;color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:99px;padding:10px 22px}
 .chips span i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:10px;vertical-align:1px}
 
+/* ---------- próximos passos ---------- */
+#rota{z-index:28;background:rgba(10,28,40,.92);backdrop-filter:blur(8px);place-items:center}
+.rota{width:1640px;text-align:left}
+.rota-k{font-family:var(--ws);font-weight:600;font-size:16px;letter-spacing:.2em;text-transform:uppercase;color:var(--aqua)}
+.rota-h{margin:14px 0 0;font-family:var(--ws);font-weight:600;font-size:66px;line-height:1.1;letter-spacing:-.02em;color:#fff}
+.trilho{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:28px;margin-top:86px}
+.tr{position:absolute;left:0;right:0;top:56px;height:3px;border-radius:3px;background:rgba(255,255,255,.2);transform-origin:0 50%}
+.tr.feito{background:linear-gradient(90deg,var(--teal),var(--aqua))}
+.marco{position:relative}
+.fase{display:block;height:22px;line-height:22px;font-family:var(--ws);font-size:15px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.55)}
+.agora .fase{color:var(--aqua)}
+.no{display:block;position:relative;width:22px;height:22px;margin-top:24px;border-radius:50%;background:var(--fundo);box-shadow:inset 0 0 0 3px rgba(255,255,255,.5);z-index:1}
+.agora .no{background:var(--aqua);box-shadow:0 0 0 6px rgba(0,175,170,.22)}
+.pulso{position:absolute;inset:-5px;border-radius:50%;border:2px solid var(--aqua)}
+.card{margin-top:30px;min-height:262px;border-radius:24px 24px 24px 4px;padding:30px 30px 32px;border:1.5px dashed rgba(255,255,255,.3);color:#fff}
+.agora .card{background:#fff;color:var(--navy);border:1.5px solid #fff;box-shadow:0 30px 70px rgba(0,0,0,.35)}
+.card svg{display:block;width:42px;height:42px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;color:rgba(255,255,255,.75)}
+.agora .card svg{color:var(--teal)}
+.card b{display:block;margin-top:20px;font-family:var(--ws);font-weight:600;font-size:31px;line-height:1.2}
+.card p{margin:12px 0 0;font-size:20px;line-height:1.5;font-weight:300;color:rgba(255,255,255,.72)}
+.agora .card p{color:var(--ink)}
+.card b .ref{font-family:var(--rb);font-size:17px;font-weight:400;letter-spacing:.02em;color:rgba(255,255,255,.55);white-space:nowrap}
 #inicio{z-index:50;background:rgba(14,36,51,.94)}
 .inicio-acoes{display:flex;gap:16px;justify-content:center;margin-top:52px}
 .inicio-acoes button{font-family:var(--ws);font-size:22px;font-weight:600;border:0;border-radius:99px;padding:18px 36px;cursor:pointer}
@@ -271,6 +293,18 @@ b,strong{font-weight:500}
 
   <div class="full" id="intro"><span class="c1"></span><span class="c2"></span><span class="c3"></span>
     <div><img src="logo-brmed.png" alt="BR MED" id="introLogo"><div class="ttl" id="introT">Briefing<small>Suporte · prazos do cliente</small></div></div></div>
+  <div class="full" id="rota"><div class="rota">
+    <div class="rota-cab"><div class="rota-k">Próximos passos</div><h2 class="rota-h">Para onde o Briefing vai</h2></div>
+    <div class="trilho"><i class="tr" id="trBase"></i><i class="tr feito" id="trFeito"></i>
+      <div class="marco agora"><span class="fase">Agora · piloto</span><span class="no"><i class="pulso"></i></span>
+        <div class="card"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4M8.5 15l2.2 2.2L15.5 13"/></svg><b>Prazos</b><p>Vencidas, vencendo hoje e próximos dias, por carteira.</p></div></div>
+      <div class="marco"><span class="fase">Próximo</span><span class="no"></span>
+        <div class="card"><svg viewBox="0 0 24 24"><path d="M4 5h13v14H6a2 2 0 0 1-2-2zM17 9h3v8a2 2 0 0 1-2 2M7.5 9h6M7.5 12.5h6M7.5 16h3.5"/></svg><b>Resumo do cliente</b><p>Notícias e movimentos daquele cliente, para o gestor chegar informado.</p></div></div>
+      <div class="marco"><span class="fase">Próximo</span><span class="no"></span>
+        <div class="card"><svg viewBox="0 0 24 24"><path d="M3.5 16.5a8.5 8.5 0 0 1 17 0M12 16.5l4-6"/><circle cx="12" cy="16.5" r="1.3"/></svg><b>Satisfação da carteira <small class="ref">“NPS”</small></b><p>A satisfação de cada cliente ao lado dos prazos dele.</p></div></div>
+      <div class="marco"><span class="fase">Depois</span><span class="no"></span>
+        <div class="card"><svg viewBox="0 0 24 24"><path d="M3 7l6 6 4-4 8 8M15 17h6v-6"/></svg><b>Risco de churn</b><p>Sinais de que um cliente pode sair, antes que ele avise.</p></div></div>
+    </div></div></div>
   <div class="full" id="outro" style="background:rgba(14,36,51,.86)"><div><img src="logo-brmed.png" alt="BR MED"><div class="ttl" style="font-size:120px">Briefing Suporte<small>Prazos do cliente, todo dia útil às 07:00.</small></div>
     <div class="chips" id="chips"><span><i style="background:#A05E1E"></i>Onde atuar hoje</span><span><i style="background:#2EC4E6"></i>Cada carteira e tier</span><span><i style="background:#00AFAA"></i>Evolução edição a edição</span></div></div></div>
   <svg id="linhas" viewBox="0 0 1920 1080"></svg><div id="notas"></div>
@@ -366,11 +400,11 @@ b,strong{font-weight:500}
   $("tip").style.top = `${chartR.y + 4}px`;
 
   // ---------- linha do tempo ----------
-  const TOTAL = 82;
+  const TOTAL = 98;
   const q = new URLSearchParams(location.search);
   // ritmo: os tempos do roteiro são escritos em "segundos de roteiro"; 1.1 = 10% mais devagar
   const RITMO = Number(q.get("ritmo")) || 1.1;
-  const CENAS = [[0, "Abertura"], [4, "Montagem"], [12.8, "Números"], [20.8, "Filtros"], [29, "Comece"], [34.6, "Onde atuar"], [43.8, "Gerencial"], [52.4, "Evolução"], [61.8, "E-mail"], [72.4, "Fim"]];
+  const CENAS = [[0, "Abertura"], [4, "Montagem"], [12.8, "Números"], [20.8, "Filtros"], [29, "Comece"], [34.6, "Onde atuar"], [43.8, "Gerencial"], [52.4, "Evolução"], [61.8, "E-mail"], [72.4, "Próximos passos"], [88.4, "Fim"]];
 
   // narração: um áudio por cena (tour/narracao.json, gerado por scripts/narracao.mjs). Sem o arquivo, roda sem voz.
   const NARR = q.get("voz") === "0" ? null : await fetch("tour/narracao.json").then((r) => (r.ok ? r.json() : null)).catch(() => null);
@@ -578,10 +612,33 @@ b,strong{font-weight:500}
   K($("mcta"), [[66.6, { transform: "none", boxShadow: "0 0 0 0 rgba(0,175,170,.5)" }], [67.2, { transform: "scale(1.06)", boxShadow: "0 0 0 12px rgba(0,175,170,0)" }], [67.7, { transform: "none" }], [68.3, { transform: "scale(1.06)", boxShadow: "0 0 0 0 rgba(0,175,170,.5)" }], [68.9, { transform: "none", boxShadow: "0 0 0 12px rgba(0,175,170,0)" }]]);
 
   // ---------- encerramento ----------
-  K($("outro"), [[0, { opacity: 0, visibility: "hidden" }], [74.6, { opacity: 0, visibility: "visible" }], [75.6, { opacity: 1 }]]);
-  K(document.querySelector("#outro .ttl"), [[0, { opacity: 0 }], [74.8, { opacity: 0, transform: "translateY(24px)" }], [75.8, { opacity: 1, transform: "none" }]]);
-  document.querySelectorAll("#chips span").forEach((c, i) => K(c, [[0, { opacity: 0 }], [76.4 + i * 0.3, { opacity: 0, transform: "translateY(16px)" }], [77 + i * 0.3, { opacity: 1, transform: "none" }]], "cubic-bezier(.2,1.2,.4,1)"));
-  K(document.querySelector("#outro img"), [[0, { opacity: 0 }], [74.8, { opacity: 0 }], [75.6, { opacity: 1 }]]);
+  K($("outro"), [[0, { opacity: 0, visibility: "hidden" }], [90.2, { opacity: 0, visibility: "visible" }], [91.2, { opacity: 1 }]]);
+  K(document.querySelector("#outro .ttl"), [[0, { opacity: 0 }], [90.4, { opacity: 0, transform: "translateY(24px)" }], [91.4, { opacity: 1, transform: "none" }]]);
+  document.querySelectorAll("#chips span").forEach((c, i) => K(c, [[0, { opacity: 0 }], [92 + i * 0.3, { opacity: 0, transform: "translateY(16px)" }], [92.6 + i * 0.3, { opacity: 1, transform: "none" }]], "cubic-bezier(.2,1.2,.4,1)"));
+  K(document.querySelector("#outro img"), [[0, { opacity: 0 }], [90.4, { opacity: 0 }], [91.2, { opacity: 1 }]]);
+
+  // ---------- próximos passos: cada marco surge quando a narração diz o nome dele ----------
+  const S9 = 72.4, iRota = CENAS.findIndex(([t]) => t === S9);
+  const marca = NARR?.falas?.[iRota]?.marcas;
+  const quando = (k, reserva) => (marca?.[k] != null ? Winv(REAL[iRota] + ANTES + marca[k]) : S9 + reserva);
+  const tm0 = [quando("prazos", 4), quando("resumo", 7), quando("nps", 10.5), quando("churn", 13)];
+  const FIM9 = 88.4;
+  K($("rota"), [[0, { opacity: 0, visibility: "hidden" }], [S9 + 0.1, { opacity: 0, visibility: "visible" }], [S9 + 0.9, { opacity: 1 }], [FIM9 + 0.2, { opacity: 1 }], [FIM9 + 1, { opacity: 0, visibility: "hidden" }]]);
+  K(document.querySelector(".rota-cab"), [[0, { opacity: 0, transform: "translateY(30px)" }], [S9 + 0.5, { opacity: 0, transform: "translateY(30px)" }], [S9 + 1.3, { opacity: 1, transform: "none" }]], "cubic-bezier(.2,1,.3,1)");
+  const trilho = document.querySelector(".trilho"), W9 = trilho.offsetWidth;
+  const xNo = [...document.querySelectorAll(".marco .no")].map((n) => (n.closest(".marco").offsetLeft + n.offsetLeft + n.offsetWidth / 2) / W9);
+  // a linha se desenha até cada marco no momento em que ele aparece; o trecho aceso vai só até o "agora"
+  K($("trBase"), [[0, { transform: "scaleX(0)" }], [S9 + 1, { transform: "scaleX(0)" }], ...tm0.map((t, i) => [t, { transform: `scaleX(${i === 3 ? 1 : xNo[i]})` }])], "cubic-bezier(.45,0,.2,1)");
+  K($("trFeito"), [[0, { transform: "scaleX(0)" }], [S9 + 1, { transform: "scaleX(0)" }], [tm0[0], { transform: `scaleX(${xNo[0]})` }]], "cubic-bezier(.45,0,.2,1)");
+  document.querySelectorAll(".marco").forEach((m, i) => {
+    const t = tm0[i];
+    K(m.querySelector(".fase"), [[0, { opacity: 0 }], [t - 0.2, { opacity: 0, transform: "translateY(8px)" }], [t + 0.3, { opacity: 1, transform: "none" }]]);
+    K(m.querySelector(".no"), [[0, { transform: "scale(0)" }], [t - 0.1, { transform: "scale(0)" }], [t + 0.35, { transform: "scale(1)" }]], "cubic-bezier(.2,1.6,.4,1)");
+    K(m.querySelector(".card"), [[0, { opacity: 0, transform: "translateY(44px) scale(.95)" }], [t, { opacity: 0, transform: "translateY(44px) scale(.95)" }], [t + 0.7, { opacity: 1, transform: "none" }]], "cubic-bezier(.2,1.15,.35,1)");
+  });
+  // pulso de "você está aqui" no marco atual
+  const pulsos = []; for (let t = tm0[0] + 0.6; t < FIM9 - 1; t += 1.6) pulsos.push([t, { opacity: 0.9, transform: "scale(1)" }], [t + 1.4, { opacity: 0, transform: "scale(2.4)" }]);
+  K(document.querySelector(".agora .pulso"), [[0, { opacity: 0 }], ...pulsos]);
 
   // ---------- legendas ----------
   const CAPS = [

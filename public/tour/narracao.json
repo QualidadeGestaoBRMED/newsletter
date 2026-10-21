@@ -1,7 +1,7 @@
 {
   "voz": "XrExE9yKIg1WjnnlVkGX",
   "modelo": "eleven_multilingual_v2",
-  "gerado_em": "2026-10-21T14:00:08.971Z",
+  "gerado_em": "2026-10-21T14:11:17.527Z",
   "falas": [
     {
       "arquivo": "narracao-01.mp3",
@@ -47,6 +47,17 @@
       "arquivo": "narracao-09.mp3",
       "duracao": 7.77,
       "texto": "Às sete da manhã, cada gestor recebe um e-mail curto: três números, e um botão que abre o painel."
+    },
+    {
+      "arquivo": "fala-09c05f6668.mp3",
+      "duracao": 22.3,
+      "texto": "E isso é só o começo. Hoje, no piloto, o Briefing cuida dos prazos. Os próximos passos são o resumo do cliente, com notícias e movimentos, para o gestor chegar informado; e a satisfação da carteira, ao lado dos prazos. Depois, o risco de churn: sinais de que um cliente pode sair, antes que ele avise.",
+      "marcas": {
+        "prazos": 4.574,
+        "resumo": 7.361,
+        "nps": 13.015,
+        "churn": 17.426
+      }
     },
     {
       "arquivo": "narracao-10.mp3",

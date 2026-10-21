@@ -3,7 +3,9 @@
 //   node scripts/narracao.mjs vozes            → lista vozes em pt-BR (da sua conta e da biblioteca)
 //   node scripts/narracao.mjs gerar [--voz=ID] → gera os áudios (sem --voz: ELEVENLABS_VOICE_ID ou a Matilda)
 // Precisa de ELEVENLABS_API_KEY no .env.
-import { mkdir, writeFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
+import { existsSync } from "node:fs";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 
 try {
   process.loadEnvFile();
@@ -18,6 +20,7 @@ const VOZ_PADRAO = "XrExE9yKIg1WjnnlVkGX";
 const SAIDA = new URL("../public/tour/", import.meta.url);
 
 // Uma fala por cena, na ordem das cenas do tour.html. Frases curtas, para soar conversado.
+// Uma fala com `marcas` registra quando cada palavra começa, para a cena sincronizar a animação com a voz.
 const FALAS = [
   "Este é o Briefing Suporte.",
   "Duas vezes por dia útil, ele lê o Pipefy, calcula o prazo de cada demanda e monta o painel.",
@@ -28,6 +31,11 @@ const FALAS = [
   "A visão gerencial compara as carteiras. Quanto mais escura a célula, maior o atraso. E um clique desce de nível.",
   "Em Evolução, você acompanha esses números, edição a edição.",
   "Às sete da manhã, cada gestor recebe um e-mail curto: três números, e um botão que abre o painel.",
+  {
+    texto:
+      "E isso é só o começo. Hoje, no piloto, o Briefing cuida dos prazos. Os próximos passos são o resumo do cliente, com notícias e movimentos, para o gestor chegar informado; e a satisfação da carteira, ao lado dos prazos. Depois, o risco de churn: sinais de que um cliente pode sair, antes que ele avise.",
+    marcas: { prazos: "prazos", resumo: "resumo", nps: "satisfação", churn: "churn" },
+  },
   "Briefing Suporte. Os prazos dos clientes, todo dia útil, às sete.",
 ];
 
@@ -62,8 +70,18 @@ async function adicionar() {
 async function gerar() {
   const voz = arg("voz") ?? process.env.ELEVENLABS_VOICE_ID?.trim() ?? VOZ_PADRAO;
   await mkdir(SAIDA, { recursive: true });
+  // fala com o mesmo texto e a mesma voz já gerada é reaproveitada (não gasta créditos)
+  const anterior = existsSync(new URL("narracao.json", SAIDA)) ? JSON.parse(await readFile(new URL("narracao.json", SAIDA), "utf8")) : null;
+  const textos = FALAS.map((f) => (typeof f === "string" ? f : f.texto));
   const falas = [];
-  for (const [i, texto] of FALAS.entries()) {
+  for (const [i, fala] of FALAS.entries()) {
+    const texto = textos[i], marcasPedidas = typeof fala === "string" ? null : fala.marcas;
+    const pronta = anterior?.voz === voz && anterior.falas.find((f) => f.texto === texto && existsSync(new URL(f.arquivo, SAIDA)));
+    if (pronta && (!marcasPedidas || pronta.marcas)) {
+      falas.push(pronta);
+      console.log(`${pronta.arquivo}  reaproveitada`);
+      continue;
+    }
     const r = await api(`/text-to-speech/${voz}/with-timestamps?output_format=mp3_44100_128`, {
       method: "POST",
       body: JSON.stringify({
@@ -71,15 +89,22 @@ async function gerar() {
         model_id: MODELO,
         language_code: "pt",
         // texto vizinho deixa a entonação contínua entre as cenas
-        previous_text: FALAS[i - 1],
-        next_text: FALAS[i + 1],
+        previous_text: textos[i - 1],
+        next_text: textos[i + 1],
         voice_settings: { stability: 0.5, similarity_boost: 0.8, style: 0.2, use_speaker_boost: true, speed: 0.95 },
       }),
     });
-    const arquivo = `narracao-${String(i + 1).padStart(2, "0")}.mp3`;
+    const arquivo = `fala-${createHash("sha1").update(voz + texto).digest("hex").slice(0, 10)}.mp3`;
     await writeFile(new URL(arquivo, SAIDA), Buffer.from(r.audio_base64, "base64"));
-    const fim = r.alignment?.character_end_times_seconds?.at(-1) ?? 0;
-    falas.push({ arquivo, duracao: Math.round((fim + 0.15) * 100) / 100, texto });
+    const al = r.alignment;
+    const fim = al?.character_end_times_seconds?.at(-1) ?? 0;
+    const item = { arquivo, duracao: Math.round((fim + 0.15) * 100) / 100, texto };
+    if (marcasPedidas && al) {
+      // segundo em que cada palavra marcada começa a ser dita
+      const dito = al.characters.join("");
+      item.marcas = Object.fromEntries(Object.entries(marcasPedidas).map(([k, palavra]) => [k, al.character_start_times_seconds[dito.indexOf(palavra)] ?? null]));
+    }
+    falas.push(item);
     console.log(`${arquivo}  ${fim.toFixed(2)}s  ${texto}`);
   }
   await writeFile(new URL("narracao.json", SAIDA), JSON.stringify({ voz, modelo: MODELO, gerado_em: new Date().toISOString(), falas }, null, 2));
