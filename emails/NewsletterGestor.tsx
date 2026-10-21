@@ -8,13 +8,13 @@ const C = {
   navy: "#193B4F",
   teal: "#007891",
   aqua: "#00AFAA",
-  ambar: "#CC851E",
-  ferrugem: "#A05E1E",
   cinza1: "#767A7B",
   cinza2: "#BFC3C6",
   cinza3: "#DFE0E2",
   fundo: "#E9EDEF",
 };
+// Cores de status, as mesmas do painel (escala de severidade: Catastrófico, Alto, Moderado, Baixo)
+const STATUS = { vencido: "#cc0000", hoje: "#cc851e", radar: "#d9be53", resolvido: "#2cad6e" };
 const WS = "'Work Sans', Arial, sans-serif";
 const RB = "Roboto, Arial, sans-serif";
 
@@ -32,10 +32,12 @@ export type NewsletterProps = {
   logo: string;
 };
 
+// a cor do status vai na barrinha, como o ponto da legenda do painel; o número fica navy (o amarelo não se lê em texto)
 function Numero({ valor, rotulo, cor }: { valor: number; rotulo: string; cor: string }) {
   return (
     <Column align="center" style={{ width: "33%", padding: "0 6px", verticalAlign: "top" }}>
-      <Text style={{ margin: 0, fontFamily: WS, fontSize: 40, lineHeight: "44px", fontWeight: 300, color: valor ? cor : C.cinza2 }}>{fmt(valor)}</Text>
+      <div style={{ width: 28, height: 4, borderRadius: 2, background: valor ? cor : C.cinza3, margin: "0 auto 12px", fontSize: 0, lineHeight: 0 }}>&nbsp;</div>
+      <Text style={{ margin: 0, fontFamily: WS, fontSize: 40, lineHeight: "44px", fontWeight: 300, color: valor ? C.navy : C.cinza2 }}>{fmt(valor)}</Text>
       <Text style={{ margin: "6px 0 0", fontFamily: RB, fontSize: 13, lineHeight: "17px", color: C.cinza1 }}>{rotulo}</Text>
     </Column>
   );
@@ -56,14 +58,14 @@ export default function NewsletterGestor({ nome, periodo, data, horario, numeros
 
   const numeros = tarde
     ? [
-        { valor: n.atrasadasAbertas, rotulo: pl(n.atrasadasAbertas, "atrasada em aberto", "atrasadas em aberto"), cor: C.ferrugem },
-        { valor: n.viramAtraso, rotulo: pl(n.viramAtraso, "vira atraso amanhã", "viram atraso amanhã"), cor: C.ambar },
-        { valor: n.concluidas, rotulo: pl(n.concluidas, "resolvida hoje", "resolvidas hoje"), cor: C.teal },
+        { valor: n.atrasadasAbertas, rotulo: pl(n.atrasadasAbertas, "atrasada em aberto", "atrasadas em aberto"), cor: STATUS.vencido },
+        { valor: n.viramAtraso, rotulo: pl(n.viramAtraso, "vira atraso amanhã", "viram atraso amanhã"), cor: STATUS.hoje },
+        { valor: n.concluidas, rotulo: pl(n.concluidas, "resolvida hoje", "resolvidas hoje"), cor: STATUS.resolvido },
       ]
     : [
-        { valor: n.vencidas, rotulo: "com prazo vencido", cor: C.ferrugem },
-        { valor: n.hoje, rotulo: pl(n.hoje, "vence hoje", "vencem hoje"), cor: C.ambar },
-        { valor: n.radar, rotulo: "nos próximos 2 dias", cor: C.teal },
+        { valor: n.vencidas, rotulo: "com prazo vencido", cor: STATUS.vencido },
+        { valor: n.hoje, rotulo: pl(n.hoje, "vence hoje", "vencem hoje"), cor: STATUS.hoje },
+        { valor: n.radar, rotulo: "nos próximos 2 dias", cor: STATUS.radar },
       ];
 
   return (
