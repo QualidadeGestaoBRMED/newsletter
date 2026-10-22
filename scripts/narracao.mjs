@@ -22,11 +22,12 @@ const MODELO = "eleven_multilingual_v2";
 // Carla ("Inviting, Warm and Helpful"), voz brasileira da biblioteca (exige plano pago), escolhida em 2026-10-21.
 // Anteriores: Lucas SVgp5d1fyFQRW1eQbwkq (0.95), Matilda XrExE9yKIg1WjnnlVkGX (0.95)
 const VOZ_PADRAO = "m151rjrbWXbBqyq56tly";
-// Perfis de voz (velocidade: a ElevenLabs aceita de 0.7 a 1.2). "expressivo" foi escolhido para a versão executiva em
-// 2026-10-22, por soar mais natural: velocidade normal, menos estabilidade e mais estilo.
+// Perfis de voz (velocidade: a ElevenLabs aceita de 0.7 a 1.2). "expressivo" é o da versão executiva (2026-10-22): mais estilo,
+// estabilidade 0.5 (com 0.35 saíam engasgos no meio das palavras) e `acelerar`: fator aplicado no ffmpeg (atempo, mantém o tom),
+// porque a velocidade da ElevenLabs muda o ritmo da fala de um jeito pouco previsível.
 const PERFIS = {
   padrao: { velocidade: 1.1, stability: 0.5, style: 0.2 },
-  expressivo: { velocidade: 1.0, stability: 0.35, style: 0.45 },
+  expressivo: { velocidade: 1.1, stability: 0.5, style: 0.45, acelerar: 1.05 },
 };
 const SAIDA = new URL("../public/tour/", import.meta.url);
 // cada voz sai num volume; todas as falas são niveladas para este alvo (o vídeo usa o mesmo)
@@ -73,7 +74,7 @@ const FALAS_EXEC = [
   },
   {
     texto:
-      "Mas por que isso acontece? São mais de mil cards abertos, espalhados em trinta fases do Pipefy. Ninguém enxerga a carteira inteira. E o que ninguém vê, fica para trás. Então, como resolver? Levando essa visibilidade até cada gestor, todo dia, sem esforço nenhum. É isso que o Briefing faz.",
+      "Mas por que isso acontece? São mais de mil cards abertos, espalhados em trinta fases do Pipefy. Ninguém consegue ver a carteira inteira. E o que ninguém vê, fica para trás. Então, como resolver? Levando essa visibilidade até cada gestor, todo dia, sem esforço nenhum. É isso que o Briefing faz.",
     marcas: { porque: "por que", mil: "mil", ninguem: "Ninguém", resolver: "resolver", gestor: "cada gestor", dia: "todo dia", esforco: "sem esforço" },
   },
   ...FALAS.slice(1, 7),
@@ -122,13 +123,14 @@ async function adicionar() {
 }
 
 // loudnorm em duas passadas (medir, depois ganho linear): muda só o volume, sem comprimir a fala
-function nivelar(arquivo) {
-  const caminho = fileURLToPath(new URL(arquivo, SAIDA)), alvo = `I=${LUFS}:TP=-1.5:LRA=11`;
-  const log = spawnSync(FFMPEG, ["-hide_banner", "-i", caminho, "-af", `loudnorm=${alvo}:print_format=json`, "-f", "null", "-"], { encoding: "utf8" }).stderr;
+// `acelerar` (> 1) encurta a fala sem mudar o tom; vem antes do loudnorm nas duas passadas
+function nivelar(arquivo, acelerar = 1) {
+  const caminho = fileURLToPath(new URL(arquivo, SAIDA)), alvo = `I=${LUFS}:TP=-1.5:LRA=11`, tempo = acelerar !== 1 ? `atempo=${acelerar},` : "";
+  const log = spawnSync(FFMPEG, ["-hide_banner", "-i", caminho, "-af", `${tempo}loudnorm=${alvo}:print_format=json`, "-f", "null", "-"], { encoding: "utf8" }).stderr;
   const m = JSON.parse(log.slice(log.lastIndexOf("{")));
   const tmp = caminho.replace(/\.mp3$/, ".nivel.mp3");
   execFileSync(FFMPEG, ["-y", "-hide_banner", "-loglevel", "error", "-i", caminho, "-af",
-    `loudnorm=${alvo}:measured_I=${m.input_i}:measured_TP=${m.input_tp}:measured_LRA=${m.input_lra}:measured_thresh=${m.input_thresh}:offset=${m.target_offset}:linear=true`,
+    `${tempo}loudnorm=${alvo}:measured_I=${m.input_i}:measured_TP=${m.input_tp}:measured_LRA=${m.input_lra}:measured_thresh=${m.input_thresh}:offset=${m.target_offset}:linear=true`,
     "-ar", "44100", "-c:a", "libmp3lame", "-b:a", "128k", tmp]);
   execFileSync("mv", [tmp, caminho]);
 }
@@ -149,7 +151,7 @@ async function gerar() {
   const falas = [];
   for (const [i, fala] of FALAS.entries()) {
     const texto = textos[i], marcasPedidas = typeof fala === "string" ? null : fala.marcas;
-    const pronta = prontas.find((f) => f.texto === texto && existsSync(new URL(f.arquivo, SAIDA)));
+    const pronta = prontas.find((f) => f.texto === texto && (f.acelerar ?? 1) === (perfil.acelerar ?? 1) && existsSync(new URL(f.arquivo, SAIDA)));
     if (pronta && (!marcasPedidas || pronta.marcas)) {
       if (pronta.lufs !== LUFS) { nivelar(pronta.arquivo); pronta.lufs = LUFS; }
       falas.push(pronta);
@@ -168,16 +170,18 @@ async function gerar() {
         voice_settings: { stability: perfil.stability, similarity_boost: 0.8, style: perfil.style, use_speaker_boost: true, speed: perfil.velocidade },
       }),
     });
-    const arquivo = `fala-${createHash("sha1").update(voz + perfil.velocidade + (roteiro.perfil === "padrao" ? "" : roteiro.perfil) + texto).digest("hex").slice(0, 10)}.mp3`;
+    const arquivo = `fala-${createHash("sha1").update(voz + perfil.velocidade + (roteiro.perfil === "padrao" ? "" : JSON.stringify(perfil)) + texto).digest("hex").slice(0, 10)}.mp3`;
     await writeFile(new URL(arquivo, SAIDA), Buffer.from(r.audio_base64, "base64"));
-    nivelar(arquivo);
+    const acelerar = perfil.acelerar ?? 1;
+    nivelar(arquivo, acelerar);
     const al = r.alignment;
     const fim = al?.character_end_times_seconds?.at(-1) ?? 0;
-    const item = { arquivo, duracao: Math.round((fim + 0.15) * 100) / 100, texto, lufs: LUFS };
+    // tempos da ElevenLabs são da fala original: divididos pelo fator de aceleração
+    const item = { arquivo, duracao: Math.round((fim / acelerar + 0.15) * 100) / 100, texto, lufs: LUFS, ...(acelerar !== 1 && { acelerar }) };
     if (marcasPedidas && al) {
       // segundo em que cada palavra marcada começa a ser dita
       const dito = al.characters.join("");
-      item.marcas = Object.fromEntries(Object.entries(marcasPedidas).map(([k, palavra]) => [k, al.character_start_times_seconds[dito.indexOf(palavra)] ?? null]));
+      item.marcas = Object.fromEntries(Object.entries(marcasPedidas).map(([k, palavra]) => [k, dito.includes(palavra) ? Math.round((al.character_start_times_seconds[dito.indexOf(palavra)] / acelerar) * 1000) / 1000 : null]));
     }
     falas.push(item);
     console.log(`${arquivo}  ${fim.toFixed(2)}s  ${texto}`);
