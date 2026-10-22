@@ -1,11 +1,13 @@
-// Gera a narração da apresentação (public/tour.html) com a ElevenLabs: um MP3 por cena + tour/narracao.json.
+// Gera a narração das apresentações com a ElevenLabs: um MP3 por cena + o manifesto do roteiro em public/tour/.
+//   tour  → public/tour.html (tour do produto), manifesto tour/narracao.json
+//   tour2 → public/tour2.html (versão executiva: "as is" antes do produto, roadmap com indicadores), tour/narracao-tour2.json
 // Uso:
-//   node scripts/narracao.mjs vozes            → lista vozes em pt-BR (da sua conta e da biblioteca)
-//   node scripts/narracao.mjs gerar [--voz=ID] → gera os áudios (sem --voz: ELEVENLABS_VOICE_ID ou a Carla)
+//   node scripts/narracao.mjs vozes                                  → lista vozes em pt-BR (da sua conta e da biblioteca)
+//   node scripts/narracao.mjs gerar [--roteiro=tour|tour2] [--voz=ID] → gera os áudios (sem --voz: ELEVENLABS_VOICE_ID ou a Carla)
 // Precisa de ELEVENLABS_API_KEY no .env e de ffmpeg (variável FFMPEG ou no PATH) para nivelar o volume das falas.
 import { execFileSync, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { existsSync } from "node:fs";
+import { existsSync, readdirSync } from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 
@@ -55,6 +57,29 @@ const FALAS = [
   "Briefing Suporte. Os prazos dos clientes, todo dia útil, às sete.",
 ];
 
+// Versão executiva: as mesmas falas do produto, com o problema antes (dados do Pipefy de 21/10/2026: 78% vencidas,
+// 709 vencidas há mais de 30 dias, 47% das vencidas em clientes Diamante e Ouro) e o roadmap ligado a indicadores.
+const FALAS_EXEC = [
+  FALAS[0],
+  {
+    texto:
+      "Hoje, quase oito em cada dez demandas de clientes estão com o prazo vencido. E muitas não estão só atrasadas: estão esquecidas. Mais de setecentas venceram há mais de trinta dias. Quase metade é de clientes Diamante e Ouro: é receita em risco. O problema não é só o prazo; é a falta de visibilidade.",
+    marcas: { vencidas: "oito", esquecidas: "setecentas", receita: "metade", visibilidade: "visibilidade" },
+  },
+  ...FALAS.slice(1, 9),
+  {
+    texto:
+      "E isso é só o começo. No piloto, testamos uma hipótese: com visibilidade diária, os cards esquecidos diminuem. Depois, o resumo do cliente, para o gestor chegar informado e procurar o cliente antes; a satisfação da carteira, com o NPS ao lado dos prazos; e o risco de churn, para proteger a receita antes que o cliente avise.",
+    marcas: { prazos: "piloto", resumo: "resumo", nps: "satisfação", churn: "churn" },
+  },
+  "Briefing Suporte, um desenvolvimento interno da Qualidade e Gestão. Os prazos dos clientes, todo dia útil, às sete.",
+];
+
+const ROTEIROS = {
+  tour: { falas: FALAS, manifesto: "narracao.json" },
+  tour2: { falas: FALAS_EXEC, manifesto: "narracao-tour2.json" },
+};
+
 const chave = process.env.ELEVENLABS_API_KEY?.trim();
 if (!chave) {
   console.error("Defina ELEVENLABS_API_KEY no .env (ElevenLabs → Profile → API Keys).");
@@ -97,14 +122,21 @@ function nivelar(arquivo) {
 
 async function gerar() {
   const voz = arg("voz") ?? process.env.ELEVENLABS_VOICE_ID?.trim() ?? VOZ_PADRAO;
+  const roteiro = ROTEIROS[arg("roteiro") ?? "tour"];
+  if (!roteiro) throw new Error(`Roteiro desconhecido; use ${Object.keys(ROTEIROS).join(" ou ")}`);
+  const FALAS = roteiro.falas;
   await mkdir(SAIDA, { recursive: true });
-  // fala com o mesmo texto e a mesma voz já gerada é reaproveitada (não gasta créditos)
-  const anterior = existsSync(new URL("narracao.json", SAIDA)) ? JSON.parse(await readFile(new URL("narracao.json", SAIDA), "utf8")) : null;
+  // fala com o mesmo texto, voz e velocidade já gerada em qualquer roteiro é reaproveitada (não gasta créditos)
+  const prontas = [];
+  for (const nome of readdirSync(SAIDA).filter((n) => /^narracao.*\.json$/.test(n))) {
+    const m = JSON.parse(await readFile(new URL(nome, SAIDA), "utf8"));
+    if (m.voz === voz && (m.velocidade ?? 0.95) === VELOCIDADE) prontas.push(...m.falas);
+  }
   const textos = FALAS.map((f) => (typeof f === "string" ? f : f.texto));
   const falas = [];
   for (const [i, fala] of FALAS.entries()) {
     const texto = textos[i], marcasPedidas = typeof fala === "string" ? null : fala.marcas;
-    const pronta = anterior?.voz === voz && (anterior.velocidade ?? 0.95) === VELOCIDADE && anterior.falas.find((f) => f.texto === texto && existsSync(new URL(f.arquivo, SAIDA)));
+    const pronta = prontas.find((f) => f.texto === texto && existsSync(new URL(f.arquivo, SAIDA)));
     if (pronta && (!marcasPedidas || pronta.marcas)) {
       if (pronta.lufs !== LUFS) { nivelar(pronta.arquivo); pronta.lufs = LUFS; }
       falas.push(pronta);
@@ -137,14 +169,14 @@ async function gerar() {
     falas.push(item);
     console.log(`${arquivo}  ${fim.toFixed(2)}s  ${texto}`);
   }
-  await writeFile(new URL("narracao.json", SAIDA), JSON.stringify({ voz, velocidade: VELOCIDADE, modelo: MODELO, gerado_em: new Date().toISOString(), falas }, null, 2));
+  await writeFile(new URL(roteiro.manifesto, SAIDA), JSON.stringify({ voz, velocidade: VELOCIDADE, modelo: MODELO, gerado_em: new Date().toISOString(), falas }, null, 2));
   console.log(`\n${falas.length} falas em public/tour/. Rode npm run build para o servidor de produção servir os arquivos novos.`);
 }
 
 const cmd = process.argv[2];
 const acoes = { vozes, adicionar, gerar };
 if (!acoes[cmd]) {
-  console.error("Uso: node scripts/narracao.mjs vozes | adicionar --dono=ID --voz=ID | gerar [--voz=ID]");
+  console.error("Uso: node scripts/narracao.mjs vozes | adicionar --dono=ID --voz=ID | gerar [--roteiro=tour|tour2] [--voz=ID]");
   process.exit(1);
 }
 acoes[cmd]().catch((e) => {

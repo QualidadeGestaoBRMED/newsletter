@@ -1,6 +1,7 @@
 // Grava public/tour.html em MP4: quadro a quadro (no tempo exato de cada quadro, então sai liso mesmo se a captura for lenta)
 // com a narração de tour/narracao.json posicionada em cada cena e a música de fundo por baixo.
-// Uso: FFMPEG=/caminho/do/ffmpeg node scripts/gravar-video.mjs [saida.mp4] [--fps=60] [--escala=1] [--ate=SEGUNDOS]
+// Uso: FFMPEG=/caminho/do/ffmpeg node scripts/gravar-video.mjs [saida.mp4] [--pagina=tour.html] [--fps=60] [--escala=1] [--ate=SEGUNDOS]
+//   --pagina=tour2.html grava a versão executiva.
 //   --escala=1.3333333333 grava em 2560×1440; --escala=2 em 3840×2160. Precisa do Google Chrome instalado.
 import { spawn } from "node:child_process";
 import { mkdtempSync } from "node:fs";
@@ -10,7 +11,7 @@ import { fileURLToPath } from "node:url";
 
 const arg = (k, padrao) => process.argv.find((a) => a.startsWith(`--${k}=`))?.slice(k.length + 3) ?? padrao;
 const saida = process.argv.slice(2).find((a) => !a.startsWith("--")) ?? "briefing-suporte.mp4";
-const FPS = Number(arg("fps", 60)), ESCALA = Number(arg("escala", 1)), ATE = Number(arg("ate", 0));
+const FPS = Number(arg("fps", 60)), ESCALA = Number(arg("escala", 1)), ATE = Number(arg("ate", 0)), PAGINA = arg("pagina", "tour.html");
 const FFMPEG = process.env.FFMPEG || "ffmpeg";
 const PUBLICO = fileURLToPath(new URL("../public/", import.meta.url));
 const PORTA = 9400 + Math.floor(Math.random() * 400);
@@ -35,7 +36,7 @@ const cmd = (method, params = {}) => new Promise((r) => { const i = ++id; pend.s
 const ev = async (e) => (await cmd("Runtime.evaluate", { expression: e, awaitPromise: true, returnByValue: true })).result?.result?.value;
 
 await cmd("Emulation.setDeviceMetricsOverride", { width: 1920, height: 1080, deviceScaleFactor: ESCALA, mobile: false });
-await cmd("Page.navigate", { url: `file://${PUBLICO}tour.html?gravar=1` });
+await cmd("Page.navigate", { url: `file://${PUBLICO}${PAGINA}?gravar=1` });
 for (let i = 0; i < 200 && !(await ev("window.tour?.pronto === true")); i++) await dormir(100);
 await dormir(800); // fontes e imagens assentarem
 
