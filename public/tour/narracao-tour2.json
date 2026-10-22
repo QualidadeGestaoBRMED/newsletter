@@ -3,7 +3,7 @@
   "perfil": "expressivo",
   "velocidade": 1,
   "modelo": "eleven_multilingual_v2",
-  "gerado_em": "2026-10-22T14:57:54.205Z",
+  "gerado_em": "2026-10-22T15:06:15.939Z",
   "falas": [
     {
       "arquivo": "fala-f6e32aaf55.mp3",
@@ -101,15 +101,15 @@
       "lufs": -21
     },
     {
-      "arquivo": "fala-a1c44d4bd2.mp3",
-      "duracao": 27.74,
-      "texto": "E isso é só o começo. No piloto, testamos uma hipótese: com visibilidade diária, os cards esquecidos diminuem. Depois, o resumo do cliente, para o gestor chegar informado e procurar o cliente antes; a satisfação da carteira, com o NPS ao lado dos prazos; e o risco de churn, para proteger a receita antes que o cliente avise.",
+      "arquivo": "fala-86acf2a886.mp3",
+      "duracao": 43.85,
+      "texto": "E isso é só o começo. No piloto, a hipótese é simples: com visibilidade todos os dias, o Suporte cobra as áreas a tempo, evita novos atrasos e resgata os cards esquecidos. Depois, vem o resumo do cliente: notícias e movimentos de cada empresa, para o gestor chegar informado, fortalecer o relacionamento e aumentar a retenção. Em seguida, a satisfação de cada carteira, lado a lado com os prazos. E, por fim, o risco de churn: sinais de que um cliente pode sair, para agir antes que seja tarde demais, e não perder receita.",
       "lufs": -21,
       "marcas": {
-        "prazos": 2.856,
-        "resumo": 11.146,
-        "nps": 16.707,
-        "churn": 22.373
+        "prazos": 3.019,
+        "resumo": 15.696,
+        "nps": 27.411,
+        "churn": 34.04
       }
     },
     {

@@ -79,7 +79,7 @@ const FALAS_EXEC = [
   ...FALAS.slice(1, 9),
   {
     texto:
-      "E isso é só o começo. No piloto, testamos uma hipótese: com visibilidade diária, os cards esquecidos diminuem. Depois, o resumo do cliente, para o gestor chegar informado e procurar o cliente antes; a satisfação da carteira, com o NPS ao lado dos prazos; e o risco de churn, para proteger a receita antes que o cliente avise.",
+      "E isso é só o começo. No piloto, a hipótese é simples: com visibilidade todos os dias, o Suporte cobra as áreas a tempo, evita novos atrasos e resgata os cards esquecidos. Depois, vem o resumo do cliente: notícias e movimentos de cada empresa, para o gestor chegar informado, fortalecer o relacionamento e aumentar a retenção. Em seguida, a satisfação de cada carteira, lado a lado com os prazos. E, por fim, o risco de churn: sinais de que um cliente pode sair, para agir antes que seja tarde demais, e não perder receita.",
     marcas: { prazos: "piloto", resumo: "resumo", nps: "satisfação", churn: "churn" },
   },
   "Briefing Suporte, um desenvolvimento interno da Qualidade e Gestão. Os prazos dos clientes, todo dia útil, às sete.",

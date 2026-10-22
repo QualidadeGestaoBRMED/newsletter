@@ -365,7 +365,9 @@ b,strong{font-weight:500}
   for (const t of [0, 5, 10, 15, 20, 25]) g += `<line x1="${ML}" x2="${ML + IW}" y1="${cy(t)}" y2="${cy(t)}" stroke="#ECEEEF"/><text class="tk" x="${ML - 8}" y="${cy(t)}" dy=".32em" text-anchor="end">${t}</text>`;
   DATAS.forEach((d, i) => { if (i % 2 === 0 || i === DATAS.length - 1) g += `<text class="tk" x="${cx(i)}" y="${CH - 6}" text-anchor="middle">${d}</text>`; });
   g += `<line id="cross" x1="0" x2="0" y1="${MT}" y2="${MT + IH}" stroke="#BFC3C6"/>`;
-  const nomes = ["prazo vencido", "vence hoje", "próximos 2 dias"], fimY = [cy(21), cy(9) - 9, cy(6) + 9];
+  // rótulo no fim de cada linha, na altura do último valor dela; vence hoje e próximos 2 dias se afastam um pouco para não encostar
+  const nomes = ["prazo vencido", "vence hoje", "próximos 2 dias"], ultimo = SER.map(([, v]) => v[v.length - 1]);
+  const fimY = [cy(ultimo[0]), cy(ultimo[1]) + (ultimo[1] < ultimo[2] ? 9 : -9), cy(ultimo[2]) + (ultimo[2] < ultimo[1] ? 9 : -9)];
   SER.forEach(([c, v], k) => {
     g += `<path class="ln" d="${v.map((y, i) => `${i ? "L" : "M"}${cx(i).toFixed(1)},${cy(y).toFixed(1)}`).join("")}" fill="none" stroke="${c}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
     g += `<circle class="fimdot" cx="${cx(11)}" cy="${cy(v[11])}" r="4" fill="${c}" stroke="#fff" stroke-width="2"/>`;

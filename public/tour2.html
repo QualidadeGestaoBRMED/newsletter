@@ -361,13 +361,13 @@ b,strong{font-weight:500}
     <div class="rota-cab"><div class="rota-k">Próximos passos</div><h2 class="rota-h">Para onde o Briefing vai</h2></div>
     <div class="trilho"><i class="tr" id="trBase"></i><i class="tr feito" id="trFeito"></i>
       <div class="marco agora"><span class="fase">Agora · piloto</span><span class="no"><i class="pulso"></i></span>
-        <div class="card"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4M8.5 15l2.2 2.2L15.5 13"/></svg><b>Prazos</b><p>Vencidas, vencendo hoje e próximos dias, por carteira.</p><p class="hip"><b>Hipótese do piloto:</b> com visibilidade diária, os cards esquecidos diminuem.</p><div class="ind"><small>Indicador</small>Vencidas há mais de 30 dias</div></div></div>
+        <div class="card"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4M8.5 15l2.2 2.2L15.5 13"/></svg><b>Prazos</b><p>Vencidas, vencendo hoje e próximos dias, por carteira.</p><p class="hip"><b>Hipótese do piloto:</b> com visibilidade diária, o Suporte cobra as áreas a tempo, evita novos atrasos e resgata os esquecidos.</p><div class="ind"><small>Indicador</small>Vencidas e vencidas há mais de 30 dias</div></div></div>
       <div class="marco"><span class="fase">Próximo</span><span class="no"></span>
-        <div class="card"><svg viewBox="0 0 24 24"><path d="M4 5h13v14H6a2 2 0 0 1-2-2zM17 9h3v8a2 2 0 0 1-2 2M7.5 9h6M7.5 12.5h6M7.5 16h3.5"/></svg><b>Resumo do cliente</b><p>Notícias e movimentos daquele cliente, para o gestor chegar informado.</p><div class="ind"><small>Indicador</small>Contatos proativos com o cliente</div></div></div>
+        <div class="card"><svg viewBox="0 0 24 24"><path d="M4 5h13v14H6a2 2 0 0 1-2-2zM17 9h3v8a2 2 0 0 1-2 2M7.5 9h6M7.5 12.5h6M7.5 16h3.5"/></svg><b>Resumo do cliente</b><p>Notícias e movimentos de cada cliente, para o gestor chegar informado e fortalecer o relacionamento.</p><div class="ind"><small>Indicador</small>Retenção de clientes (CRR)</div></div></div>
       <div class="marco"><span class="fase">Próximo</span><span class="no"></span>
-        <div class="card"><svg viewBox="0 0 24 24"><path d="M3.5 16.5a8.5 8.5 0 0 1 17 0M12 16.5l4-6"/><circle cx="12" cy="16.5" r="1.3"/></svg><b>Satisfação da carteira <small class="ref">“NPS”</small></b><p>A satisfação de cada cliente ao lado dos prazos dele.</p><div class="ind"><small>Indicador</small>NPS por carteira, ao lado do atraso</div></div></div>
+        <div class="card"><svg viewBox="0 0 24 24"><path d="M3.5 16.5a8.5 8.5 0 0 1 17 0M12 16.5l4-6"/><circle cx="12" cy="16.5" r="1.3"/></svg><b>Satisfação da carteira</b><p>A satisfação de cada cliente lado a lado com os prazos dele.</p><div class="ind"><small>Indicador</small>Satisfação por carteira, ao lado do atraso</div></div></div>
       <div class="marco"><span class="fase">Depois</span><span class="no"></span>
-        <div class="card"><svg viewBox="0 0 24 24"><path d="M3 7l6 6 4-4 8 8M15 17h6v-6"/></svg><b>Risco de churn</b><p>Sinais de que um cliente pode sair, antes que ele avise.</p><div class="ind"><small>Indicador</small>Receita retida</div></div></div>
+        <div class="card"><svg viewBox="0 0 24 24"><path d="M3 7l6 6 4-4 8 8M15 17h6v-6"/></svg><b>Risco de churn</b><p>Sinais de que um cliente pode sair, para agir antes que seja tarde demais.</p><div class="ind"><small>Indicador</small>Receita preservada</div></div></div>
     </div></div></div>
   <div class="full" id="outro" style="background:rgba(14,36,51,.86)"><div><img src="logo-brmed.png" alt="BR MED"><div class="ttl" style="font-size:120px">Briefing Suporte<small>Prazos do cliente, todo dia útil às 07:00.</small></div>
     <div class="chips" id="chips"><span><i style="background:#cc0000"></i>Onde atuar hoje</span><span><i style="background:#2EC4E6"></i>Cada carteira e tier</span><span><i style="background:#00AFAA"></i>Evolução edição a edição</span></div>
@@ -426,7 +426,9 @@ b,strong{font-weight:500}
   for (const t of [0, 5, 10, 15, 20, 25]) g += `<line x1="${ML}" x2="${ML + IW}" y1="${cy(t)}" y2="${cy(t)}" stroke="#ECEEEF"/><text class="tk" x="${ML - 8}" y="${cy(t)}" dy=".32em" text-anchor="end">${t}</text>`;
   DATAS.forEach((d, i) => { if (i % 2 === 0 || i === DATAS.length - 1) g += `<text class="tk" x="${cx(i)}" y="${CH - 6}" text-anchor="middle">${d}</text>`; });
   g += `<line id="cross" x1="0" x2="0" y1="${MT}" y2="${MT + IH}" stroke="#BFC3C6"/>`;
-  const nomes = ["prazo vencido", "vence hoje", "próximos 2 dias"], fimY = [cy(21), cy(9) - 9, cy(6) + 9];
+  // rótulo no fim de cada linha, na altura do último valor dela; vence hoje e próximos 2 dias se afastam um pouco para não encostar
+  const nomes = ["prazo vencido", "vence hoje", "próximos 2 dias"], ultimo = SER.map(([, v]) => v[v.length - 1]);
+  const fimY = [cy(ultimo[0]), cy(ultimo[1]) + (ultimo[1] < ultimo[2] ? 9 : -9), cy(ultimo[2]) + (ultimo[2] < ultimo[1] ? 9 : -9)];
   SER.forEach(([c, v], k) => {
     g += `<path class="ln" d="${v.map((y, i) => `${i ? "L" : "M"}${cx(i).toFixed(1)},${cy(y).toFixed(1)}`).join("")}" fill="none" stroke="${c}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
     g += `<circle class="fimdot" cx="${cx(11)}" cy="${cy(v[11])}" r="4" fill="${c}" stroke="#fff" stroke-width="2"/>`;
