@@ -1,5 +1,6 @@
 // Grava public/tour.html em MP4: quadro a quadro (no tempo exato de cada quadro, então sai liso mesmo se a captura for lenta)
 // com a narração de tour/narracao.json posicionada em cada cena e a música de fundo por baixo.
+// Para o notebook não suspender no meio: systemd-inhibit --what=sleep:idle node scripts/gravar-video.mjs ...
 // Uso: FFMPEG=/caminho/do/ffmpeg node scripts/gravar-video.mjs [saida.mp4] [--pagina=tour.html] [--fps=60] [--escala=1] [--ate=SEGUNDOS]
 //   --pagina=tour2.html grava a versão executiva.
 //   --escala=1.3333333333 grava em 2560×1440; --escala=2 em 3840×2160. Precisa do Google Chrome instalado.
@@ -32,7 +33,12 @@ await new Promise((r) => (ws.onopen = r));
 let id = 0;
 const pend = new Map();
 ws.onmessage = (m) => { const d = JSON.parse(m.data); pend.get(d.id)?.(d); pend.delete(d.id); };
-const cmd = (method, params = {}) => new Promise((r) => { const i = ++id; pend.set(i, r); ws.send(JSON.stringify({ id: i, method, params })); });
+// sem resposta em 60s (ex.: o computador suspendeu e o Chrome não voltou), para com erro em vez de esperar para sempre
+const cmd = (method, params = {}) => new Promise((r, j) => {
+  const i = ++id, limite = setTimeout(() => j(new Error(`Chrome não respondeu a ${method} em 60s`)), 60000);
+  pend.set(i, (d) => { clearTimeout(limite); r(d); });
+  ws.send(JSON.stringify({ id: i, method, params }));
+});
 const ev = async (e) => (await cmd("Runtime.evaluate", { expression: e, awaitPromise: true, returnByValue: true })).result?.result?.value;
 
 await cmd("Emulation.setDeviceMetricsOverride", { width: 1920, height: 1080, deviceScaleFactor: ESCALA, mobile: false });
