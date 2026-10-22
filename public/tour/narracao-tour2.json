@@ -1,104 +1,120 @@
 {
   "voz": "m151rjrbWXbBqyq56tly",
-  "velocidade": 1.1,
+  "perfil": "expressivo",
+  "velocidade": 1,
   "modelo": "eleven_multilingual_v2",
-  "gerado_em": "2026-10-22T14:40:46.290Z",
+  "gerado_em": "2026-10-22T14:57:54.205Z",
   "falas": [
     {
-      "arquivo": "fala-59183914d7.mp3",
-      "duracao": 2.19,
+      "arquivo": "fala-f6e32aaf55.mp3",
+      "duracao": 2.57,
       "texto": "Este é o Briefing Suporte.",
       "lufs": -21
     },
     {
-      "arquivo": "fala-64e8c41b3a.mp3",
-      "duracao": 23.74,
-      "texto": "Hoje, quase oito em cada dez demandas de clientes estão com o prazo vencido. E muitas não estão só atrasadas: estão esquecidas. Mais de setecentas venceram há mais de trinta dias. Quase metade é de clientes Diamante e Ouro: é receita em risco. O problema não é só o prazo; é a falta de visibilidade.",
+      "arquivo": "fala-441db27ef9.mp3",
+      "duracao": 20.63,
+      "texto": "Hoje, quase oito em cada dez demandas dos nossos clientes estão com o prazo vencido. E muitas não estão só atrasadas: estão esquecidas. Mais de setecentas venceram há mais de um mês. E quase metade é de clientes Diamante e Ouro. Ou seja: é receita em risco.",
       "lufs": -21,
       "marcas": {
-        "vencidas": 1.382,
-        "esquecidas": 10.693,
-        "receita": 14.721,
-        "visibilidade": 21.931
+        "vencidas": 1.358,
+        "esquecidas": 11.575,
+        "receita": 15.035,
+        "risco": 17.752
       }
     },
     {
-      "arquivo": "fala-b40da64c1f.mp3",
-      "duracao": 7.77,
+      "arquivo": "fala-f995c7ca3d.mp3",
+      "duracao": 23.51,
+      "texto": "Mas por que isso acontece? São mais de mil cards abertos, espalhados em trinta fases do Pipefy. Ninguém enxerga a carteira inteira. E o que ninguém vê, fica para trás. Então, como resolver? Levando essa visibilidade até cada gestor, todo dia, sem esforço nenhum. É isso que o Briefing faz.",
+      "lufs": -21,
+      "marcas": {
+        "porque": 0.221,
+        "mil": 2.531,
+        "ninguem": 7.581,
+        "resolver": 13.955,
+        "gestor": 16.254,
+        "dia": 17.717,
+        "esforco": 18.971
+      }
+    },
+    {
+      "arquivo": "fala-54ec52254b.mp3",
+      "duracao": 8.51,
       "texto": "Duas vezes por dia útil, ele lê o Pipefy, calcula o prazo de cada demanda e monta o painel.",
       "lufs": -21
     },
     {
-      "arquivo": "fala-24cf2df158.mp3",
-      "duracao": 9.21,
+      "arquivo": "fala-2da4e8c25b.mp3",
+      "duracao": 10.65,
       "texto": "No topo, os números do dia: o que já venceu, o que vence hoje, e o que vence nos próximos dois dias.",
       "lufs": -21
     },
     {
-      "arquivo": "fala-ecc9a5424f.mp3",
-      "duracao": 11.2,
+      "arquivo": "fala-330f1f1c29.mp3",
+      "duracao": 11.81,
       "texto": "Dá para filtrar por gestor, grupo, empresa, área e tíer. E quem chega pelo e-mail já abre na própria carteira.",
       "lufs": -21
     },
     {
-      "arquivo": "fala-e058a28a61.mp3",
-      "duracao": 6.37,
+      "arquivo": "fala-f29c188b3a.mp3",
+      "duracao": 6.93,
       "texto": "Em destaque, a demanda mais urgente, com um link direto para o card no Pipefy.",
       "lufs": -21
     },
     {
-      "arquivo": "fala-c1a1dd1b6c.mp3",
-      "duracao": 22.02,
+      "arquivo": "fala-52da9ba4e5.mp3",
+      "duracao": 22.35,
       "texto": "Em Onde atuar, as demandas vêm em três colunas: primeiro, o que já venceu, das mais antigas para as mais novas; depois, o que vence hoje; e por fim, o que dá para antecipar. Cada linha mostra a área, o grupo e o tíer do cliente: Diamante, Ouro, Prata ou Bronze.",
       "lufs": -21,
       "marcas": {
-        "c1": 3.413,
-        "c2": 7.732,
-        "c3": 10.182,
-        "tier": 15.789
+        "c1": 3.239,
+        "c2": 7.442,
+        "c3": 9.776,
+        "tier": 15.569
       }
     },
     {
-      "arquivo": "fala-5d4ad21983.mp3",
-      "duracao": 21.7,
+      "arquivo": "fala-de93ecf87a.mp3",
+      "duracao": 19.7,
       "texto": "Na visão gerencial, você vê onde cada demanda está, e com quem. Nas colunas, a área: Segurança, Saúde e On-Going. Nas linhas, o gestor. Quanto mais escura a célula, maior o atraso. Um clique no gestor abre a carteira dele; outro clique, as empresas de cada grupo.",
       "lufs": -21,
       "marcas": {
-        "onde": 1.916,
-        "area": 6.211,
-        "linhas": 10.24,
-        "escura": 12.365,
-        "clique": 15.36,
-        "outro": 18.158
+        "onde": 1.44,
+        "area": 5.039,
+        "linhas": 9.021,
+        "escura": 11.006,
+        "clique": 13.862,
+        "outro": 16.323
       }
     },
     {
-      "arquivo": "fala-3e48c12f7a.mp3",
-      "duracao": 5.49,
+      "arquivo": "fala-aade9efd27.mp3",
+      "duracao": 5.68,
       "texto": "Em Evolução, você acompanha esses números, edição a edição.",
       "lufs": -21
     },
     {
-      "arquivo": "fala-4d13c65e39.mp3",
-      "duracao": 8.51,
+      "arquivo": "fala-bee8bcb037.mp3",
+      "duracao": 9.07,
       "texto": "Às sete da manhã, cada gestor recebe um e-mail curto: três números, e um botão que abre o painel.",
       "lufs": -21
     },
     {
-      "arquivo": "fala-37265419a4.mp3",
-      "duracao": 26.25,
+      "arquivo": "fala-a1c44d4bd2.mp3",
+      "duracao": 27.74,
       "texto": "E isso é só o começo. No piloto, testamos uma hipótese: com visibilidade diária, os cards esquecidos diminuem. Depois, o resumo do cliente, para o gestor chegar informado e procurar o cliente antes; a satisfação da carteira, com o NPS ao lado dos prazos; e o risco de churn, para proteger a receita antes que o cliente avise.",
       "lufs": -21,
       "marcas": {
-        "prazos": 2.821,
-        "resumo": 10.623,
-        "nps": 16.184,
-        "churn": 21.432
+        "prazos": 2.856,
+        "resumo": 11.146,
+        "nps": 16.707,
+        "churn": 22.373
       }
     },
     {
-      "arquivo": "fala-bb7e7e93e9.mp3",
-      "duracao": 9.07,
+      "arquivo": "fala-c7ca200129.mp3",
+      "duracao": 10,
       "texto": "Briefing Suporte, um desenvolvimento interno da Qualidade e Gestão. Os prazos dos clientes, todo dia útil, às sete.",
       "lufs": -21
     }

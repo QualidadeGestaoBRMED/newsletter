@@ -203,6 +203,20 @@ b,strong{font-weight:500}
 .hoje-fim{margin-top:56px;font-family:var(--ws);font-weight:300;font-size:44px;line-height:1.2;color:#fff}
 .hoje-fim b{font-weight:600;color:var(--aqua)}
 .hoje-fonte{margin-top:22px;font-size:15px;color:rgba(255,255,255,.45)}
+/* ---------- por quê: a parede de cards e a virada para a solução ---------- */
+#virada{z-index:32;background:radial-gradient(1200px 800px at 70% 40%,#16384B 0%,var(--fundo) 70%);place-items:center}
+.vir1,.vir2{position:absolute;left:160px;right:160px;top:50%;transform:translateY(-50%);text-align:left}
+.parede{margin-top:44px}
+.parede canvas{display:block;width:1600px;height:440px}
+.parede-leg{display:flex;gap:28px;margin-top:18px;font-size:17px;color:rgba(255,255,255,.62)}
+.parede-leg i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px;vertical-align:1px}
+.vir-msg{margin:40px 0 0;font-family:var(--ws);font-weight:300;font-size:44px;line-height:1.2;color:#fff}
+.vir-msg b{font-weight:600;color:var(--aqua)}
+.pilares{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;margin-top:64px}
+.pilar{border-radius:24px 24px 24px 4px;padding:34px 34px 38px;background:#fff;color:var(--navy);box-shadow:0 30px 70px rgba(0,0,0,.35)}
+.pilar svg{display:block;width:44px;height:44px;fill:none;stroke:var(--teal);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.pilar b{display:block;margin-top:20px;font-family:var(--ws);font-weight:600;font-size:32px;line-height:1.2}
+.pilar span{display:block;margin-top:12px;font-size:21px;line-height:1.45;font-weight:300;color:var(--ink)}
 .ind{margin-top:22px;padding-top:14px;border-top:1px solid rgba(255,255,255,.18);font-family:var(--ws);font-size:18px;font-weight:600;line-height:1.3;color:#fff}
 .ind small{display:block;margin-bottom:4px;font-size:12.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--aqua)}
 .agora .ind{border-top-color:var(--g3);color:var(--navy)}
@@ -328,9 +342,21 @@ b,strong{font-weight:500}
       <div class="stat2" style="--c:#cc851e"><i></i><strong>709</strong><b>vencidas há mais de 30 dias</b><span>cards esquecidos</span></div>
       <div class="stat2" style="--c:#2EC4E6"><i></i><strong>47%</strong><b>das vencidas em clientes Diamante e Ouro</b><span>receita em risco</span></div>
     </div>
-    <p class="hoje-fim">O problema não é só prazo. <b>É visibilidade.</b></p>
+    <p class="hoje-fim">Não é só atraso. <b>É receita em risco.</b></p>
     <p class="hoje-fonte">Demandas de clientes no Pipefy em 21/10/2026, nas áreas de Segurança, Saúde e On-Going.</p>
   </div></div>
+  <div class="full" id="virada">
+    <div class="vir1"><div class="hoje-k">Por quê</div><h2 class="hoje-h">Por que isso acontece?</h2>
+      <div class="parede"><canvas id="paredeC" width="3200" height="880"></canvas>
+        <div class="parede-leg"><span>1.240 cards abertos · 31 fases do Pipefy · cada ponto é uma demanda</span><span><i style="background:#cc0000"></i>prazo vencido</span><span><i style="background:#cc851e"></i>vence hoje</span><span><i style="background:#aad1b4"></i>próximos 2 dias</span></div></div>
+      <p class="vir-msg">Ninguém enxerga a carteira inteira. <b>E o que ninguém vê fica para trás.</b></p></div>
+    <div class="vir2"><div class="hoje-k">Como resolver</div><h2 class="hoje-h">Visibilidade, todo dia, para cada gestor.</h2>
+      <div class="pilares">
+        <div class="pilar"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg><b>Para cada gestor</b><span>A própria carteira, no e-mail das 07:00 e no painel.</span></div>
+        <div class="pilar"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><b>Todo dia útil</b><span>O Pipefy lido duas vezes por dia, sem planilha.</span></div>
+        <div class="pilar"><svg viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg><b>Sem esforço</b><span>Automático, começando pelo que é mais urgente.</span></div>
+      </div></div>
+  </div>
   <div class="full" id="rota"><div class="rota">
     <div class="rota-cab"><div class="rota-k">Próximos passos</div><h2 class="rota-h">Para onde o Briefing vai</h2></div>
     <div class="trilho"><i class="tr" id="trBase"></i><i class="tr feito" id="trFeito"></i>
@@ -453,7 +479,7 @@ b,strong{font-weight:500}
   const q = new URLSearchParams(location.search);
   // ritmo: os tempos do roteiro são escritos em "segundos de roteiro"; 1.1 = 10% mais devagar
   const RITMO = Number(q.get("ritmo")) || 1.1;
-  const CENAS = [[0, "Abertura"], [3.5, "Hoje"], [4, "Montagem"], [12.8, "Números"], [20.8, "Filtros"], [29, "Comece"], [34.6, "Onde atuar"], [43.8, "Gerencial"], [52.4, "Evolução"], [61.8, "E-mail"], [72.4, "Próximos passos"], [88.4, "Fim"]];
+  const CENAS = [[0, "Abertura"], [3.5, "Hoje"], [3.75, "Por quê"], [4, "Montagem"], [12.8, "Números"], [20.8, "Filtros"], [29, "Comece"], [34.6, "Onde atuar"], [43.8, "Gerencial"], [52.4, "Evolução"], [61.8, "E-mail"], [72.4, "Próximos passos"], [88.4, "Fim"]];
 
   // narração: um áudio por cena (tour/narracao-tour2.json, gerado por scripts/narracao.mjs --roteiro=tour2). Sem o arquivo, roda sem voz.
   const NARR = q.get("voz") === "0" ? null : await fetch("tour/narracao-tour2.json").then((r) => (r.ok ? r.json() : null)).catch(() => null);
@@ -582,8 +608,8 @@ b,strong{font-weight:500}
   nota(C.pho, meio(R.mcta, 0.02, 0.5), [-300, 30], "Um botão", "abre o painel já filtrado", 65.8, 71.2);
 
   // ---------- hoje: cada número entra quando a narração chega nele ----------
-  const S1 = 3.5, FIM1 = 4;
-  const [tVenc, tEsq, tRec, tVis] = [["vencidas", 3.6], ["esquecidas", 3.7], ["receita", 3.8], ["visibilidade", 3.9]].map(([k, r]) => marcaEm(S1, k, r - S1));
+  const S1 = 3.5, FIM1 = 3.75;
+  const [tVenc, tEsq, tRec, tVis] = [["vencidas", 0.05], ["esquecidas", 0.1], ["receita", 0.15], ["risco", 0.2]].map(([k, r]) => marcaEm(S1, k, r));
   K($("hoje"), [[0, { opacity: 0, visibility: "hidden" }], [S1, { opacity: 0, visibility: "visible" }], [ds(S1, 0.6), { opacity: 1 }], [ds(FIM1, -0.6), { opacity: 1 }], [FIM1, { opacity: 0, visibility: "hidden" }]]);
   K(document.querySelector(".hoje-cab"), [[0, { opacity: 0, transform: "translateY(30px)" }], [ds(S1, 0.3), { opacity: 0, transform: "translateY(30px)" }], [ds(S1, 1.1), { opacity: 1, transform: "none" }]], "cubic-bezier(.2,1,.3,1)");
   document.querySelectorAll(".stat2").forEach((el, i) => {
@@ -593,6 +619,28 @@ b,strong{font-weight:500}
   });
   K(document.querySelector(".hoje-fim"), [[0, { opacity: 0, transform: "translateY(20px)" }], [ds(tVis, -0.9), { opacity: 0, transform: "translateY(20px)" }], [ds(tVis, -0.2), { opacity: 1, transform: "none" }]]);
   K(document.querySelector(".hoje-fonte"), [[0, { opacity: 0 }], [ds(tVenc, 0.6), { opacity: 0 }], [ds(tVenc, 1.4), { opacity: 1 }]]);
+
+  // ---------- por quê: a parede de cards (dados reais de 21/10) e a virada para a solução ----------
+  // uma coluna por fase do Pipefy, um ponto por demanda: [vencidas, vence hoje, próximos 2 dias]
+  const PAREDE = [[521,32,39],[313,1,2],[182,4,7],[108,12,62],[51,16,96],[122,9,4],[105,8,17],[24,11,76],[66,17,26],[80,5,3],[38,5,4],[38,2,2],[24,2,11],[32,0,0],[9,5,11],[18,0,1],[8,0,8],[13,2,1],[13,1,0],[3,1,10],[6,0,6],[10,0,0],[8,0,1],[9,0,0],[4,1,2],[5,0,0],[3,0,1],[3,0,0],[2,1,0],[1,1,0],[1,0,0]];
+  {
+    const cv = $("paredeC"), g = cv.getContext("2d"), cw = cv.width / PAREDE.length, d = 8, gap = 2.4, porLinha = Math.floor((cw - 8) / (d + gap));
+    PAREDE.forEach((col, c) => {
+      let n = 0;
+      col.forEach((qtd, k) => { g.fillStyle = ["#cc0000", "#cc851e", "#aad1b4"][k];
+        for (let j = 0; j < qtd; j++, n++) { const x = c * cw + 4 + (n % porLinha) * (d + gap), y = cv.height - d - Math.floor(n / porLinha) * (d + gap); g.beginPath(); g.arc(x + d / 2, y + d / 2, d / 2, 0, 7); g.fill(); } });
+    });
+  }
+  const S2 = 3.75, FIM2 = 4;
+  const [tPq, tMil, tNinguem, tResolver, tGestor, tDia, tEsforco] = [["porque", 0.01], ["mil", 0.03], ["ninguem", 0.08], ["resolver", 0.12], ["gestor", 0.15], ["dia", 0.17], ["esforco", 0.19]].map(([k, r]) => marcaEm(S2, k, r));
+  K($("virada"), [[0, { opacity: 0, visibility: "hidden" }], [ds(S2, -0.6), { opacity: 0, visibility: "visible" }], [S2, { opacity: 1 }], [ds(FIM2, -0.6), { opacity: 1 }], [FIM2, { opacity: 0, visibility: "hidden" }]]);
+  const sobe = (el, t, dy = 30) => K(el, [[0, { opacity: 0, transform: `translateY(${dy}px)` }], [ds(t, -0.2), { opacity: 0, transform: `translateY(${dy}px)` }], [ds(t, 0.5), { opacity: 1, transform: "none" }]], "cubic-bezier(.2,1,.3,1)");
+  sobe(document.querySelector(".vir1 .hoje-k"), tPq); sobe(document.querySelector(".vir1 .hoje-h"), tPq);
+  K(document.querySelector(".parede"), [[0, { opacity: 0, transform: "translateY(40px) scale(.97)" }], [ds(tMil, -0.3), { opacity: 0, transform: "translateY(40px) scale(.97)" }], [ds(tMil, 0.9), { opacity: 1, transform: "none" }]], "cubic-bezier(.2,1,.3,1)");
+  sobe(document.querySelector(".vir-msg"), tNinguem, 20);
+  K(document.querySelector(".vir1"), [[0, { opacity: 1 }], [ds(tResolver, -0.7), { opacity: 1 }], [ds(tResolver, -0.1), { opacity: 0 }]]);
+  sobe(document.querySelector(".vir2 .hoje-k"), tResolver); sobe(document.querySelector(".vir2 .hoje-h"), tResolver);
+  document.querySelectorAll(".pilar").forEach((el, i) => K(el, [[0, { opacity: 0, transform: "translateY(44px) scale(.95)" }], [ds([tGestor, tDia, tEsforco][i], -0.2), { opacity: 0, transform: "translateY(44px) scale(.95)" }], [ds([tGestor, tDia, tEsforco][i], 0.5), { opacity: 1, transform: "none" }]], "cubic-bezier(.2,1.15,.35,1)"));
 
   // ---------- abertura ----------
   K($("intro"), [[0, { opacity: 1 }], [3.55, { opacity: 1 }], [3.7, { opacity: 0, visibility: "hidden" }]]);

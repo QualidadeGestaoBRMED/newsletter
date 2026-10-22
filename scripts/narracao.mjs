@@ -22,7 +22,12 @@ const MODELO = "eleven_multilingual_v2";
 // Carla ("Inviting, Warm and Helpful"), voz brasileira da biblioteca (exige plano pago), escolhida em 2026-10-21.
 // Anteriores: Lucas SVgp5d1fyFQRW1eQbwkq (0.95), Matilda XrExE9yKIg1WjnnlVkGX (0.95)
 const VOZ_PADRAO = "m151rjrbWXbBqyq56tly";
-const VELOCIDADE = 1.1; // a ElevenLabs aceita de 0.7 a 1.2
+// Perfis de voz (velocidade: a ElevenLabs aceita de 0.7 a 1.2). "expressivo" foi escolhido para a versão executiva em
+// 2026-10-22, por soar mais natural: velocidade normal, menos estabilidade e mais estilo.
+const PERFIS = {
+  padrao: { velocidade: 1.1, stability: 0.5, style: 0.2 },
+  expressivo: { velocidade: 1.0, stability: 0.35, style: 0.45 },
+};
 const SAIDA = new URL("../public/tour/", import.meta.url);
 // cada voz sai num volume; todas as falas são niveladas para este alvo (o vídeo usa o mesmo)
 const LUFS = -21;
@@ -57,14 +62,19 @@ const FALAS = [
   "Briefing Suporte. Os prazos dos clientes, todo dia útil, às sete.",
 ];
 
-// Versão executiva: as mesmas falas do produto, com o problema antes (dados do Pipefy de 21/10/2026: 78% vencidas,
-// 709 vencidas há mais de 30 dias, 47% das vencidas em clientes Diamante e Ouro) e o roadmap ligado a indicadores.
+// Versão executiva: o problema (dados do Pipefy de 21/10/2026: 78% vencidas, 709 há mais de 30 dias, 47% das vencidas em
+// Diamante e Ouro), o porquê (1.240 cards em 31 fases) e a virada para a solução; depois as falas do produto e o roadmap com indicadores.
 const FALAS_EXEC = [
   FALAS[0],
   {
     texto:
-      "Hoje, quase oito em cada dez demandas de clientes estão com o prazo vencido. E muitas não estão só atrasadas: estão esquecidas. Mais de setecentas venceram há mais de trinta dias. Quase metade é de clientes Diamante e Ouro: é receita em risco. O problema não é só o prazo; é a falta de visibilidade.",
-    marcas: { vencidas: "oito", esquecidas: "setecentas", receita: "metade", visibilidade: "visibilidade" },
+      "Hoje, quase oito em cada dez demandas dos nossos clientes estão com o prazo vencido. E muitas não estão só atrasadas: estão esquecidas. Mais de setecentas venceram há mais de um mês. E quase metade é de clientes Diamante e Ouro. Ou seja: é receita em risco.",
+    marcas: { vencidas: "oito", esquecidas: "setecentas", receita: "metade", risco: "Ou seja" },
+  },
+  {
+    texto:
+      "Mas por que isso acontece? São mais de mil cards abertos, espalhados em trinta fases do Pipefy. Ninguém enxerga a carteira inteira. E o que ninguém vê, fica para trás. Então, como resolver? Levando essa visibilidade até cada gestor, todo dia, sem esforço nenhum. É isso que o Briefing faz.",
+    marcas: { porque: "por que", mil: "mil", ninguem: "Ninguém", resolver: "resolver", gestor: "cada gestor", dia: "todo dia", esforco: "sem esforço" },
   },
   ...FALAS.slice(1, 9),
   {
@@ -76,8 +86,8 @@ const FALAS_EXEC = [
 ];
 
 const ROTEIROS = {
-  tour: { falas: FALAS, manifesto: "narracao.json" },
-  tour2: { falas: FALAS_EXEC, manifesto: "narracao-tour2.json" },
+  tour: { falas: FALAS, manifesto: "narracao.json", perfil: "padrao" },
+  tour2: { falas: FALAS_EXEC, manifesto: "narracao-tour2.json", perfil: "expressivo" },
 };
 
 const chave = process.env.ELEVENLABS_API_KEY?.trim();
@@ -124,13 +134,13 @@ async function gerar() {
   const voz = arg("voz") ?? process.env.ELEVENLABS_VOICE_ID?.trim() ?? VOZ_PADRAO;
   const roteiro = ROTEIROS[arg("roteiro") ?? "tour"];
   if (!roteiro) throw new Error(`Roteiro desconhecido; use ${Object.keys(ROTEIROS).join(" ou ")}`);
-  const FALAS = roteiro.falas;
+  const FALAS = roteiro.falas, perfil = PERFIS[roteiro.perfil];
   await mkdir(SAIDA, { recursive: true });
   // fala com o mesmo texto, voz e velocidade já gerada em qualquer roteiro é reaproveitada (não gasta créditos)
   const prontas = [];
   for (const nome of readdirSync(SAIDA).filter((n) => /^narracao.*\.json$/.test(n))) {
     const m = JSON.parse(await readFile(new URL(nome, SAIDA), "utf8"));
-    if (m.voz === voz && (m.velocidade ?? 0.95) === VELOCIDADE) prontas.push(...m.falas);
+    if (m.voz === voz && (m.perfil ?? "padrao") === roteiro.perfil && (m.velocidade ?? 0.95) === perfil.velocidade) prontas.push(...m.falas);
   }
   const textos = FALAS.map((f) => (typeof f === "string" ? f : f.texto));
   const falas = [];
@@ -152,10 +162,10 @@ async function gerar() {
         // texto vizinho deixa a entonação contínua entre as cenas
         previous_text: textos[i - 1],
         next_text: textos[i + 1],
-        voice_settings: { stability: 0.5, similarity_boost: 0.8, style: 0.2, use_speaker_boost: true, speed: VELOCIDADE },
+        voice_settings: { stability: perfil.stability, similarity_boost: 0.8, style: perfil.style, use_speaker_boost: true, speed: perfil.velocidade },
       }),
     });
-    const arquivo = `fala-${createHash("sha1").update(voz + VELOCIDADE + texto).digest("hex").slice(0, 10)}.mp3`;
+    const arquivo = `fala-${createHash("sha1").update(voz + perfil.velocidade + (roteiro.perfil === "padrao" ? "" : roteiro.perfil) + texto).digest("hex").slice(0, 10)}.mp3`;
     await writeFile(new URL(arquivo, SAIDA), Buffer.from(r.audio_base64, "base64"));
     nivelar(arquivo);
     const al = r.alignment;
@@ -169,7 +179,7 @@ async function gerar() {
     falas.push(item);
     console.log(`${arquivo}  ${fim.toFixed(2)}s  ${texto}`);
   }
-  await writeFile(new URL(roteiro.manifesto, SAIDA), JSON.stringify({ voz, velocidade: VELOCIDADE, modelo: MODELO, gerado_em: new Date().toISOString(), falas }, null, 2));
+  await writeFile(new URL(roteiro.manifesto, SAIDA), JSON.stringify({ voz, perfil: roteiro.perfil, velocidade: perfil.velocidade, modelo: MODELO, gerado_em: new Date().toISOString(), falas }, null, 2));
   console.log(`\n${falas.length} falas em public/tour/. Rode npm run build para o servidor de produção servir os arquivos novos.`);
 }
 
