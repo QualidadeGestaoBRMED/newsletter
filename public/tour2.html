@@ -477,7 +477,8 @@ b,strong{font-weight:500}
   $("tip").style.top = `${chartR.y + 4}px`;
 
   // ---------- linha do tempo ----------
-  const TOTAL = 98;
+  // encerramento mais curto que no tour: o logo fica só uns 2s depois da última fala
+  const TOTAL = 95.5;
   const q = new URLSearchParams(location.search);
   // ritmo: os tempos do roteiro são escritos em "segundos de roteiro"; 1.1 = 10% mais devagar
   const RITMO = Number(q.get("ritmo")) || 1.1;
@@ -486,7 +487,8 @@ b,strong{font-weight:500}
   // narração: um áudio por cena (tour/narracao-tour2.json, gerado por scripts/narracao.mjs --roteiro=tour2). Sem o arquivo, roda sem voz.
   const NARR = q.get("voz") === "0" ? null : await fetch("tour/narracao-tour2.json").then((r) => (r.ok ? r.json() : null)).catch(() => null);
   // cada cena dura o que o roteiro pede ou o que a fala precisa, o que for maior; W converte roteiro → segundos reais
-  const ANTES = 0.5, DEPOIS = 0.8;
+  // intervalo curto entre as falas: a versão executiva não deve ter tempo ocioso
+  const ANTES = 0.3, DEPOIS = 0.4;
   const LIM = [...CENAS.map(([t]) => t), TOTAL], REAL = [0];
   CENAS.forEach((_, i) => { const fala = NARR?.falas?.[i]?.duracao; REAL.push(REAL[i] + Math.max((LIM[i + 1] - LIM[i]) * RITMO, fala ? fala + ANTES + DEPOIS : 0)); });
   const TOTAL_REAL = REAL[REAL.length - 1];

@@ -76,13 +76,16 @@ const FALAS_EXEC = [
       "Mas por que isso acontece? São mais de mil cards abertos, espalhados em trinta fases do Pipefy. Ninguém enxerga a carteira inteira. E o que ninguém vê, fica para trás. Então, como resolver? Levando essa visibilidade até cada gestor, todo dia, sem esforço nenhum. É isso que o Briefing faz.",
     marcas: { porque: "por que", mil: "mil", ninguem: "Ninguém", resolver: "resolver", gestor: "cada gestor", dia: "todo dia", esforco: "sem esforço" },
   },
-  ...FALAS.slice(1, 9),
+  ...FALAS.slice(1, 7),
+  // Evolução e e-mail com um pouco mais de texto: na versão executiva elas tinham mais animação do que fala (silêncio)
+  "Em Evolução, você acompanha esses números, edição a edição. É aqui que vamos medir se a visibilidade está reduzindo os atrasos.",
+  "Às sete da manhã, cada gestor recebe um e-mail curto: três números, e um botão que abre o painel, já na carteira dele.",
   {
     texto:
       "E isso é só o começo. No piloto, a hipótese é simples: com visibilidade todos os dias, o Suporte cobra as áreas a tempo, evita novos atrasos e resgata os cards esquecidos. Depois, vem o resumo do cliente: notícias e movimentos de cada empresa, para o gestor chegar informado, fortalecer o relacionamento e aumentar a retenção. Em seguida, a satisfação de cada carteira, lado a lado com os prazos. E, por fim, o risco de churn: sinais de que um cliente pode sair, para agir antes que seja tarde demais, e não perder receita.",
     marcas: { prazos: "piloto", resumo: "resumo", nps: "satisfação", churn: "churn" },
   },
-  "Briefing Suporte, um desenvolvimento interno da Qualidade e Gestão. Os prazos dos clientes, todo dia útil, às sete.",
+  FALAS[10],
 ];
 
 const ROTEIROS = {

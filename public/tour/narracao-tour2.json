@@ -3,7 +3,7 @@
   "perfil": "expressivo",
   "velocidade": 1,
   "modelo": "eleven_multilingual_v2",
-  "gerado_em": "2026-10-22T15:06:15.939Z",
+  "gerado_em": "2026-10-22T15:14:30.859Z",
   "falas": [
     {
       "arquivo": "fala-f6e32aaf55.mp3",
@@ -89,15 +89,15 @@
       }
     },
     {
-      "arquivo": "fala-aade9efd27.mp3",
-      "duracao": 5.68,
-      "texto": "Em Evolução, você acompanha esses números, edição a edição.",
+      "arquivo": "fala-ba925e0f27.mp3",
+      "duracao": 12.22,
+      "texto": "Em Evolução, você acompanha esses números, edição a edição. É aqui que vamos medir se a visibilidade está reduzindo os atrasos.",
       "lufs": -21
     },
     {
-      "arquivo": "fala-bee8bcb037.mp3",
-      "duracao": 9.07,
-      "texto": "Às sete da manhã, cada gestor recebe um e-mail curto: três números, e um botão que abre o painel.",
+      "arquivo": "fala-99af24af08.mp3",
+      "duracao": 10.79,
+      "texto": "Às sete da manhã, cada gestor recebe um e-mail curto: três números, e um botão que abre o painel, já na carteira dele.",
       "lufs": -21
     },
     {
@@ -113,9 +113,9 @@
       }
     },
     {
-      "arquivo": "fala-c7ca200129.mp3",
-      "duracao": 10,
-      "texto": "Briefing Suporte, um desenvolvimento interno da Qualidade e Gestão. Os prazos dos clientes, todo dia útil, às sete.",
+      "arquivo": "fala-3fb3cd9561.mp3",
+      "duracao": 5.63,
+      "texto": "Briefing Suporte. Os prazos dos clientes, todo dia útil, às sete.",
       "lufs": -21
     }
   ]
