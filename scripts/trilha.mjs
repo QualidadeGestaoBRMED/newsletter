@@ -1,11 +1,11 @@
 // Gera a música de fundo da apresentação (public/tour/trilha.mp3): pop alegre a 124 BPM, em ré maior e só com acordes maiores,
 // sintetizado aqui mesmo (sem licença de terceiros). Determinístico: rodar de novo produz o mesmo arquivo.
-// Uso: FFMPEG=/caminho/do/ffmpeg node scripts/trilha.mjs [--segundos=180]
+// Uso: FFMPEG=/caminho/do/ffmpeg node scripts/trilha.mjs [--segundos=240]
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 const arg = (k, padrao) => process.argv.find((a) => a.startsWith(`--${k}=`))?.slice(k.length + 3) ?? padrao;
-const SEG = Number(arg("segundos", 180)), SR = 48000, N = SEG * SR;
+const SEG = Number(arg("segundos", 240)), SR = 48000, N = SEG * SR;
 const FFMPEG = process.env.FFMPEG || "ffmpeg";
 const SAIDA = fileURLToPath(new URL("../public/tour/trilha.mp3", import.meta.url));
 
