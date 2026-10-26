@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { contaPermitida, listaGestao } from "../lib/acesso";
+import { contaPermitida, destinoSeguro, listaGestao } from "../lib/acesso";
 
 describe("contaPermitida", () => {
   it("aceita conta verificada do domínio, sem diferenciar maiúsculas", () => {
@@ -22,5 +22,17 @@ describe("listaGestao", () => {
   it("separa por vírgula, ignora espaços, vazios e maiúsculas", () => {
     expect([...listaGestao(" Ana@grupobrmed.com.br, ,bruno@grupobrmed.com.br ")]).toEqual(["ana@grupobrmed.com.br", "bruno@grupobrmed.com.br"]);
     expect(listaGestao("").size).toBe(0);
+  });
+});
+
+describe("destinoSeguro", () => {
+  it("mantém caminhos do painel", () => {
+    expect(destinoSeguro("/")).toBe("/");
+    expect(destinoSeguro("/?ed=2026-10-26-manha&gestor=Ana+Santos")).toBe("/?ed=2026-10-26-manha&gestor=Ana+Santos");
+  });
+  it("troca por / o que o navegador levaria para outro site", () => {
+    for (const u of ["//evil.com", "/\\evil.com", "/\\/evil.com", "https://evil.com", "evil.com", "/\tevil.com", "", undefined, null]) {
+      expect(destinoSeguro(u)).toBe("/");
+    }
   });
 });

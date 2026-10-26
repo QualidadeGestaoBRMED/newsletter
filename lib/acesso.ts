@@ -10,3 +10,6 @@ export const contaPermitida = (p?: PerfilGoogle | null) =>
 // GESTAO_EMAILS: e-mails separados por vírgula que abrem o painel na visão de todos os gestores
 export const listaGestao = (v = process.env.GESTAO_EMAILS ?? "") =>
   new Set(v.split(",").map((e) => e.trim().toLowerCase()).filter(Boolean));
+
+// Destino depois do login: só caminhos do próprio painel. "//x" e "/\x" o navegador trata como outro site.
+export const destinoSeguro = (url?: string | null) => (url && /^\/(?![/\\])/.test(url) && !/[\\\s]/.test(url) ? url : "/");

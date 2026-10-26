@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { auth, signIn } from "@/auth";
-import { DOMINIO } from "@/lib/acesso";
+import { DOMINIO, destinoSeguro } from "@/lib/acesso";
 
 export const metadata = { title: "Entrar – Briefing Suporte" };
 
@@ -11,8 +11,7 @@ const ERROS: Record<string, string> = {
 
 export default async function Entrar({ searchParams }: { searchParams: Promise<{ callbackUrl?: string; error?: string }> }) {
   const { callbackUrl, error } = await searchParams;
-  // só volta para caminhos do próprio painel
-  const destino = callbackUrl?.startsWith("/") && !callbackUrl.startsWith("//") ? callbackUrl : "/";
+  const destino = destinoSeguro(callbackUrl);
   if (await auth()) redirect(destino);
 
   return (
