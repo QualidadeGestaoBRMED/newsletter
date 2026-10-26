@@ -49,7 +49,7 @@ export async function montarEmail(c: Carteira, data: Dia, periodo: Periodo, para
   // sem data: o e-mail chega no próprio dia e horário da edição
   const assunto = tarde
     ? `Prazos: ${n.concluidas} resolvidas, ${n.viramAtraso} viram atraso amanhã · tarde`
-    : `Prazos: ${n.vencidas} vencidas, ${n.hoje} vencem hoje · manhã`;
+    : `Seus prazos: ${n.vencidas} ${n.vencidas === 1 ? "vencida" : "vencidas"}, ${n.hoje} ${n.hoje === 1 ? "vence" : "vencem"} hoje`;
 
   return {
     para: { email: para, nome: c.nome },
