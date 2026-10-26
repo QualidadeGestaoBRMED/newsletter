@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { PIPE_ID, PIPEFY_URL, TABELAS } from "./config";
 import { exigir } from "./env";
-import { faseMonitorada, normalizar, type CampoCru, type CardCru, type Databases } from "./regras";
+import { faseMonitorada, idRegistroBrnet, normalizar, parseDia, type CampoCru, type CardCru, type Databases, type RegistroBrnet } from "./regras";
 
 const TENTATIVAS = 6;
 const ESPERA_BASE_MS = 1_000;
@@ -83,12 +83,15 @@ const CampoZ = z.object({
 const CardZ = z.object({
   id: z.string(),
   title: z.string().nullable(),
+  createdAt: z.string().nullish(),
   current_phase: z.object({ id: z.string(), name: z.string() }),
+  phases_history: z.array(z.object({ phase: z.object({ id: z.string() }) })).nullish(),
   fields: z.array(CampoZ),
 });
 
 const CARD_FRAG = `
-  id title current_phase { id name }
+  id title createdAt current_phase { id name }
+  phases_history { phase { id } }
   fields {
     field { id } value date_value datetime_value array_value
     connectedRepoItems { ... on PublicTableRecord { id title } ... on PublicCard { id title } }
@@ -106,7 +109,7 @@ function paraCardCru(c: z.infer<typeof CardZ>): CardCru {
         .map((x) => ({ id: x.id!, title: x.title ?? "" })),
     };
   }
-  return { id: c.id, title: c.title ?? "", fase: { id: c.current_phase.id, nome: c.current_phase.name }, campos };
+  return { id: c.id, title: c.title ?? "", fase: { id: c.current_phase.id, nome: c.current_phase.name }, campos, fasesPassadas: (c.phases_history ?? []).map((h) => h.phase.id), criadoEm: parseDia(c.createdAt) || undefined };
 }
 
 /** Todos os cards das fases monitoradas. Card que não passa no schema vira aviso. */
@@ -200,6 +203,7 @@ export async function carregarDatabases(): Promise<Databases> {
     coordenadorPorEmpresa: new Map(),
     coordenadorPorGrupo: new Map(),
     tierPorEmpresa: new Map(),
+    tierPorGrupo: new Map(),
   };
   for (const r of await registros(g.id)) {
     const nome = r.v[g.nome] || r.title;
@@ -212,24 +216,52 @@ export async function carregarDatabases(): Promise<Databases> {
   return db;
 }
 
+const RecZ = z.object({ table_record: z.object({ record_fields: z.array(z.object({ field: z.object({ id: z.string() }), value: z.string().nullable() })) }).nullable() });
+
+/**
+ * Registros da DB - BR NET ligados aos cards pelo conector da empresa ([NEW] Informar a empresa, Selecione a empresa do BRNET).
+ * Dão o empresa_name e o group_name exibidos no painel, e o gestor e o tier com prioridade sobre o card.
+ */
+export async function carregarRegistrosBrnet(db: Databases, cards: CardCru[]) {
+  const b = TABELAS.brnet;
+  const ids = [...new Set(cards.map(idRegistroBrnet).filter((x): x is string => !!x))];
+  db.brnetPorRegistro ??= new Map();
+  await emParalelo(ids, 6, async (id) => {
+    const r = RecZ.parse(await gql(`query($id: ID!) { table_record(id: $id) { record_fields { field { id } value } } }`, { id }));
+    if (!r.table_record) return;
+    const v = Object.fromEntries(r.table_record.record_fields.map((f) => [f.field.id, f.value?.trim() ?? ""]));
+    const reg: RegistroBrnet = { empresa: v[b.empresa] ?? "", grupo: v[b.grupo] ?? "", coordenador: v[b.gestor] || null, tier: v[b.tier] || null };
+    db.brnetPorRegistro!.set(id, reg);
+  });
+  log(`DB - BR NET: ${db.brnetPorRegistro.size} de ${ids.length} registros ligados aos cards`);
+}
+
 const FindZ = z.object({
   findRecords: z.object({
     edges: z.array(z.object({ node: z.object({ fields: z.array(z.object({ field: z.object({ id: z.string() }), value: z.string().nullable() })) }) })),
   }),
 });
 
-/** Primeiro registro da DB - BR NET com `campo` = `valor`, como mapa campo → valor. */
-async function registroNaBrnet(campo: string, valor: string): Promise<Record<string, string> | null> {
+/** Registros da DB - BR NET com `campo` = `valor` (até `n`), cada um como mapa campo → valor. */
+async function registrosNaBrnet(campo: string, valor: string, n: number): Promise<Record<string, string>[]> {
   const r = FindZ.parse(
     await gql(
-      `query($t: String!, $f: String!, $v: String!) { findRecords(tableId: $t, search: { fieldId: $f, fieldValue: $v }, first: 1) {
+      `query($t: String!, $f: String!, $v: String!, $n: Int!) { findRecords(tableId: $t, search: { fieldId: $f, fieldValue: $v }, first: $n) {
         edges { node { fields { field { id } value } } }
       } }`,
-      { t: TABELAS.brnet.id, f: campo, v: valor },
+      { t: TABELAS.brnet.id, f: campo, v: valor, n },
     ),
   );
-  const campos = r.findRecords.edges[0]?.node.fields;
-  return campos ? Object.fromEntries(campos.map((c) => [c.field.id, c.value?.trim() ?? ""])) : null;
+  return r.findRecords.edges.map((e) => Object.fromEntries(e.node.fields.map((c) => [c.field.id, c.value?.trim() ?? ""])));
+}
+
+/** O valor mais frequente entre os preenchidos (empate: o que aparece primeiro). */
+export function maisComum(valores: (string | undefined)[]): string | null {
+  const conta = new Map<string, number>();
+  for (const v of valores) if (v) conta.set(v, (conta.get(v) ?? 0) + 1);
+  let melhor: string | null = null;
+  for (const [v, n] of conta) if (!melhor || n > conta.get(melhor)!) melhor = v;
+  return melhor;
 }
 
 /** O que a DB - BR NET diz de uma empresa. Empresa não encontrada fica com os dois campos nulos. */
@@ -247,7 +279,7 @@ export interface CacheBrnet {
  */
 export async function completarBrnet(
   db: Databases,
-  itens: { empresa: string; grupo: string; gestor_nome: string | null }[],
+  itens: { empresa: string; grupo: string }[],
   cache?: CacheBrnet,
 ) {
   const b = TABELAS.brnet;
@@ -263,19 +295,25 @@ export async function completarBrnet(
   const faltam = empresas.filter((e) => !conhecidas.has(normalizar(e)));
 
   const consultadas = await emParalelo(faltam, 6, async (empresa): Promise<EmpresaBrnet> => {
-    const r = await registroNaBrnet(b.empresa, empresa);
-    return { empresa, coordenador: r?.[b.gestor] || null, tier: r?.[b.tier] || null };
+    // a mesma empresa pode ter mais de um registro, nem todos com gestor e tier preenchidos
+    const rs = await registrosNaBrnet(b.empresa, empresa, 5);
+    return { empresa, coordenador: rs.map((r) => r[b.gestor]).find(Boolean) || null, tier: rs.map((r) => r[b.tier]).find(Boolean) || null };
   });
   consultadas.forEach(aplicar);
   if (consultadas.length) await cache?.gravar(consultadas);
 
-  const semGestor = itens.filter((x) => !x.gestor_nome);
-  const grupos = [
-    ...new Set(semGestor.filter((x) => !db.coordenadorPorEmpresa.has(normalizar(x.empresa))).map((x) => x.grupo).filter(Boolean)),
-  ].filter((g) => !db.coordenadorPorGrupo.has(normalizar(g)));
+  // o gestor da DB - BR NET vale mais que o do card: todo item cuja empresa não trouxe gestor ou tier procura pelo grupo,
+  // ficando com o gestor e o tier mais frequentes entre as empresas do grupo
+  const incompleta = (x: { empresa: string }) => !db.coordenadorPorEmpresa.has(normalizar(x.empresa)) || !db.tierPorEmpresa.has(normalizar(x.empresa));
+  const grupos = [...new Set(itens.filter(incompleta).map((x) => x.grupo).filter(Boolean))].filter(
+    (g) => !db.coordenadorPorGrupo.has(normalizar(g)) || !db.tierPorGrupo.has(normalizar(g)),
+  );
   await emParalelo(grupos, 4, async (g) => {
-    const c = (await registroNaBrnet(b.grupo, g))?.[b.gestor];
+    const rs = await registrosNaBrnet(b.grupo, g, 50);
+    const c = maisComum(rs.map((r) => r[b.gestor]));
+    const t = maisComum(rs.map((r) => r[b.tier]));
     if (c) db.coordenadorPorGrupo.set(normalizar(g), c);
+    if (t) db.tierPorGrupo.set(normalizar(g), t);
   });
   log(`DB - BR NET: ${doCache.length} empresas do cache, ${faltam.length} empresas e ${grupos.length} grupos consultados`);
 }

@@ -32,11 +32,11 @@ const salvar = args.includes("--salvar");
 const camposPrazo: string[] = [
   ...CAMPOS_PRAZO.ST,
   CAMPOS_PRAZO.SO.relatorioAnualOculto,
-  CAMPOS_PRAZO.SO.prazoRelatorioAnual,
+  ...CAMPOS_PRAZO.SO.prazoRelatorioAnual,
   ...CAMPOS_PRAZO.SO.demais,
   ...CAMPOS_PRAZO.OG,
 ];
-const camposConfig = new Set<string>([...camposPrazo, ...Object.values(CAMPOS).flat()]);
+const camposConfig = new Set<string>([...camposPrazo, ...Object.values(CAMPOS).flat(), ...Object.values(CAMPOS_PRAZO.SO).flat()]);
 
 async function main() {
   const { pipe } = await gql<{

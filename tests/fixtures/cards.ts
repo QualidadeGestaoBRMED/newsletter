@@ -59,5 +59,6 @@ export function databases(): Databases {
     coordenadorPorEmpresa: new Map([["empresa da base", "Patricia Exemplo"]]),
     coordenadorPorGrupo: new Map([["grupo da base", "Karen Exemplo"]]),
     tierPorEmpresa: new Map([["edificio exemplo", "Ouro"]]),
+    tierPorGrupo: new Map([["grupo da base", "Diamante"]]),
   };
 }
