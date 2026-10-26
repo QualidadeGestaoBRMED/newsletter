@@ -48,8 +48,8 @@ jobs:
       REMETENTE_NOME: ${{ secrets.REMETENTE_NOME }}
       PAINEL_URL: ${{ secrets.PAINEL_URL }}
       ALERTA_EMAIL: ${{ secrets.ALERTA_EMAIL }}
-      # desligado (padrão) | teste (tudo para ALERTA_EMAIL) | gestores. Variável em Settings → Secrets and variables → Actions → Variables
-      ENVIO: ${{ vars.ENVIO || 'desligado' }}
+      # desligado (padrão) | teste (tudo para ALERTA_EMAIL) | gestores. Vale a variável ENVIO (aba Variables) ou, sem ela, o secret ENVIO
+      ENVIO: ${{ vars.ENVIO || secrets.ENVIO || 'desligado' }}
     steps:
       - uses: actions/checkout@v4
 
