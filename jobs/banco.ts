@@ -4,6 +4,7 @@ import { and, eq, gt, inArray, sql as q } from "drizzle-orm";
 import { db, pool, schema } from "../db";
 import { BRNET_VALIDADE_DIAS, type Periodo } from "./config";
 import { idEdicao, type ItemEdicao } from "./edicao";
+import type { RegistroEnvios } from "./envio";
 import type { CacheBrnet } from "./pipefy";
 import { normalizar, type Dia } from "./regras";
 
@@ -51,6 +52,26 @@ export const cacheBrnet: CacheBrnet = {
           set: { empresa: q`excluded.empresa`, coordenador: q`excluded.coordenador`, tier: q`excluded.tier`, consultado_em: new Date() },
         });
     }
+  },
+};
+
+/** Status atual da edição, ou null se ainda não foi gerada. */
+export async function statusEdicao(id: string) {
+  const [e] = await db.select({ status: schema.edicoes.status }).from(schema.edicoes).where(eq(schema.edicoes.id, id));
+  return e?.status ?? null;
+}
+
+export async function marcarEdicao(id: string, status: "enviada" | "falhou") {
+  await db.update(schema.edicoes).set({ status }).where(eq(schema.edicoes.id, id));
+}
+
+export const registroEnvios: RegistroEnvios = {
+  async jaEnviados(edicao) {
+    const r = await db.select({ d: schema.envios.destinatario }).from(schema.envios).where(eq(schema.envios.edicao_id, edicao));
+    return new Set(r.map((x) => x.d));
+  },
+  async registrar(edicao, destinatario, messageId) {
+    await db.insert(schema.envios).values({ edicao_id: edicao, destinatario, message_id: messageId }).onConflictDoNothing();
   },
 };
 
