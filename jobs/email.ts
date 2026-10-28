@@ -39,6 +39,9 @@ export interface Remetente {
 /** ALERTA_EMAIL aceita vários endereços, separados por vírgula ou ponto e vírgula. */
 export const destinosAlerta = (v = process.env.ALERTA_EMAIL ?? "") => v.split(/[,;]/).map((e) => e.trim()).filter(Boolean);
 
+/** RESERVA_EMAIL recebe a carteira de gestor sem e-mail ou com e-mail recusado; vazio, vale o ALERTA_EMAIL. */
+export const destinosReserva = () => destinosAlerta(process.env.RESERVA_EMAIL?.trim() || process.env.ALERTA_EMAIL);
+
 export function linkPainel(data: Dia, periodo: Periodo, gestor?: string) {
   const u = new URL(exigir("PAINEL_URL"));
   u.searchParams.set("ed", `${data}-${periodo}`);

@@ -4,7 +4,7 @@ import "./env";
 import { itensComCache } from "./cache";
 import { FERIADOS, type Periodo } from "./config";
 import { carteiras, idEdicao, numeros } from "./edicao";
-import { destinosAlerta, MandrillRemetente } from "./email";
+import { destinosAlerta, destinosReserva, MandrillRemetente } from "./email";
 import { enviarEdicao, modoEnvio, resumoProblemas } from "./envio";
 import type { Aviso } from "./pipefy";
 import { hojeEmSP, type Dia } from "./regras";
@@ -48,10 +48,13 @@ async function gerar(data: string, periodo: Periodo, avisos: Aviso[], modo: Retu
   if (modo === "desligado") return console.log("ENVIO=desligado: e-mails não enviados");
   const alertas = destinosAlerta();
   const remetente = new MandrillRemetente();
-  const r = await enviarEdicao(lista, { id, data: data as Dia, periodo }, modo, remetente, banco.registroEnvios, alertas[0]);
+  const r = await enviarEdicao(lista, { id, data: data as Dia, periodo }, modo, remetente, banco.registroEnvios, {
+    teste: alertas[0],
+    reserva: destinosReserva(),
+  });
   console.log(
-    `ENVIO=${modo}: ${r.enviados.length} enviados, ${r.pulados.length} já tinham recebido, ${r.semEmail.length} gestores sem e-mail, ` +
-      `${r.recusados.length} recusados, ${r.falhas.length} falhas`,
+    `ENVIO=${modo}: ${r.enviados.length} enviados, ${r.pulados.length} já tinham recebido, ${r.encaminhados.length} encaminhados para a reserva, ` +
+      `${r.semEmail.length} sem e-mail nem reserva, ${r.recusados.length} recusados, ${r.falhas.length} falhas`,
   );
   for (const f of r.recusados) console.warn(`  recusado ${f.gestor}: ${f.erro}`);
   for (const f of r.falhas) console.error(`  falhou ${f.gestor}: ${f.erro}`);

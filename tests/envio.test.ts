@@ -76,12 +76,33 @@ describe("enviarEdicao", () => {
     expect(resumoProblemas(res)).toContain("conta inexistente ou inativa");
   });
 
+  it("com reserva: carteira recusada ou sem e-mail é encaminhada, com o gestor no assunto", async () => {
+    const { r, enviadas } = remetente(undefined, "ana@x.com");
+    const { reg, gravados } = registro();
+    const res = await enviarEdicao(lista, edicao, "gestores", r, reg, { reserva: ["eu@x.com"] });
+    expect(enviadas.map((m) => m.para.email)).toEqual(["eu@x.com", "bia@x.com", "eu@x.com"]);
+    expect(enviadas[0].assunto).toMatch(/^\[Encaminhado\] Ana \(e-mail recusado\): Seus prazos/);
+    expect(enviadas[2].assunto).toMatch(/^\[Encaminhado\] Sem Email \(sem e-mail cadastrado\): /);
+    expect(gravados).toEqual(["reserva:ana@x.com", "bia@x.com", "reserva:nome:Sem Email"]);
+    expect(res.encaminhados).toEqual(["Ana", "Sem Email"]);
+    expect(res.semEmail).toEqual([]);
+  });
+
+  it("não encaminha de novo o que já foi encaminhado nesta edição", async () => {
+    const { r, enviadas } = remetente(undefined, "ana@x.com");
+    const ja = ["reserva:ana@x.com", "bia@x.com", "reserva:nome:Sem Email"];
+    await enviarEdicao(lista, edicao, "gestores", r, registro(ja).reg, { reserva: ["eu@x.com"] });
+    expect(enviadas).toEqual([]);
+  });
+
   it("teste: tudo vai para a caixa de teste, com [TESTE] e o nome do gestor, sem registrar", async () => {
     const { r, enviadas } = remetente();
     const { reg, gravados } = registro(["ana@x.com"]);
-    await enviarEdicao(lista, edicao, "teste", r, reg, "eu@x.com");
-    expect(enviadas.map((m) => m.para.email)).toEqual(["eu@x.com", "eu@x.com"]);
+    await enviarEdicao(lista, edicao, "teste", r, reg, { teste: "eu@x.com", reserva: ["outro@x.com"] });
+    // a carteira sem e-mail também vai para a caixa de teste, nunca para a reserva
+    expect(enviadas.map((m) => m.para.email)).toEqual(["eu@x.com", "eu@x.com", "eu@x.com"]);
     expect(enviadas[0].assunto).toMatch(/^\[TESTE\] Ana: Seus prazos/);
+    expect(enviadas[2].assunto).toMatch(/^\[TESTE\] \[Encaminhado\] Sem Email/);
     expect(gravados).toEqual([]);
   });
 
