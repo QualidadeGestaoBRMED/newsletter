@@ -1,9 +1,11 @@
 import type { NextConfig } from "next";
 
 // O Next usa scripts e estilos inline, por isso o 'unsafe-inline'; as fontes vêm do Google Fonts.
+// No `next dev` o React precisa de eval (recarga e mensagens de erro); sem ele a página não hidrata. Em produção, não.
+const DEV = process.env.NODE_ENV === "development";
 const CSP = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline'",
+  `script-src 'self' 'unsafe-inline'${DEV ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' https://fonts.gstatic.com data:",
   "img-src 'self' data: blob:",
