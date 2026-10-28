@@ -26,7 +26,8 @@ const fmt = (n: number) => new Intl.NumberFormat("pt-BR").format(n);
 export type RadarEmail = {
   novas: number;
   agir: number;
-  itens: { grupo: string; tier: string | null; titulo: string; agir: boolean }[];
+  /** cada manchete leva à página do cliente no Radar */
+  itens: { grupo: string; tier: string | null; titulo: string; agir: boolean; link: string }[];
   link: string;
 };
 
@@ -43,12 +44,11 @@ export type NewsletterProps = {
   radar?: RadarEmail | null;
 };
 
-// Bloco do Radar: as mesmas regras do painel (tier sempre com a sua cor, "pede ação" em vermelho, sem pílulas)
-function BlocoRadar({ r }: { r: RadarEmail }) {
-  const resto = r.novas - r.itens.length;
+// Cartão do Radar, abaixo do de prazos: segunda seção da newsletter, com chamada secundária para não competir com a do painel.
+// Mesmas regras do painel: tier sempre com a sua cor, "pede ação" em vermelho, sem pílulas.
+function CartaoRadar({ r }: { r: RadarEmail }) {
   return (
-    <Section style={{ background: "#FFFFFF", padding: "8px 36px 0" }}>
-      <div style={{ height: 1, background: C.cinza3, fontSize: 0, lineHeight: 0, margin: "0 0 26px" }}>&nbsp;</div>
+    <Section style={{ background: "#FFFFFF", borderRadius: 20, padding: "30px 36px 32px", marginTop: 16 }}>
       <Text style={{ margin: 0, fontFamily: WS, fontSize: 11, lineHeight: "14px", fontWeight: 600, letterSpacing: "0.16em", textTransform: "uppercase", color: C.teal }}>
         Radar dos seus clientes
       </Text>
@@ -69,14 +69,31 @@ function BlocoRadar({ r }: { r: RadarEmail }) {
             )}
             {it.agir && <span style={{ color: STATUS.vencido }}>{" · Pede ação"}</span>}
           </Text>
-          <Text style={{ margin: "4px 0 0", fontFamily: WS, fontSize: 16, lineHeight: "22px", fontWeight: 500, color: C.navy }}>{it.titulo}</Text>
+          <Text style={{ margin: "4px 0 0", fontFamily: WS, fontSize: 16, lineHeight: "22px", fontWeight: 500 }}>
+            <Link href={it.link} style={{ color: C.navy, textDecoration: "none" }}>
+              {it.titulo}
+            </Link>
+          </Text>
         </div>
       ))}
-      <Text style={{ margin: "16px 0 0", fontFamily: RB, fontSize: 14, lineHeight: "20px" }}>
-        <Link href={r.link} style={{ fontFamily: WS, fontWeight: 600, color: C.teal, textDecoration: "none" }}>
-          {resto > 0 ? `Ver as ${fmt(r.novas)} no Radar →` : "Ver no Radar →"}
-        </Link>
-      </Text>
+      <Section style={{ textAlign: "center", paddingTop: 24 }}>
+        <Button
+          href={r.link}
+          style={{
+            background: "#FFFFFF",
+            color: C.teal,
+            border: `1.5px solid ${C.teal}`,
+            borderRadius: 99,
+            padding: "12px 28px",
+            fontFamily: WS,
+            fontSize: 14,
+            fontWeight: 600,
+            textDecoration: "none",
+          }}
+        >
+          Abrir o Radar
+        </Button>
+      </Section>
     </Section>
   );
 }
@@ -139,8 +156,6 @@ export default function NewsletterGestor({ nome, periodo, data, horario, numeros
             </Row>
           </Section>
 
-          {radar && radar.itens.length > 0 && <BlocoRadar r={radar} />}
-
           <Section style={{ background: "#FFFFFF", borderRadius: "0 0 20px 20px", padding: "28px 36px 36px", textAlign: "center" }}>
             <Button
               href={linkPainel}
@@ -158,6 +173,8 @@ export default function NewsletterGestor({ nome, periodo, data, horario, numeros
               {tarde ? "Ver o fechamento da carteira" : "Ver minha carteira no painel"}
             </Button>
           </Section>
+
+          {radar && radar.itens.length > 0 && <CartaoRadar r={radar} />}
 
           <Text style={{ margin: "20px 0 0", textAlign: "center", fontFamily: RB, fontSize: 12, lineHeight: "18px", color: C.cinza1 }}>
             {`Briefing Suporte · enviado automaticamente às ${horario}`}

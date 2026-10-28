@@ -107,10 +107,16 @@ export async function radarDaCarteira(gestor: string, desde: Date, link: string)
   if (!rows.length) return null;
   const sinais: Sinal[] = rows.map((x) => ({ ...x, gestor: x.gestor_nome, coletado_em: x.coletado_em.toISOString() }));
   const ord = ordenarSinais(sinais, TIERS_RADAR);
+  // cada manchete abre a página do cliente no Radar
+  const doCliente = (grupo: string) => {
+    const u = new URL(link);
+    u.searchParams.set("grupo", grupo);
+    return u.toString();
+  };
   return {
     novas: ord.length,
     agir: ord.filter((x) => x.prioridade === "agir").length,
-    itens: ord.slice(0, 3).map((x) => ({ grupo: x.grupo, tier: x.tier, titulo: x.titulo, agir: x.prioridade === "agir" })),
+    itens: ord.slice(0, 3).map((x) => ({ grupo: x.grupo, tier: x.tier, titulo: x.titulo, agir: x.prioridade === "agir", link: doCliente(x.grupo) })),
     link,
   };
 }
