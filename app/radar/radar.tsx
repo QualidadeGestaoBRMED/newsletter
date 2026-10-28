@@ -330,7 +330,7 @@ export default function Radar({ gestorInicial }: { gestorInicial: string | null 
                       if (p.grupo) setParams({ grupo: null }, true);
                     }}
                   >
-                    CLIENTES
+                    RADAR
                   </a>
                 </nav>
               </div>

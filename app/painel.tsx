@@ -345,7 +345,7 @@ export default function Painel({ gestorInicial }: { gestorInicial: string | null
                   </span>
                   <i aria-hidden="true">·</i>
                   <a className="sec" href={`/radar${p.gestor || p.tier ? "?" + new URLSearchParams(Object.entries({ gestor: p.gestor, tier: p.tier }).filter(([, v]) => v) as [string, string][]) : ""}`}>
-                    CLIENTES
+                    RADAR
                   </a>
                 </nav>
                 <select
