@@ -72,7 +72,7 @@ export async function montarEmail(c: Carteira, data: Dia, periodo: Periodo, para
 // ---------- remetentes ----------
 
 const MANDRILL_API = "https://mandrillapp.com/api/1.0";
-// a recusa por soft-bounce (conta inativa) expira em 1 dia: sem olhar as expiradas, o e-mail sai e volta dia sim, dia não
+// a recusa por soft-bounce (conta inativa) expira no Mandrill em 1 dia: por isso vale o histórico dos últimos 30 dias
 const RECUSA_DIAS = 30;
 
 export class MandrillRemetente implements Remetente {
@@ -109,29 +109,33 @@ export class MandrillRemetente implements Remetente {
     return { id: r._id! };
   }
 
-  // a API de recusas tem limite de chamadas: a lista inteira é lida uma vez por execução, não uma vez por gestor
-  private recusas?: Promise<Map<string, { reason: string; created_at: string }>>;
+  // As APIs de consulta do Mandrill têm limite de chamadas: o histórico é lido uma vez por execução, não uma vez por gestor.
+  // Vale o último e-mail do briefing para cada endereço: se voltou, a conta está inexistente ou inativa.
+  private recusas?: Promise<Map<string, string>>;
 
   async recusaRecente(email: string) {
     this.recusas ??= this.lerRecusas();
-    const r = (await this.recusas).get(email.toLowerCase());
-    return r ? `recusado pelo Mandrill em ${r.created_at.slice(0, 10)} (${r.reason})` : null;
+    return (await this.recusas).get(email.toLowerCase()) ?? null;
   }
 
   private async lerRecusas() {
-    const res = await fetch(`${MANDRILL_API}/rejects/list`, {
+    const desde = new Date(Date.now() - RECUSA_DIAS * 864e5).toISOString().slice(0, 10);
+    const res = await fetch(`${MANDRILL_API}/messages/search`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ key: this.chave, include_expired: true }),
+      body: JSON.stringify({ key: this.chave, query: `tags:"newsletter-suporte"`, date_from: desde, limit: 1000 }),
     });
-    const m = new Map<string, { reason: string; created_at: string }>();
+    const m = new Map<string, string>();
     if (!res.ok) {
-      console.warn(`Mandrill rejects/list HTTP ${res.status}: sem a lista de recusas, todos os e-mails são tentados`);
+      console.warn(`Mandrill messages/search HTTP ${res.status}: sem o histórico de recusas, todos os e-mails são tentados`);
       return m;
     }
-    const limite = Date.now() - RECUSA_DIAS * 864e5;
-    for (const x of (await res.json()) as { email: string; reason: string; created_at: string }[]) {
-      if (Date.parse(`${x.created_at.replace(" ", "T")}Z`) > limite) m.set(x.email.toLowerCase(), x);
+    const msgs = (await res.json()) as { email: string; ts: number; state: string; tags?: string[] }[];
+    for (const x of msgs.filter((x) => !x.tags?.includes("alerta")).sort((a, b) => a.ts - b.ts)) {
+      const email = x.email.toLowerCase();
+      if (["bounced", "soft-bounced", "rejected"].includes(x.state)) {
+        m.set(email, `e-mail de ${new Date(x.ts * 1000).toISOString().slice(0, 10)} voltou (${x.state}): conta inexistente ou inativa`);
+      } else if (x.state === "sent") m.delete(email);
     }
     return m;
   }
