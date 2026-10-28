@@ -34,13 +34,12 @@ export class EnderecoRecusado extends Error {}
 
 export interface Remetente {
   enviar(m: Mensagem): Promise<{ id: string }>;
+  /** Motivo, se o endereço foi recusado recentemente (mesmo que a recusa já tenha expirado); null se não. */
+  recusaRecente?(email: string): Promise<string | null>;
 }
 
 /** ALERTA_EMAIL aceita vários endereços, separados por vírgula ou ponto e vírgula. */
 export const destinosAlerta = (v = process.env.ALERTA_EMAIL ?? "") => v.split(/[,;]/).map((e) => e.trim()).filter(Boolean);
-
-/** RESERVA_EMAIL recebe a carteira de gestor sem e-mail ou com e-mail recusado; vazio, vale o ALERTA_EMAIL. */
-export const destinosReserva = () => destinosAlerta(process.env.RESERVA_EMAIL?.trim() || process.env.ALERTA_EMAIL);
 
 export function linkPainel(data: Dia, periodo: Periodo, gestor?: string) {
   const u = new URL(exigir("PAINEL_URL"));
@@ -72,7 +71,9 @@ export async function montarEmail(c: Carteira, data: Dia, periodo: Periodo, para
 
 // ---------- remetentes ----------
 
-const MANDRILL_URL = "https://mandrillapp.com/api/1.0/messages/send";
+const MANDRILL_API = "https://mandrillapp.com/api/1.0";
+// a recusa por soft-bounce (conta inativa) expira em 1 dia: sem olhar as expiradas, o e-mail sai e volta dia sim, dia não
+const RECUSA_DIAS = 30;
 
 export class MandrillRemetente implements Remetente {
   private chave = exigir("MANDRILL_API_KEY");
@@ -80,7 +81,7 @@ export class MandrillRemetente implements Remetente {
   private nome = process.env.REMETENTE_NOME?.trim() || "Briefing Suporte";
 
   async enviar(m: Mensagem) {
-    const res = await fetch(MANDRILL_URL, {
+    const res = await fetch(`${MANDRILL_API}/messages/send`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -106,6 +107,33 @@ export class MandrillRemetente implements Remetente {
     if (r && ["rejected", "invalid"].includes(r.status ?? "")) throw new EnderecoRecusado(`Mandrill recusou ${m.para.email}: ${r.status} ${r.reject_reason ?? ""}`);
     if (!r || !["sent", "queued", "scheduled"].includes(r.status ?? "")) throw new Error(`Mandrill: ${m.para.email} ${r?.status} ${r?.reject_reason ?? ""}`);
     return { id: r._id! };
+  }
+
+  // a API de recusas tem limite de chamadas: a lista inteira é lida uma vez por execução, não uma vez por gestor
+  private recusas?: Promise<Map<string, { reason: string; created_at: string }>>;
+
+  async recusaRecente(email: string) {
+    this.recusas ??= this.lerRecusas();
+    const r = (await this.recusas).get(email.toLowerCase());
+    return r ? `recusado pelo Mandrill em ${r.created_at.slice(0, 10)} (${r.reason})` : null;
+  }
+
+  private async lerRecusas() {
+    const res = await fetch(`${MANDRILL_API}/rejects/list`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key: this.chave, include_expired: true }),
+    });
+    const m = new Map<string, { reason: string; created_at: string }>();
+    if (!res.ok) {
+      console.warn(`Mandrill rejects/list HTTP ${res.status}: sem a lista de recusas, todos os e-mails são tentados`);
+      return m;
+    }
+    const limite = Date.now() - RECUSA_DIAS * 864e5;
+    for (const x of (await res.json()) as { email: string; reason: string; created_at: string }[]) {
+      if (Date.parse(`${x.created_at.replace(" ", "T")}Z`) > limite) m.set(x.email.toLowerCase(), x);
+    }
+    return m;
   }
 }
 

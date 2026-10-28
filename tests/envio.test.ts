@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { Carteira } from "../jobs/edicao";
+import type { Carteira, ItemEdicao } from "../jobs/edicao";
+import type { Item } from "../jobs/regras";
 import { destinosAlerta, EnderecoRecusado, type Mensagem, type Remetente } from "../jobs/email";
 import { enviarEdicao, modoEnvio, resumoProblemas, type RegistroEnvios } from "../jobs/envio";
 
@@ -38,6 +39,11 @@ describe("modoEnvio", () => {
   });
 });
 
+const item = (card: string, status: Item["status"], dias_atraso: number, prazo: string) =>
+  ({ item_id: card, card_id: card, card, area: "ST", demanda: "PGR", empresa: "Cliente <X>", grupo: "G", gestor_nome: null, gestor_email: null,
+    tier: null, campo_prazo: "p", prazo, status, dias_atraso, fase_id: "f", fase_nome: "F", link: `https://app.pipefy.com/open-cards/${card}`,
+    situacao_fim_dia: null }) as ItemEdicao;
+
 describe("enviarEdicao", () => {
   const lista = [carteira("Ana", "ana@x.com"), carteira("Bia", "bia@x.com"), carteira("Sem Email", null)];
 
@@ -47,7 +53,7 @@ describe("enviarEdicao", () => {
     const res = await enviarEdicao(lista, edicao, "gestores", r, reg);
     expect(enviadas.map((m) => m.para.email)).toEqual(["ana@x.com", "bia@x.com"]);
     expect(gravados).toEqual(["ana@x.com", "bia@x.com"]);
-    expect(res.semEmail.map((c) => c.nome)).toEqual(["Sem Email"]);
+    expect(res.semEmail.map((x) => x.carteira.nome)).toEqual(["Sem Email"]);
   });
 
   it("não reenvia para quem já recebeu nesta edição", async () => {
@@ -63,8 +69,7 @@ describe("enviarEdicao", () => {
     const res = await enviarEdicao(lista, edicao, "gestores", r, reg);
     expect(enviadas.map((m) => m.para.email)).toEqual(["bia@x.com"]);
     expect(gravados).toEqual(["bia@x.com"]);
-    expect(res.falhas).toHaveLength(1);
-    expect(resumoProblemas(res)).toContain("Ana <ana@x.com>: Mandrill fora do ar");
+    expect(res.falhas.map((x) => x.motivo)).toEqual(["Mandrill fora do ar"]);
   });
 
   it("endereço recusado (conta inativa) vai para recusados, não para falhas", async () => {
@@ -72,43 +77,48 @@ describe("enviarEdicao", () => {
     const res = await enviarEdicao(lista, edicao, "gestores", r, registro().reg);
     expect(enviadas.map((m) => m.para.email)).toEqual(["bia@x.com"]);
     expect(res.falhas).toEqual([]);
-    expect(res.recusados.map((f) => f.gestor)).toEqual(["Ana <ana@x.com>"]);
-    expect(resumoProblemas(res)).toContain("conta inexistente ou inativa");
+    expect(res.recusados.map((x) => x.carteira.nome)).toEqual(["Ana"]);
   });
 
-  it("com reserva: carteira recusada ou sem e-mail é encaminhada, com o gestor no assunto", async () => {
-    const { r, enviadas } = remetente(undefined, "ana@x.com");
-    const { reg, gravados } = registro();
-    const res = await enviarEdicao(lista, edicao, "gestores", r, reg, { reserva: ["eu@x.com"] });
-    expect(enviadas.map((m) => m.para.email)).toEqual(["eu@x.com", "bia@x.com", "eu@x.com"]);
-    expect(enviadas[0].assunto).toMatch(/^\[Encaminhado\] Ana \(e-mail recusado\): Seus prazos/);
-    expect(enviadas[2].assunto).toMatch(/^\[Encaminhado\] Sem Email \(sem e-mail cadastrado\): /);
-    expect(gravados).toEqual(["reserva:ana@x.com", "bia@x.com", "reserva:nome:Sem Email"]);
-    expect(res.encaminhados).toEqual(["Ana", "Sem Email"]);
-    expect(res.semEmail).toEqual([]);
-  });
-
-  it("não encaminha de novo o que já foi encaminhado nesta edição", async () => {
-    const { r, enviadas } = remetente(undefined, "ana@x.com");
-    const ja = ["reserva:ana@x.com", "bia@x.com", "reserva:nome:Sem Email"];
-    await enviarEdicao(lista, edicao, "gestores", r, registro(ja).reg, { reserva: ["eu@x.com"] });
-    expect(enviadas).toEqual([]);
+  it("endereço recusado recentemente (recusa já expirada no Mandrill) nem é tentado", async () => {
+    const { r, enviadas } = remetente();
+    r.recusaRecente = async (e) => (e === "ana@x.com" ? "recusado pelo Mandrill em 2026-10-27 (soft-bounce)" : null);
+    const res = await enviarEdicao(lista.slice(0, 2), edicao, "gestores", r, registro().reg);
+    expect(enviadas.map((m) => m.para.email)).toEqual(["bia@x.com"]);
+    expect(res.recusados[0].motivo).toContain("soft-bounce");
   });
 
   it("teste: tudo vai para a caixa de teste, com [TESTE] e o nome do gestor, sem registrar", async () => {
     const { r, enviadas } = remetente();
     const { reg, gravados } = registro(["ana@x.com"]);
-    await enviarEdicao(lista, edicao, "teste", r, reg, { teste: "eu@x.com", reserva: ["outro@x.com"] });
-    // a carteira sem e-mail também vai para a caixa de teste, nunca para a reserva
-    expect(enviadas.map((m) => m.para.email)).toEqual(["eu@x.com", "eu@x.com", "eu@x.com"]);
+    await enviarEdicao(lista, edicao, "teste", r, reg, "eu@x.com");
+    expect(enviadas.map((m) => m.para.email)).toEqual(["eu@x.com", "eu@x.com"]);
     expect(enviadas[0].assunto).toMatch(/^\[TESTE\] Ana: Seus prazos/);
-    expect(enviadas[2].assunto).toMatch(/^\[TESTE\] \[Encaminhado\] Sem Email/);
     expect(gravados).toEqual([]);
   });
+});
 
-  it("sem problemas, não há aviso", async () => {
+describe("resumoProblemas", () => {
+  it("sem problemas, não há e-mail", async () => {
     const res = await enviarEdicao([carteira("Ana", "ana@x.com")], edicao, "gestores", remetente().r, registro().reg);
-    expect(resumoProblemas(res)).toBeNull();
+    expect(resumoProblemas(res, edicao, "eu@x.com")).toBeNull();
+  });
+
+  it("um único e-mail com o motivo de cada carteira e os itens dela, do mais urgente ao menos", async () => {
+    const ana = { nome: "Ana", email: "ana@x.com", itens: [item("111", "No radar (até D+2)", 0, "2026-10-29"), item("222", "Atrasado", 5, "2026-10-22")] };
+    const sem = { nome: "Sem Email", email: null, itens: [item("333", "Atrasado", 1, "2026-10-26")] };
+    const { r } = remetente(undefined, "ana@x.com");
+    const res = await enviarEdicao([ana, sem], edicao, "gestores", r, registro().reg);
+    const m = resumoProblemas(res, edicao, "eu@x.com")!;
+
+    expect(m.para.email).toBe("eu@x.com");
+    expect(m.assunto).toBe("[Briefing Suporte] 2026-10-27-manha: 2 carteiras não chegaram ao gestor");
+    expect(m.texto).toContain("Ana <ana@x.com>: 2 itens (Mandrill recusou: rejected hard-bounce)");
+    expect(m.texto).toContain("Sem Email: 1 itens (sem e-mail cadastrado na Equipe Comercial)");
+    expect(m.html.indexOf("open-cards/222")).toBeLessThan(m.html.indexOf("open-cards/111"));
+    expect(m.html).toContain("Atrasado 5d");
+    expect(m.html).toContain("Cliente &lt;X&gt;");
+    expect(m.html).toContain("gestor=Ana");
   });
 });
 

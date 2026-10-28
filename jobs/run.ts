@@ -4,7 +4,7 @@ import "./env";
 import { itensComCache } from "./cache";
 import { FERIADOS, type Periodo } from "./config";
 import { carteiras, idEdicao, numeros } from "./edicao";
-import { destinosAlerta, destinosReserva, MandrillRemetente } from "./email";
+import { destinosAlerta, MandrillRemetente } from "./email";
 import { enviarEdicao, modoEnvio, resumoProblemas } from "./envio";
 import type { Aviso } from "./pipefy";
 import { hojeEmSP, type Dia } from "./regras";
@@ -48,26 +48,27 @@ async function gerar(data: string, periodo: Periodo, avisos: Aviso[], modo: Retu
   if (modo === "desligado") return console.log("ENVIO=desligado: e-mails não enviados");
   const alertas = destinosAlerta();
   const remetente = new MandrillRemetente();
-  const r = await enviarEdicao(lista, { id, data: data as Dia, periodo }, modo, remetente, banco.registroEnvios, {
-    teste: alertas[0],
-    reserva: destinosReserva(),
-  });
+  const ed = { id, data: data as Dia, periodo };
+  const r = await enviarEdicao(lista, ed, modo, remetente, banco.registroEnvios, alertas[0]);
   console.log(
-    `ENVIO=${modo}: ${r.enviados.length} enviados, ${r.pulados.length} já tinham recebido, ${r.encaminhados.length} encaminhados para a reserva, ` +
-      `${r.semEmail.length} sem e-mail nem reserva, ${r.recusados.length} recusados, ${r.falhas.length} falhas`,
+    `ENVIO=${modo}: ${r.enviados.length} enviados, ${r.pulados.length} já tinham recebido, ` +
+      `${r.semEmail.length} sem e-mail, ${r.recusados.length} recusados, ${r.falhas.length} falhas`,
   );
-  for (const f of r.recusados) console.warn(`  recusado ${f.gestor}: ${f.erro}`);
-  for (const f of r.falhas) console.error(`  falhou ${f.gestor}: ${f.erro}`);
+  for (const x of [...r.semEmail, ...r.recusados, ...r.falhas]) console.warn(`  não entregue ${x.carteira.nome}: ${x.motivo}`);
   // com falha passageira a edição fica "gerada" (visível no painel) e um novo run reenvia só os que faltaram
   if (modo === "gestores" && !r.falhas.length) await banco.marcarEdicao(id, "enviada");
 
-  const problemas = resumoProblemas(r);
-  for (const alerta of problemas ? alertas : []) {
-    await remetente
-      .enviar({ para: { email: alerta }, assunto: `[Briefing Suporte] Edição ${id}: pontos de atenção no envio`, html: `<pre>${problemas!.replace(/</g, "&lt;")}</pre>`, texto: problemas!, tags: ["newsletter-suporte", "alerta"] })
-      .catch((e) => console.error(`Alerta não enviado: ${e}`));
+  // um único e-mail com tudo o que não chegou aos gestores; se ele sair, o job termina sem erro (o resumo já avisa)
+  let avisado = false;
+  for (const para of alertas) {
+    const resumo = resumoProblemas(r, ed, para);
+    if (!resumo) break;
+    await remetente.enviar(resumo).then(
+      () => (avisado = true),
+      (e) => console.error(`Resumo não enviado para ${para}: ${e}`),
+    );
   }
-  if (r.falhas.length) throw new Error(`${r.falhas.length} e-mails falharam`);
+  if (r.falhas.length && !avisado) throw new Error(`${r.falhas.length} e-mails falharam e o resumo não foi enviado`);
 }
 
 main().catch((e) => {
