@@ -4,14 +4,14 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { TIERS } from "@/jobs/config";
-import { COR_TIER } from "@/lib/painel";
 import { manchete, ordenarSinais, PERIODOS, periodoDe, type Sinal } from "@/lib/radar";
+import { ponto } from "./ponto";
+import SeletorCliente, { type OpcaoCliente } from "./seletor-cliente";
 
 type SinalTela = Sinal & { voto: boolean | null };
 type Params = { gestor: string | null; tier: string | null; grupo: string | null; ver: string | null };
 const PARAMS = ["gestor", "tier", "grupo", "ver"] as const;
 const VISITA = "radar:ultima-visita";
-
 // as mesmas cores do painel: agir = vencido, acompanhar = vence hoje; novo usa o verde-água da marca
 const COR = { agir: "#cc0000", acompanhar: "#cc851e", novo: "#00AFAA" };
 const MES = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
@@ -25,9 +25,6 @@ const fmtD = (s: string | null) => (s ? `${s.slice(8, 10)}/${s.slice(5, 7)}` : "
 const quando = (s: Sinal) => fmtD(s.publicado_em ?? s.coletado_em.slice(0, 10));
 const fmtVisita = (iso: string) =>
   new Date(iso).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
-
-// tier sempre com a sua cor (a mesma do painel)
-const ponto = (t: string) => <i className={"rd-dot" + (COR_TIER[t] ? "" : " sem")} style={{ background: COR_TIER[t] }} aria-hidden="true" />;
 
 const UP = (
   <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -112,6 +109,16 @@ export default function Radar({ gestorInicial }: { gestorInicial: string | null 
   const ctx = vis.filter((s) => s.prioridade === "contexto");
   const lead = manchete(comAcao, TIERS, hoje) as SinalTela | null;
   const refGrupo = doGrupo[0];
+
+  // seletor de cliente: só quem teve notícia no recorte (carteira e tier), com a contagem; o cliente aberto entra mesmo fora dele
+  const porCliente = new Map<string, OpcaoCliente>();
+  for (const s of noTier) {
+    const c = porCliente.get(s.grupo) ?? { nome: s.grupo, tier: s.tier, n: 0 };
+    c.n++;
+    porCliente.set(s.grupo, c);
+  }
+  if (p.grupo && !porCliente.has(p.grupo)) porCliente.set(p.grupo, { nome: p.grupo, tier: refGrupo?.tier ?? null, n: doGrupo.length });
+  const clientesSel = [...porCliente.values()].sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
 
   // ---------- votos ----------
   const votar = (s: SinalTela, util: boolean) => {
@@ -207,8 +214,8 @@ export default function Radar({ gestorInicial }: { gestorInicial: string | null 
           {s.tier}
         </span>
       )}
-      {novo(s) && <span className="rd-tag new">Novo</span>}
-      {s.prioridade === "agir" && <span className="rd-tag hot">Agir agora</span>}
+      {s.prioridade === "agir" && <span className="rd-st agir">· Pede ação</span>}
+      {novo(s) && <span className="rd-st novo">· Novo</span>}
     </div>
   );
   const ehVagas = (s: SinalTela) => s.tipo === "contratacao" && s.fontes.every((f) => f.url.includes("linkedin.com/jobs"));
@@ -244,7 +251,8 @@ export default function Radar({ gestorInicial }: { gestorInicial: string | null 
       <h4>{s.titulo}</h4>
       <p className="rd-ds">{s.resumo}</p>
       <p className="rd-go">
-        <b>Próximo passo:</b> {s.proximo_passo}
+        <span className="lb">Próximo passo</span>
+        {s.proximo_passo.charAt(0).toUpperCase() + s.proximo_passo.slice(1)}
       </p>
       {rodape(s)}
     </article>
@@ -374,39 +382,47 @@ export default function Radar({ gestorInicial }: { gestorInicial: string | null 
           </div>
         </header>
 
-        {!p.grupo && (
-          <div className="filters" id="filtros">
-            <span className="kicker">Filtrar</span>
-            <select aria-label="Gestor da conta" value={p.gestor && gestores.includes(p.gestor) ? p.gestor : ""} onChange={(e) => setParams({ gestor: e.target.value || null })}>
-              <option value="">Todos os gestores</option>
-              {gestores.map((g) => (
-                <option key={g} value={g}>
-                  {g}
-                </option>
-              ))}
-            </select>
-            {/* botões em vez de select: a opção do select não mostra a cor do tier */}
-            <span className="rd-tiers" role="group" aria-label="Tier do cliente">
-              <button type="button" aria-pressed={!p.tier} onClick={() => setParams({ tier: null })}>
-                Todos os tiers
-              </button>
-              {tiersDisp.map((t) => (
-                <button key={t} type="button" aria-pressed={p.tier === t} onClick={() => setParams({ tier: p.tier === t ? null : t })}>
-                  {ponto(t)}
-                  {t}
+        <div className="filters" id="filtros">
+          <span className="kicker">Filtrar</span>
+          {!p.grupo && (
+            <>
+              <select aria-label="Gestor da conta" value={p.gestor && gestores.includes(p.gestor) ? p.gestor : ""} onChange={(e) => setParams({ gestor: e.target.value || null })}>
+                <option value="">Todos os gestores</option>
+                {gestores.map((g) => (
+                  <option key={g} value={g}>
+                    {g}
+                  </option>
+                ))}
+              </select>
+            </>
+          )}
+          {/* atalho para a página do cliente; na página dele, troca de cliente sem voltar */}
+          <SeletorCliente clientes={clientesSel} valor={p.grupo} onEscolher={(g) => setParams({ grupo: g, ver: null }, true)} />
+          {!p.grupo && (
+            <>
+              {/* botões em vez de select: a opção do select não mostra a cor do tier */}
+              <span className="rd-tiers" role="group" aria-label="Tier do cliente">
+                <button type="button" aria-pressed={!p.tier} onClick={() => setParams({ tier: null })}>
+                  Todos os tiers
                 </button>
-              ))}
-            </span>
-            <select aria-label="Mostrar" value={p.ver ?? ""} onChange={(e) => setParams({ ver: e.target.value || null })}>
-              <option value="">{`Todas as notícias (${noTier.length})`}</option>
-              <option value="novos">{`Só as novas (${noTier.filter(novo).length})`}</option>
-              <option value="agir">{`Só as que pedem ação (${noTier.filter((s) => s.prioridade === "agir").length})`}</option>
-            </select>
-            <button type="button" className="reset" onClick={() => setParams({ gestor: null, tier: null, ver: null })}>
-              Limpar
-            </button>
-          </div>
-        )}
+                {tiersDisp.map((t) => (
+                  <button key={t} type="button" aria-pressed={p.tier === t} onClick={() => setParams({ tier: p.tier === t ? null : t })}>
+                    {ponto(t)}
+                    {t}
+                  </button>
+                ))}
+              </span>
+              <select aria-label="Mostrar" value={p.ver ?? ""} onChange={(e) => setParams({ ver: e.target.value || null })}>
+                <option value="">{`Todas as notícias (${noTier.length})`}</option>
+                <option value="novos">{`Só as novas (${noTier.filter(novo).length})`}</option>
+                <option value="agir">{`Só as que pedem ação (${noTier.filter((s) => s.prioridade === "agir").length})`}</option>
+              </select>
+            </>
+          )}
+          <button type="button" className="reset" onClick={() => setParams({ gestor: null, tier: null, ver: null, grupo: null }, !!p.grupo)}>
+            Limpar
+          </button>
+        </div>
 
         <div className="sheet">
           <div className="next" id="comece">
