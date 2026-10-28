@@ -433,9 +433,7 @@ export default function Radar({ gestorInicial }: { gestorInicial: string | null 
                     ? "Tudo o que o Radar encontrou sobre o cliente nos últimos 90 dias, do que pede ação ao que é só para acompanhar."
                     : "Só aparece aqui o cliente que teve notícia. Clique no nome do cliente para ver o histórico dele."}
                 </p>
-              </div>
-              <aside className="note">Notícias e posts públicos da web e do LinkedIn, triados por IA e cruzados com as unidades que atendemos. Marque 👍/👎 para calibrar.</aside>
-            </div>
+              </div>            </div>
             {lista}
             {ctx.length > 0 && (
               <details className="rd-ctx">
