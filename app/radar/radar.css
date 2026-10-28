@@ -3,6 +3,15 @@
 .bm .mast-w.rd-mast-grupo{font-size:clamp(56px,7vw,112px);white-space:normal;line-height:.9;letter-spacing:-.05em;margin-top:6px}
 .bm .rd-empty{padding:28px 4px;color:var(--gray-1);font-size:15px}
 
+/* tier sempre com a sua cor: pontinho igual ao do painel */
+.bm .rd-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin:0 5px 1px 0;vertical-align:middle;flex:none}
+.bm .rd-dot.sem{box-shadow:inset 0 0 0 1px var(--gray-2)}
+.bm .hello .rd-dot{width:.34em;height:.34em;margin:0 .2em .12em .08em}
+.bm .filters .rd-tiers{display:inline-flex;flex-wrap:wrap;gap:6px}
+.bm .filters .rd-tiers button{display:inline-flex;align-items:center;font-family:var(--ws);font-size:12.5px;color:var(--navy);background:#fff;border:1px solid var(--gray-3);border-radius:99px;padding:6px 13px;text-decoration:none;cursor:pointer}
+.bm .filters .rd-tiers button:hover{border-color:var(--teal)}
+.bm .filters .rd-tiers button[aria-pressed="true"]{border-color:var(--navy);box-shadow:inset 0 0 0 1px var(--navy);font-weight:600}
+
 /* seções e cartões */
 .bm .rd-sec{margin-top:32px}
 .bm .rd-sh{display:flex;align-items:baseline;gap:10px;padding:0 4px 12px;margin-bottom:10px;border-bottom:1px solid var(--gray-3)}

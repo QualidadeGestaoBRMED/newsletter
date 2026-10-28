@@ -26,5 +26,17 @@ export type Linha = {
 
 export const ID_EDICAO = /^\d{4}-\d{2}-\d{2}-(manha|tarde)$/;
 
+// Cor do pontinho de cada tier (painel e Radar); longe do âmbar e do ferrugem, que no painel são status.
+// Tier sempre aparece com a sua cor.
+export const COR_TIER: Record<string, string> = {
+  Diamante: "#2EC4E6",
+  Ouro: "#E3B341",
+  Prata: "#AEB6BC",
+  Bronze: "#B9825A",
+  "Bronze(-)": "#D9B79A",
+  RG: "#7E8C96",
+  "Parceiros / Cortesia": "#C9A9D6",
+};
+
 /** Um ponto do gráfico de evolução: contagens de uma edição da manhã. */
 export type PontoSerie = { id: string; data: string; vencidas: number; hoje: number; radar: number };

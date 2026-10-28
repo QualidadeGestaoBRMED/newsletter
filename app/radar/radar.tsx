@@ -4,6 +4,7 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { TIERS } from "@/jobs/config";
+import { COR_TIER } from "@/lib/painel";
 import { manchete, ordenarSinais, PERIODOS, periodoDe, type Sinal } from "@/lib/radar";
 
 type SinalTela = Sinal & { voto: boolean | null };
@@ -24,6 +25,9 @@ const fmtD = (s: string | null) => (s ? `${s.slice(8, 10)}/${s.slice(5, 7)}` : "
 const quando = (s: Sinal) => fmtD(s.publicado_em ?? s.coletado_em.slice(0, 10));
 const fmtVisita = (iso: string) =>
   new Date(iso).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
+
+// tier sempre com a sua cor (a mesma do painel)
+const ponto = (t: string) => <i className={"rd-dot" + (COR_TIER[t] ? "" : " sem")} style={{ background: COR_TIER[t] }} aria-hidden="true" />;
 
 const UP = (
   <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -151,7 +155,20 @@ export default function Radar({ gestorInicial }: { gestorInicial: string | null 
 
   // ---------- capa (a mesma do painel de prazos) ----------
   const nome = first(p.gestor);
-  const hello = p.grupo ? (refGrupo?.tier ? `Cliente ${refGrupo.tier}.` : "Cliente.") : nome ? `Bom dia, ${nome}.` : "Bom dia.";
+  const hello: ReactNode = p.grupo ? (
+    refGrupo?.tier ? (
+      <>
+        Cliente {ponto(refGrupo.tier)}
+        {refGrupo.tier}.
+      </>
+    ) : (
+      "Cliente."
+    )
+  ) : nome ? (
+    `Bom dia, ${nome}.`
+  ) : (
+    "Bom dia."
+  );
   const claim = !sinais
     ? erro
       ? "Não foi possível carregar o Radar."
@@ -184,7 +201,12 @@ export default function Radar({ gestorInicial }: { gestorInicial: string | null 
           {s.grupo}
         </button>
       )}
-      {s.tier && <span className="tier">· {s.tier}</span>}
+      {s.tier && (
+        <span className="tier">
+          · {ponto(s.tier)}
+          {s.tier}
+        </span>
+      )}
       {novo(s) && <span className="rd-tag new">Novo</span>}
       {s.prioridade === "agir" && <span className="rd-tag hot">Agir agora</span>}
     </div>
@@ -363,14 +385,18 @@ export default function Radar({ gestorInicial }: { gestorInicial: string | null 
                 </option>
               ))}
             </select>
-            <select aria-label="Tier do cliente" value={p.tier ?? ""} onChange={(e) => setParams({ tier: e.target.value || null })}>
-              <option value="">Todos os tiers</option>
+            {/* botões em vez de select: a opção do select não mostra a cor do tier */}
+            <span className="rd-tiers" role="group" aria-label="Tier do cliente">
+              <button type="button" aria-pressed={!p.tier} onClick={() => setParams({ tier: null })}>
+                Todos os tiers
+              </button>
               {tiersDisp.map((t) => (
-                <option key={t} value={t}>
+                <button key={t} type="button" aria-pressed={p.tier === t} onClick={() => setParams({ tier: p.tier === t ? null : t })}>
+                  {ponto(t)}
                   {t}
-                </option>
+                </button>
               ))}
-            </select>
+            </span>
             <select aria-label="Mostrar" value={p.ver ?? ""} onChange={(e) => setParams({ ver: e.target.value || null })}>
               <option value="">{`Todas as notícias (${noTier.length})`}</option>
               <option value="novos">{`Só as novas (${noTier.filter(novo).length})`}</option>

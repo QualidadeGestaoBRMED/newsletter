@@ -5,7 +5,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { TIERS } from "@/jobs/config";
 import Evolucao from "./evolucao";
-import { ID_EDICAO, type EdicaoResumo, type Linha, type Periodo } from "@/lib/painel";
+import { COR_TIER, ID_EDICAO, type EdicaoResumo, type Linha, type Periodo } from "@/lib/painel";
 
 type Row = Linha & { done: boolean; off: number };
 type Params = { ed: string | null; gestor: string | null; grupo: string | null; empresa: string | null; area: string | null; tier: string | null };
@@ -49,16 +49,6 @@ const ramp = (t: number) => `rgb(${R0.map((a, i) => Math.round(a + (R1[i] - a) *
 
 const PARAMS = ["ed", "gestor", "grupo", "empresa", "area", "tier"] as const;
 // tiers na ordem da régua; valores fora dela (esquema antigo) e "Sem tier" vão para o fim
-// cor do pontinho de cada tier; longe do âmbar e do ferrugem, que no painel são status
-const COR_TIER: Record<string, string> = {
-  Diamante: "#2EC4E6",
-  Ouro: "#E3B341",
-  Prata: "#AEB6BC",
-  Bronze: "#B9825A",
-  "Bronze(-)": "#D9B79A",
-  RG: "#7E8C96",
-  "Parceiros / Cortesia": "#C9A9D6",
-};
 const ordemTier = (t: string) => (TIERS.includes(t) ? TIERS.indexOf(t) : t === "Sem tier" ? TIERS.length + 1 : TIERS.length);
 
 export default function Painel({ gestorInicial }: { gestorInicial: string | null }) {
