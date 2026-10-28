@@ -346,34 +346,38 @@ export default function Painel({ gestorInicial }: { gestorInicial: string | null
                 <img alt="BR MED" src="/logo-brmed.png" />
               </div>
               <div className="cover-right">
-                <div className="cover-client">
-                  <b>BRIEFING</b>&ensp;·&ensp;PRAZOS DO CLIENTE
-                </div>
-                {/* seletor e link na mesma linha: o canto não pode crescer para baixo, onde ficam as bolhas */}
-                <div className="cover-acts">
-                  <select
-                    className="ed-sel"
-                    aria-label="Edição"
-                    value={sel?.id ?? ""}
-                    onChange={(e) => {
-                      setOpen({});
-                      setParams({ ed: e.target.value || null });
-                    }}
-                  >
-                    {edicoes?.map((e) => {
-                      const x = day(e.data);
-                      return (
-                        <option key={e.id} value={e.id}>
-                          {`${e.id === padrao?.id ? "Atual: " : ""}${DIA[x.getDay()].slice(0, 3)} ${fmtD(e.data)}, ${e.periodo === "tarde" ? "18:00" : "07:00"}`}
-                        </option>
-                      );
-                    })}
-                  </select>
-                  <a className="radar-link" href={`/radar${p.gestor || p.tier ? "?" + new URLSearchParams(Object.entries({ gestor: p.gestor, tier: p.tier }).filter(([, v]) => v) as [string, string][]) : ""}`}>
-                    <span className="rl-longo">Radar de clientes</span>
-                    <span className="rl-curto">Radar</span> →
+                {/* a linha do Briefing é a navegação entre as seções: nada novo no canto, onde ficam as bolhas */}
+                <nav className="cover-client" aria-label="Seções do Briefing">
+                  <b>BRIEFING</b>
+                  <i aria-hidden="true">·</i>
+                  <span className="sec on" aria-current="page">
+                    <span className="sec-l">PRAZOS DO CLIENTE</span>
+                    <span className="sec-c">PRAZOS</span>
+                  </span>
+                  <i aria-hidden="true">·</i>
+                  <a className="sec" href={`/radar${p.gestor || p.tier ? "?" + new URLSearchParams(Object.entries({ gestor: p.gestor, tier: p.tier }).filter(([, v]) => v) as [string, string][]) : ""}`}>
+                    <span className="sec-l">RADAR DE CLIENTES</span>
+                    <span className="sec-c">RADAR</span>
                   </a>
-                </div>
+                </nav>
+                <select
+                  className="ed-sel"
+                  aria-label="Edição"
+                  value={sel?.id ?? ""}
+                  onChange={(e) => {
+                    setOpen({});
+                    setParams({ ed: e.target.value || null });
+                  }}
+                >
+                  {edicoes?.map((e) => {
+                    const x = day(e.data);
+                    return (
+                      <option key={e.id} value={e.id}>
+                        {`${e.id === padrao?.id ? "Atual: " : ""}${DIA[x.getDay()].slice(0, 3)} ${fmtD(e.data)}, ${e.periodo === "tarde" ? "18:00" : "07:00"}`}
+                      </option>
+                    );
+                  })}
+                </select>
               </div>
             </div>
             <div className="bubbles" role="img" aria-label={ok ? bolhas.map((x) => `${x[0]} ${x[1]}`).join(", ") : undefined}>

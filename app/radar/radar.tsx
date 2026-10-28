@@ -2,7 +2,7 @@
 // Radar de clientes: o "jornal" (só o que é notícia, na carteira e no tier escolhidos) e a página de cada cliente (?grupo=),
 // com o histórico. Mesma capa, filtros e "Comece por aqui" do painel de prazos; os filtros ficam na URL (?gestor=&tier=&grupo=&ver=).
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { TIERS } from "@/jobs/config";
 import { manchete, ordenarSinais, PERIODOS, periodoDe, type Sinal } from "@/lib/radar";
 
@@ -78,6 +78,15 @@ export default function Radar({ gestorInicial }: { gestorInicial: string | null 
       .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
       .then((j) => setSinais(j.sinais))
       .catch(() => setErro(true));
+  }, []);
+
+  const docRef = useRef<HTMLElement>(null);
+  const [largura, setLargura] = useState(1000);
+  useLayoutEffect(() => {
+    const medir = () => setLargura(docRef.current?.clientWidth || 1000);
+    medir();
+    addEventListener("resize", medir);
+    return () => removeEventListener("resize", medir);
   }, []);
 
   const hoje = hojeSP();
@@ -259,10 +268,11 @@ export default function Radar({ gestorInicial }: { gestorInicial: string | null 
     );
   }
 
-  const k = 1;
+  // bolhas menores em tela estreita, como no painel
+  const k = largura < 760 ? 0.8 : 1;
   return (
     <div className="bm">
-      <article className="doc">
+      <article className="doc" ref={docRef}>
         <header className="cover" id="topo">
           <div className="cover-teal">
             <span className="block" aria-hidden="true" />
@@ -273,17 +283,24 @@ export default function Radar({ gestorInicial }: { gestorInicial: string | null 
                 <img alt="BR MED" src="/logo-brmed.png" />
               </div>
               <div className="cover-right">
-                <div className="cover-client">
-                  <b>BRIEFING</b>&ensp;·&ensp;RADAR DE CLIENTES
-                </div>
-                {p.grupo ? (
-                  <button type="button" className="radar-link" onClick={() => setParams({ grupo: null }, true)}>
+                <nav className="cover-client" aria-label="Seções do Briefing">
+                  <b>BRIEFING</b>
+                  <i aria-hidden="true">·</i>
+                  <a className="sec" href={linkPrazos()}>
+                    <span className="sec-l">PRAZOS DO CLIENTE</span>
+                    <span className="sec-c">PRAZOS</span>
+                  </a>
+                  <i aria-hidden="true">·</i>
+                  <span className="sec on" aria-current="page">
+                    <span className="sec-l">RADAR DE CLIENTES</span>
+                    <span className="sec-c">RADAR</span>
+                  </span>
+                </nav>
+                {/* no lugar do seletor de edição do painel: mesmo peso visual no canto */}
+                {p.grupo && (
+                  <button type="button" className="ed-sel" onClick={() => setParams({ grupo: null }, true)}>
                     ← Todas as notícias
                   </button>
-                ) : (
-                  <a className="radar-link" href={linkPrazos()}>
-                    ← Prazos do cliente
-                  </a>
                 )}
               </div>
             </div>
