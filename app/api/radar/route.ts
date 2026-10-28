@@ -1,9 +1,9 @@
 // Sinais do Radar dos últimos 90 dias, com o voto de quem está lendo. A tela filtra por gestor, tier e grupo.
-import { and, desc, eq, gte } from "drizzle-orm";
+import { and, desc, eq, gte, inArray } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { db, schema } from "@/db";
-import type { Sinal } from "@/lib/radar";
+import { TIERS_RADAR, type Sinal } from "@/lib/radar";
 
 export const dynamic = "force-dynamic";
 
@@ -21,7 +21,7 @@ export async function GET() {
     .select({ sinal: s, util: f.util })
     .from(s)
     .leftJoin(f, and(eq(f.sinal_id, s.id), eq(f.email, email)))
-    .where(gte(s.coletado_em, desde))
+    .where(and(gte(s.coletado_em, desde), inArray(s.tier, TIERS_RADAR)))
     .orderBy(desc(s.coletado_em))
     .limit(2000);
 

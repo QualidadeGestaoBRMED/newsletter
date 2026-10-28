@@ -41,7 +41,6 @@ jobs:
       DATABASE_URL_UNPOOLED: ${{ secrets.DATABASE_URL_UNPOOLED }}
       SERPER_API_KEY: ${{ secrets.SERPER_API_KEY }}
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-      RADAR_TIERS: ${{ vars.RADAR_TIERS }}
       RADAR_MODELO: ${{ vars.RADAR_MODELO }}
       MANDRILL_API_KEY: ${{ secrets.MANDRILL_API_KEY }}
       REMETENTE_EMAIL: ${{ secrets.REMETENTE_EMAIL }}

@@ -2,6 +2,10 @@
 
 export type Prioridade = "agir" | "acompanhar" | "contexto";
 
+/** O Radar cobre só os clientes Diamante e Ouro: o job não coleta os demais e a tela não os mostra. */
+export const TIERS_RADAR = ["Diamante", "Ouro"];
+export const noRadar = (tier: string | null) => !!tier && TIERS_RADAR.includes(tier);
+
 export const TIPOS_SINAL = [
   "expansao",
   "nova_unidade",

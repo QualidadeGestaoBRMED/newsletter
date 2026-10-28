@@ -1,7 +1,7 @@
 // Monta o e-mail de cada gestor e envia. O envio fica atrás de `Remetente` para trocar Mandrill por Gmail/SMTP.
 import { readFileSync } from "node:fs";
 import { render } from "@react-email/render";
-import NewsletterGestor from "../emails/NewsletterGestor";
+import NewsletterGestor, { type RadarEmail } from "../emails/NewsletterGestor";
 import { HORARIO, type Periodo } from "./config";
 import { numeros, type Carteira } from "./edicao";
 import { exigir } from "./env";
@@ -48,12 +48,28 @@ export function linkPainel(data: Dia, periodo: Periodo, gestor?: string) {
   return u.toString();
 }
 
-export async function montarEmail(c: Carteira, data: Dia, periodo: Periodo, para = c.email): Promise<Mensagem> {
+/** Radar de clientes na carteira do gestor. */
+export function linkRadar(gestor: string) {
+  const u = new URL("/radar", exigir("PAINEL_URL"));
+  u.searchParams.set("gestor", gestor);
+  return u.toString();
+}
+
+export async function montarEmail(c: Carteira, data: Dia, periodo: Periodo, para = c.email, radar?: RadarEmail | null): Promise<Mensagem> {
   if (!para) throw new Error(`Gestor ${c.nome} sem e-mail`);
   const n = numeros(c.itens);
   const tarde = periodo === "tarde";
 
-  const props = { nome: c.nome, periodo, data, horario: HORARIO[periodo], numeros: n, linkPainel: linkPainel(data, periodo, c.nome), logo: `cid:${LOGO.nome}` };
+  const props = {
+    nome: c.nome,
+    periodo,
+    data,
+    horario: HORARIO[periodo],
+    numeros: n,
+    linkPainel: linkPainel(data, periodo, c.nome),
+    logo: `cid:${LOGO.nome}`,
+    radar,
+  };
   // sem data: o e-mail chega no próprio dia e horário da edição
   const assunto = tarde
     ? `Prazos: ${n.concluidas} resolvidas, ${n.viramAtraso} viram atraso amanhã · tarde`

@@ -2,23 +2,14 @@
 import { createHash } from "node:crypto";
 import { diasEntre, somarDias, type Dia } from "./regras";
 
-/** Tiers monitorados por padrão. RADAR_TIERS (separados por vírgula) troca a lista. */
-export const TIERS_RADAR_PADRAO = ["Diamante", "Ouro"];
-
-// Dias da semana (0 = domingo) em que cada tier é coletado. Tier fora daqui: só às segundas.
+// Dias da semana (0 = domingo) em que cada tier do Radar (lib/radar.ts) é coletado.
 const FREQUENCIA: Record<string, number[]> = {
   Diamante: [1, 2, 3, 4, 5],
   Ouro: [1, 3, 5],
-  Prata: [1, 4],
 };
 
-export const tiersMonitorados = (v = process.env.RADAR_TIERS ?? "") => {
-  const lista = v.split(",").map((t) => t.trim()).filter(Boolean);
-  return lista.length ? lista : TIERS_RADAR_PADRAO;
-};
-
-/** O grupo é coletado neste dia da semana? */
-export const coletaHoje = (tier: string | null, diaSemana: number) => (FREQUENCIA[tier ?? ""] ?? [1]).includes(diaSemana);
+/** O grupo é coletado neste dia da semana? Tier fora do Radar nunca é. */
+export const coletaHoje = (tier: string | null, diaSemana: number) => (FREQUENCIA[tier ?? ""] ?? []).includes(diaSemana);
 
 /** Item coletado de uma busca (notícia, post ou página de vagas do LinkedIn). */
 export type ItemColetado = {

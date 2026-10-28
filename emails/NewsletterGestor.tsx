@@ -1,8 +1,9 @@
 // Template do e-mail por gestor. HTML de tabela, sem JS. Curto de propósito: o detalhe fica no painel,
 // o e-mail só dá os números do dia e leva até lá.
-import { Body, Button, Column, Container, Head, Html, Img, Preview, Row, Section, Text } from "@react-email/components";
+import { Body, Button, Column, Container, Head, Html, Img, Link, Preview, Row, Section, Text } from "@react-email/components";
 import type { Periodo } from "../jobs/config";
 import type { Numeros } from "../jobs/edicao";
+import { COR_TIER } from "../lib/painel";
 
 const C = {
   navy: "#193B4F",
@@ -21,6 +22,14 @@ const RB = "Roboto, Arial, sans-serif";
 const pl = (n: number, um: string, varios: string) => (n === 1 ? um : varios);
 const fmt = (n: number) => new Intl.NumberFormat("pt-BR").format(n);
 
+/** Notícias novas da carteira no Radar desde a edição anterior; até 3 manchetes, as mais fortes primeiro. */
+export type RadarEmail = {
+  novas: number;
+  agir: number;
+  itens: { grupo: string; tier: string | null; titulo: string; agir: boolean }[];
+  link: string;
+};
+
 export type NewsletterProps = {
   nome: string;
   periodo: Periodo;
@@ -30,7 +39,47 @@ export type NewsletterProps = {
   linkPainel: string;
   /** src do logo branco: "cid:..." no envio (imagem embutida), data URI na prévia */
   logo: string;
+  /** sem notícia nova, o bloco do Radar não aparece */
+  radar?: RadarEmail | null;
 };
+
+// Bloco do Radar: as mesmas regras do painel (tier sempre com a sua cor, "pede ação" em vermelho, sem pílulas)
+function BlocoRadar({ r }: { r: RadarEmail }) {
+  const resto = r.novas - r.itens.length;
+  return (
+    <Section style={{ background: "#FFFFFF", padding: "8px 36px 0" }}>
+      <div style={{ height: 1, background: C.cinza3, fontSize: 0, lineHeight: 0, margin: "0 0 26px" }}>&nbsp;</div>
+      <Text style={{ margin: 0, fontFamily: WS, fontSize: 11, lineHeight: "14px", fontWeight: 600, letterSpacing: "0.16em", textTransform: "uppercase", color: C.teal }}>
+        Radar dos seus clientes
+      </Text>
+      <Text style={{ margin: "6px 0 4px", fontFamily: WS, fontSize: 20, lineHeight: "26px", fontWeight: 300, color: C.navy }}>
+        {`${fmt(r.novas)} ${pl(r.novas, "notícia nova", "notícias novas")}`}
+        {r.agir > 0 && <b style={{ fontWeight: 600 }}>{`, ${fmt(r.agir)} ${pl(r.agir, "pede", "pedem")} ação`}</b>}
+      </Text>
+      {r.itens.map((it) => (
+        <div key={it.titulo} style={{ padding: "14px 0", borderBottom: `1px solid ${C.cinza3}` }}>
+          <Text style={{ margin: 0, fontFamily: WS, fontSize: 11, lineHeight: "15px", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", color: C.cinza1 }}>
+            {it.grupo}
+            {it.tier && (
+              <span style={{ fontWeight: 400, letterSpacing: 0, textTransform: "none" }}>
+                {" · "}
+                <span style={{ display: "inline-block", width: 7, height: 7, borderRadius: "50%", background: COR_TIER[it.tier] ?? C.cinza2, margin: "0 5px 1px 0", verticalAlign: "middle" }}>&nbsp;</span>
+                {it.tier}
+              </span>
+            )}
+            {it.agir && <span style={{ color: STATUS.vencido }}>{" · Pede ação"}</span>}
+          </Text>
+          <Text style={{ margin: "4px 0 0", fontFamily: WS, fontSize: 16, lineHeight: "22px", fontWeight: 500, color: C.navy }}>{it.titulo}</Text>
+        </div>
+      ))}
+      <Text style={{ margin: "16px 0 0", fontFamily: RB, fontSize: 14, lineHeight: "20px" }}>
+        <Link href={r.link} style={{ fontFamily: WS, fontWeight: 600, color: C.teal, textDecoration: "none" }}>
+          {resto > 0 ? `Ver as ${fmt(r.novas)} no Radar →` : "Ver no Radar →"}
+        </Link>
+      </Text>
+    </Section>
+  );
+}
 
 // a cor do status vai na barrinha, como o ponto da legenda do painel; o número fica navy, legível em qualquer status
 function Numero({ valor, rotulo, cor }: { valor: number; rotulo: string; cor: string }) {
@@ -43,7 +92,7 @@ function Numero({ valor, rotulo, cor }: { valor: number; rotulo: string; cor: st
   );
 }
 
-export default function NewsletterGestor({ nome, periodo, data, horario, numeros: n, linkPainel, logo }: NewsletterProps) {
+export default function NewsletterGestor({ nome, periodo, data, horario, numeros: n, linkPainel, logo, radar }: NewsletterProps) {
   const tarde = periodo === "tarde";
   const primeiro = nome.split(" ")[0] || "time";
   const saudacao = tarde ? `Boa noite, ${primeiro}.` : `Bom dia, ${primeiro}.`;
@@ -89,6 +138,8 @@ export default function NewsletterGestor({ nome, periodo, data, horario, numeros
               ))}
             </Row>
           </Section>
+
+          {radar && radar.itens.length > 0 && <BlocoRadar r={radar} />}
 
           <Section style={{ background: "#FFFFFF", borderRadius: "0 0 20px 20px", padding: "28px 36px 36px", textAlign: "center" }}>
             <Button

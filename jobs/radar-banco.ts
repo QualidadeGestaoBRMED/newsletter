@@ -1,7 +1,9 @@
 // Banco do Radar: de onde vêm os grupos monitorados e onde os sinais ficam.
 import "./env";
-import { and, desc, eq, gte, inArray } from "drizzle-orm";
+import { and, desc, eq, gte, inArray, ne } from "drizzle-orm";
 import { db, pool, schema } from "../db";
+import type { RadarEmail } from "../emails/NewsletterGestor";
+import { ordenarSinais, TIERS_RADAR, type Sinal } from "../lib/radar";
 import { idSinal, type ItemColetado } from "./radar-regras";
 import type { SinalTriado } from "./radar-triagem";
 import { somarDias, type Dia } from "./regras";
@@ -90,6 +92,27 @@ export async function gravarSinais(g: GrupoRadar, itens: ItemColetado[], sinais:
         .onConflictDoNothing();
     }
   });
+}
+
+/**
+ * Bloco do Radar no e-mail do gestor: o que entrou na carteira desde `desde` (a edição anterior), sem as notas de contexto.
+ * Até 3 manchetes, na ordem do jornal (pede ação, tier, mais recente). Sem notícia nova, null.
+ */
+export async function radarDaCarteira(gestor: string, desde: Date, link: string): Promise<RadarEmail | null> {
+  const s = schema.radarSinais;
+  const rows = await db
+    .select()
+    .from(s)
+    .where(and(eq(s.gestor_nome, gestor), gte(s.coletado_em, desde), inArray(s.tier, TIERS_RADAR), ne(s.prioridade, "contexto")));
+  if (!rows.length) return null;
+  const sinais: Sinal[] = rows.map((x) => ({ ...x, gestor: x.gestor_nome, coletado_em: x.coletado_em.toISOString() }));
+  const ord = ordenarSinais(sinais, TIERS_RADAR);
+  return {
+    novas: ord.length,
+    agir: ord.filter((x) => x.prioridade === "agir").length,
+    itens: ord.slice(0, 3).map((x) => ({ grupo: x.grupo, tier: x.tier, titulo: x.titulo, agir: x.prioridade === "agir" })),
+    link,
+  };
 }
 
 export const fecharBanco = () => pool.end();

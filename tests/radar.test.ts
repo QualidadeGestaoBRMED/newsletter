@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { manchete, ordenarSinais, periodoDe, type Sinal } from "../lib/radar";
-import { coletaHoje, dataLinkedin, dataRelativa, dentroDaJanela, filtrarItens, idSinal, tiersMonitorados, type ItemColetado } from "../jobs/radar-regras";
+import { manchete, noRadar, ordenarSinais, periodoDe, type Sinal } from "../lib/radar";
+import { coletaHoje, dataLinkedin, dataRelativa, dentroDaJanela, filtrarItens, idSinal, type ItemColetado } from "../jobs/radar-regras";
 
 const HOJE = "2026-10-28";
 
@@ -32,17 +32,15 @@ describe("dataLinkedin", () => {
 });
 
 describe("frequência por tier", () => {
-  it("Diamante todo dia útil, Ouro seg/qua/sex, demais só segunda", () => {
+  it("Diamante todo dia útil, Ouro seg/qua/sex", () => {
     expect([1, 2, 3, 4, 5].every((d) => coletaHoje("Diamante", d))).toBe(true);
     expect([1, 3, 5].map((d) => coletaHoje("Ouro", d))).toEqual([true, true, true]);
     expect(coletaHoje("Ouro", 2)).toBe(false);
-    expect(coletaHoje("Bronze", 1)).toBe(true);
-    expect(coletaHoje("Bronze", 3)).toBe(false);
-    expect(coletaHoje(null, 1)).toBe(true);
   });
-  it("RADAR_TIERS troca a lista padrão", () => {
-    expect(tiersMonitorados("")).toEqual(["Diamante", "Ouro"]);
-    expect(tiersMonitorados("Diamante, Prata")).toEqual(["Diamante", "Prata"]);
+  it("só Diamante e Ouro entram no Radar", () => {
+    expect(coletaHoje("Prata", 1)).toBe(false);
+    expect(coletaHoje(null, 1)).toBe(false);
+    expect([noRadar("Diamante"), noRadar("Ouro"), noRadar("Prata"), noRadar(null)]).toEqual([true, true, false, false]);
   });
 });
 

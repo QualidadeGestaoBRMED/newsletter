@@ -6,7 +6,8 @@
 //   --janela    período da busca: d (24 h), w (7 dias, padrão), m (30 dias)
 import "./env";
 import { coletar } from "./radar-coleta";
-import { coletaHoje, dentroDaJanela, filtrarItens, tiersMonitorados } from "./radar-regras";
+import { noRadar, TIERS_RADAR } from "../lib/radar";
+import { coletaHoje, dentroDaJanela, filtrarItens } from "./radar-regras";
 import { triar, uso } from "./radar-triagem";
 import { hojeEmSP } from "./regras";
 
@@ -28,9 +29,9 @@ async function main() {
     if (so) {
       grupos = grupos.filter((g) => g.nome === so);
       if (!grupos.length) throw new Error(`Grupo "${so}" não aparece nas edições dos últimos 30 dias`);
+      if (!noRadar(grupos[0].tier)) throw new Error(`Grupo "${so}" é ${grupos[0].tier ?? "sem tier"}: o Radar cobre só ${TIERS_RADAR.join(" e ")}`);
     } else {
-      const tiers = tiersMonitorados();
-      grupos = grupos.filter((g) => g.tier && tiers.includes(g.tier) && (flag("todos") || coletaHoje(g.tier, diaSemana)));
+      grupos = grupos.filter((g) => noRadar(g.tier) && (flag("todos") || coletaHoje(g.tier, diaSemana)));
     }
     const limite = Number(arg("limite"));
     if (limite > 0) grupos = grupos.slice(0, limite);
