@@ -341,13 +341,11 @@ export default function Painel({ gestorInicial }: { gestorInicial: string | null
                   <b>BRIEFING</b>
                   <i aria-hidden="true">·</i>
                   <span className="sec on" aria-current="page">
-                    <span className="sec-l">PRAZOS DO CLIENTE</span>
-                    <span className="sec-c">PRAZOS</span>
+                    PRAZOS
                   </span>
                   <i aria-hidden="true">·</i>
                   <a className="sec" href={`/radar${p.gestor || p.tier ? "?" + new URLSearchParams(Object.entries({ gestor: p.gestor, tier: p.tier }).filter(([, v]) => v) as [string, string][]) : ""}`}>
-                    <span className="sec-l">RADAR DE CLIENTES</span>
-                    <span className="sec-c">RADAR</span>
+                    CLIENTES
                   </a>
                 </nav>
                 <select

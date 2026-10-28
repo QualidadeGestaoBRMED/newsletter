@@ -3,6 +3,11 @@
 .bm .mast-w.rd-mast-grupo{font-size:clamp(56px,7vw,112px);white-space:normal;line-height:.9;letter-spacing:-.05em;margin-top:6px}
 .bm .rd-empty{padding:28px 4px;color:var(--gray-1);font-size:15px}
 
+/* status na linha do cliente: só tipografia e cor, como no painel */
+.bm .rd-st{font-weight:600}
+.bm .rd-st.agir{color:#cc0000}
+.bm .rd-st.novo{color:var(--teal)}
+
 /* seletor de cliente (lista com busca; o <select> não mostra a cor do tier) */
 .bm .rd-csel{position:relative}
 .bm .filters .rd-csel-b{display:inline-flex;align-items:center;gap:0;font-family:var(--ws);font-size:12.5px;color:var(--navy);background:#fff;border:1px solid var(--gray-3);border-radius:99px;padding:7px 12px 7px 14px;cursor:pointer;text-decoration:none;max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}

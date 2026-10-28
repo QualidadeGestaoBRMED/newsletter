@@ -36,8 +36,6 @@ html,body{margin:0;background:#E9EDEF}
 .bm .cover-client .sec{color:rgba(255,255,255,.6);text-decoration:none;padding-bottom:3px;border-bottom:2px solid transparent;transition:color .15s,border-color .15s}
 .bm .cover-client a.sec:hover{color:#fff;border-bottom-color:rgba(255,255,255,.45)}
 .bm .cover-client .sec.on{color:#fff;border-bottom-color:var(--teal-vivid)}
-.bm .cover-client .sec-c{display:none}
-@media (max-width:560px){.bm .cover-client .sec-l{display:none}.bm .cover-client .sec-c{display:inline}}
 .bm .bubbles{position:absolute;right:64px;bottom:0;transform:translateY(50%);display:flex;align-items:center;z-index:2}
 .bm .bub{flex:0 0 auto;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-family:var(--ws);box-shadow:0 0 0 5px var(--navy);font-variant-numeric:tabular-nums;font-weight:400;letter-spacing:-.02em}
 .bm .bub+.bub{margin-left:-6px}
