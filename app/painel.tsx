@@ -349,6 +349,9 @@ export default function Painel({ gestorInicial }: { gestorInicial: string | null
                 <div className="cover-client">
                   <b>BRIEFING</b>&ensp;·&ensp;PRAZOS DO CLIENTE
                 </div>
+                <a className="radar-link" href={`/radar${p.gestor || p.tier ? "?" + new URLSearchParams(Object.entries({ gestor: p.gestor, tier: p.tier }).filter(([, v]) => v) as [string, string][]) : ""}`}>
+                  Radar de clientes →
+                </a>
                 <select
                   className="ed-sel"
                   aria-label="Edição"

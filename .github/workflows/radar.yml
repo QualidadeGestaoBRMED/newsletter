@@ -1,0 +1,80 @@
+# Radar de clientes: coleta notícias e LinkedIn dos grupos monitorados, faz a triagem por IA e grava os sinais no Postgres (Neon).
+name: Radar de clientes
+
+on:
+  schedule:
+    # 06:00 BRT = 09:00 UTC, antes da edição da manhã. Cada tier tem a sua frequência (jobs/radar-regras.ts).
+    - cron: "0 9 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      grupo:
+        description: Um grupo só (nome exato, como na edição). Vazio = todos os do dia
+        type: string
+        required: false
+      janela:
+        description: Período da busca
+        type: choice
+        options: [w, d, m]
+        default: w
+      todos:
+        description: Ignorar a frequência por tier (primeira carga)
+        type: boolean
+        default: false
+      dry_run:
+        description: Só coletar e imprimir, sem IA e sem gravar
+        type: boolean
+        default: false
+
+concurrency:
+  group: radar
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  radar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DATABASE_URL_UNPOOLED: ${{ secrets.DATABASE_URL_UNPOOLED }}
+      SERPER_API_KEY: ${{ secrets.SERPER_API_KEY }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      RADAR_TIERS: ${{ vars.RADAR_TIERS }}
+      RADAR_MODELO: ${{ vars.RADAR_MODELO }}
+      MANDRILL_API_KEY: ${{ secrets.MANDRILL_API_KEY }}
+      REMETENTE_EMAIL: ${{ secrets.REMETENTE_EMAIL }}
+      REMETENTE_NOME: ${{ secrets.REMETENTE_NOME }}
+      ALERTA_EMAIL: ${{ secrets.ALERTA_EMAIL }}
+      GRUPO: ${{ inputs.grupo }}
+      JANELA: ${{ inputs.janela || 'w' }}
+      TODOS: ${{ inputs.todos && '1' || '' }}
+      DRY_RUN: ${{ inputs.dry_run && '1' || '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Migrações do banco
+        run: npx drizzle-kit migrate
+
+      - name: Coletar e triar
+        run: |
+          args=("--janela=$JANELA")
+          [ -n "$GRUPO" ] && args+=("--grupo=$GRUPO")
+          [ -n "$TODOS" ] && args+=("--todos")
+          [ -n "$DRY_RUN" ] && args+=("--dry-run")
+          npx tsx --tsconfig tsconfig.jobs.json jobs/radar.ts "${args[@]}"
+
+      - name: Avisar falha por e-mail
+        if: failure()
+        run: >
+          npx tsx --tsconfig tsconfig.jobs.json jobs/alerta.ts
+          "Radar de clientes falhou"
+          "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
