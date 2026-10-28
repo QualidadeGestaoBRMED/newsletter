@@ -1,30 +1,33 @@
 "use client";
-// Radar de clientes: o "jornal" (só o que é notícia, na carteira e no tier escolhidos) e a página de cada cliente (?grupo=),
-// com o histórico. Mesma capa, filtros e "Comece por aqui" do painel de prazos; os filtros ficam na URL (?gestor=&tier=&grupo=&ver=).
+// Radar de clientes. Como os prazos, tem edições: a edição é o que a coleta do dia trouxe (?ed=AAAA-MM-DD; sem ?ed, a mais recente).
+// A página de cada cliente (?grupo=) mostra o histórico dele. Mesma capa, filtros e "Comece por aqui" do painel de prazos;
+// os filtros ficam na URL (?gestor=&tier=&grupo=&ed=).
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { TIERS } from "@/jobs/config";
-import { manchete, ordenarSinais, PERIODOS, periodoDe, type Sinal } from "@/lib/radar";
+import { manchete, ordenarSinais, type Sinal } from "@/lib/radar";
 import { ponto } from "./ponto";
 import SeletorCliente, { type OpcaoCliente } from "./seletor-cliente";
 
 type SinalTela = Sinal & { voto: boolean | null };
-type Params = { gestor: string | null; tier: string | null; grupo: string | null; ver: string | null };
-const PARAMS = ["gestor", "tier", "grupo", "ver"] as const;
-const VISITA = "radar:ultima-visita";
-// as mesmas cores do painel: agir = vencido, acompanhar = vence hoje; novo usa o verde-água da marca
-const COR = { agir: "#cc0000", acompanhar: "#cc851e", novo: "#00AFAA" };
+type Params = { gestor: string | null; tier: string | null; grupo: string | null; ed: string | null };
+const PARAMS = ["gestor", "tier", "grupo", "ed"] as const;
+const ED = /^\d{4}-\d{2}-\d{2}$/;
+
+// as mesmas cores do painel: pede ação = vencido, acompanhar = vence hoje; a terceira bolha usa o verde-água da marca
+const COR = { agir: "#cc0000", acompanhar: "#cc851e", terceira: "#00AFAA" };
 const MES = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
 const DIA = ["domingo", "segunda-feira", "terça-feira", "quarta-feira", "quinta-feira", "sexta-feira", "sábado"];
 
 const pl = (c: number, a: string, b: string) => `${c} ${c === 1 ? a : b}`;
 const dd = (x: number) => (x >= 0 && x < 10 ? "0" + x : String(x));
 const first = (s: string | null) => String(s || "").split(" ")[0];
-const hojeSP = () => new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(new Date());
+const diaSP = (d: Date) => new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(d);
+const horaSP = (iso: string) => new Date(iso).toLocaleTimeString("pt-BR", { timeZone: "America/Sao_Paulo", hour: "2-digit", minute: "2-digit" });
+const day = (s: string) => new Date(`${s}T12:00:00`);
 const fmtD = (s: string | null) => (s ? `${s.slice(8, 10)}/${s.slice(5, 7)}` : "");
 const quando = (s: Sinal) => fmtD(s.publicado_em ?? s.coletado_em.slice(0, 10));
-const fmtVisita = (iso: string) =>
-  new Date(iso).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
+const edicaoDe = (s: Sinal) => diaSP(new Date(s.coletado_em));
 
 const UP = (
   <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -43,7 +46,11 @@ export default function Radar({ gestorInicial }: { gestorInicial: string | null 
   const router = useRouter();
   const pathname = usePathname();
   const search = useSearchParams();
-  const p: Params = useMemo(() => Object.fromEntries(PARAMS.map((k) => [k, search.get(k) || null])) as Params, [search]);
+  const p: Params = useMemo(() => {
+    const o = Object.fromEntries(PARAMS.map((k) => [k, search.get(k) || null])) as Params;
+    if (o.ed && !ED.test(o.ed)) o.ed = null;
+    return o;
+  }, [search]);
   const setParams = (up: Partial<Params>, navegar = false) => {
     const s = new URLSearchParams(search.toString());
     for (const [k, v] of Object.entries(up)) {
@@ -59,17 +66,6 @@ export default function Radar({ gestorInicial }: { gestorInicial: string | null 
   useEffect(() => {
     if (gestorInicial && !p.gestor && !p.grupo) setParams({ gestor: gestorInicial });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // "Novo" = coletado depois da visita anterior; a visita atual fica gravada para a próxima vez
-  const [visita, setVisita] = useState<string | null>(null);
-  useEffect(() => {
-    try {
-      setVisita(localStorage.getItem(VISITA));
-      localStorage.setItem(VISITA, new Date().toISOString());
-    } catch {
-      // navegador sem localStorage: sem selo de novo
-    }
   }, []);
 
   const [sinais, setSinais] = useState<SinalTela[] | null>(null);
@@ -90,27 +86,32 @@ export default function Radar({ gestorInicial }: { gestorInicial: string | null 
     return () => removeEventListener("resize", medir);
   }, []);
 
-  const hoje = hojeSP();
-  const dHoje = new Date(`${hoje}T12:00:00`);
-  const novo = (s: Sinal) => (visita ? s.coletado_em > visita : periodoDe(s, hoje) === "hoje");
-
   const todos = sinais ?? [];
+
+  // ---------- edições: um dia de coleta = uma edição ----------
+  const edicoes = useMemo(() => Array.from(new Set(todos.map(edicaoDe))).sort().reverse(), [todos]);
+  const atual = edicoes[0] ?? diaSP(new Date());
+  const ed = p.ed && edicoes.includes(p.ed) ? p.ed : atual;
+  const passado = ed !== atual;
+  const dEd = day(ed);
+
+  // ---------- recortes ----------
   const gestores = Array.from(new Set(todos.map((s) => s.gestor).filter(Boolean) as string[])).sort((a, b) => a.localeCompare(b, "pt-BR"));
   const daCarteira = todos.filter((s) => !p.gestor || s.gestor === p.gestor);
   const tiersDisp = TIERS.filter((t) => daCarteira.some((s) => s.tier === t));
   const noTier = daCarteira.filter((s) => !p.tier || s.tier === p.tier);
   const doGrupo = p.grupo ? (ordenarSinais(todos.filter((s) => s.grupo === p.grupo), TIERS) as SinalTela[]) : [];
-  const base = p.grupo ? doGrupo : noTier;
-  const nNovos = base.filter(novo).length;
-  const nAgir = base.filter((s) => s.prioridade === "agir").length;
-  const nAcomp = base.filter((s) => s.prioridade === "acompanhar").length;
-  const vis = p.grupo ? doGrupo : noTier.filter((s) => (p.ver === "novos" ? novo(s) : p.ver === "agir" ? s.prioridade === "agir" : true));
-  const comAcao = vis.filter((s) => s.prioridade !== "contexto");
+  const daEdicao = noTier.filter((s) => edicaoDe(s) === ed);
+  const vis = p.grupo ? doGrupo : (ordenarSinais(daEdicao, TIERS) as SinalTela[]);
+  const agir = vis.filter((s) => s.prioridade === "agir");
+  const acomp = vis.filter((s) => s.prioridade === "acompanhar");
   const ctx = vis.filter((s) => s.prioridade === "contexto");
-  const lead = manchete(comAcao, TIERS, hoje) as SinalTela | null;
+  const lead = manchete([...agir, ...acomp], TIERS, ed) as SinalTela | null;
   const refGrupo = doGrupo[0];
+  const nClientes = new Set(vis.map((s) => s.grupo)).size;
+  const coletaHora = daEdicao.length ? horaSP(daEdicao.map((s) => s.coletado_em).sort()[0]) : null;
 
-  // seletor de cliente: só quem teve notícia no recorte (carteira e tier), com a contagem; o cliente aberto entra mesmo fora dele
+  // seletor de cliente: quem teve notícia no recorte (carteira e tier), com a contagem; o cliente aberto entra mesmo fora dele
   const porCliente = new Map<string, OpcaoCliente>();
   for (const s of noTier) {
     const c = porCliente.get(s.grupo) ?? { nome: s.grupo, tier: s.tier, n: 0 };
@@ -162,6 +163,7 @@ export default function Radar({ gestorInicial }: { gestorInicial: string | null 
 
   // ---------- capa (a mesma do painel de prazos) ----------
   const nome = first(p.gestor);
+  const seus = p.gestor ? "dos seus clientes" : "dos clientes";
   const hello: ReactNode = p.grupo ? (
     refGrupo?.tier ? (
       <>
@@ -171,6 +173,8 @@ export default function Radar({ gestorInicial }: { gestorInicial: string | null 
     ) : (
       "Cliente."
     )
+  ) : passado ? (
+    nome ? `${nome},` : "Edição anterior."
   ) : nome ? (
     `Bom dia, ${nome}.`
   ) : (
@@ -182,20 +186,15 @@ export default function Radar({ gestorInicial }: { gestorInicial: string | null 
       : "—"
     : p.grupo
       ? doGrupo.length
-        ? `${pl(doGrupo.length, "notícia", "notícias")} nos últimos 90 dias${nAgir ? `, ${nAgir} ${nAgir === 1 ? "pede" : "pedem"} ação` : ""}.`
+        ? `${pl(doGrupo.length, "notícia", "notícias")} nos últimos 90 dias${agir.length ? `, ${agir.length} ${agir.length === 1 ? "pede" : "pedem"} ação` : ""}.`
         : "Sem notícias nos últimos 90 dias."
-      : nNovos || nAgir
-        ? `${pl(nNovos, "notícia nova", "notícias novas")} e ${pl(nAgir, "sinal pede", "sinais pedem")} ação.`
-        : "Nenhuma novidade nos seus clientes.";
-  const legenda: [number, string, string][] = [
-    [nAgir, "pedem ação", COR.agir],
-    [nAcomp, "para acompanhar", COR.acompanhar],
-    [nNovos, "novos desde a última visita", COR.novo],
-  ];
-  const bolhas: [number, string, string][] = [
-    [nAgir, "pedem ação", COR.agir],
-    [nAcomp, "para acompanhar", COR.acompanhar],
-    [nNovos, "novos", COR.novo],
+      : vis.length
+        ? `${pl(vis.length, "notícia", "notícias")} ${seus} ${passado ? "nesta edição" : "hoje"}${agir.length ? `, ${agir.length} ${agir.length === 1 ? "pede" : "pedem"} ação` : ""}.`
+        : `Nenhuma notícia ${seus} ${passado ? "nesta edição" : "hoje"}.`;
+  const numeros: [number, string, string][] = [
+    [agir.length, "pedem ação", COR.agir],
+    [acomp.length, "para acompanhar", COR.acompanhar],
+    p.grupo ? [doGrupo.length, "notícias em 90 dias", COR.terceira] : [nClientes, nClientes === 1 ? "cliente com notícia" : "clientes com notícia", COR.terceira],
   ];
 
   // ---------- peças ----------
@@ -204,7 +203,7 @@ export default function Radar({ gestorInicial }: { gestorInicial: string | null 
       {p.grupo ? (
         <span>{s.grupo}</span>
       ) : (
-        <button type="button" onClick={() => setParams({ grupo: s.grupo, ver: null }, true)}>
+        <button type="button" onClick={() => setParams({ grupo: s.grupo }, true)}>
           {s.grupo}
         </button>
       )}
@@ -214,8 +213,6 @@ export default function Radar({ gestorInicial }: { gestorInicial: string | null 
           {s.tier}
         </span>
       )}
-      {s.prioridade === "agir" && <span className="rd-st agir">· Pede ação</span>}
-      {novo(s) && <span className="rd-st novo">· Novo</span>}
     </div>
   );
   const ehVagas = (s: SinalTela) => s.tipo === "contratacao" && s.fontes.every((f) => f.url.includes("linkedin.com/jobs"));
@@ -272,31 +269,17 @@ export default function Radar({ gestorInicial }: { gestorInicial: string | null 
   if (!sinais) lista = <div className="rd-empty">{erro ? "Não foi possível carregar o Radar." : "Carregando…"}</div>;
   else if (!vis.length)
     lista = (
-      <div className="rd-empty">{p.grupo ? `Nenhuma notícia sobre ${p.grupo} nos últimos 90 dias.` : "Nenhuma notícia com esse filtro. Quando um cliente tiver novidade, ela aparece aqui."}</div>
+      <div className="rd-empty">
+        {p.grupo ? `Nenhuma notícia sobre ${p.grupo} nos últimos 90 dias.` : `Nenhuma notícia ${seus} nesta edição. Quando um cliente tiver novidade, ela aparece aqui.`}
+      </div>
     );
-  else if (p.grupo)
+  else
     lista = (
       <>
-        {bloco(
-          "Agir agora",
-          comAcao.filter((s) => s.prioridade === "agir"),
-          true,
-        )}
-        {bloco(
-          "Acompanhar",
-          comAcao.filter((s) => s.prioridade === "acompanhar"),
-        )}
+        {bloco("Pedem ação", agir, true)}
+        {bloco("Para acompanhar", acomp)}
       </>
     );
-  else {
-    const ord = ordenarSinais(comAcao, TIERS) as SinalTela[];
-    lista = PERIODOS.map(([per, rot]) =>
-      bloco(
-        rot,
-        ord.filter((s) => periodoDe(s, hoje) === per),
-      ),
-    );
-  }
 
   // bolhas menores em tela estreita, como no painel
   const k = largura < 760 ? 0.8 : 1;
@@ -321,29 +304,41 @@ export default function Radar({ gestorInicial }: { gestorInicial: string | null 
                     <span className="sec-c">PRAZOS</span>
                   </a>
                   <i aria-hidden="true">·</i>
-                  <span className="sec on" aria-current="page">
+                  {/* na página do cliente, a seção atual volta para o jornal */}
+                  <a
+                    className="sec on"
+                    href="/radar"
+                    aria-current="page"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (p.grupo) setParams({ grupo: null }, true);
+                    }}
+                  >
                     <span className="sec-l">RADAR DE CLIENTES</span>
                     <span className="sec-c">RADAR</span>
-                  </span>
+                  </a>
                 </nav>
-                {/* no lugar do seletor de edição do painel: mesmo peso visual no canto */}
-                {p.grupo && (
-                  <button type="button" className="ed-sel" onClick={() => setParams({ grupo: null }, true)}>
-                    ← Todas as notícias
-                  </button>
+                {!p.grupo && edicoes.length > 0 && (
+                  <select className="ed-sel" aria-label="Edição" value={ed} onChange={(e) => setParams({ ed: e.target.value === atual ? null : e.target.value })}>
+                    {edicoes.map((x) => (
+                      <option key={x} value={x}>
+                        {`${x === atual ? "Atual: " : ""}${DIA[day(x).getDay()].slice(0, 3)} ${fmtD(x)}`}
+                      </option>
+                    ))}
+                  </select>
                 )}
               </div>
             </div>
-            <div className="bubbles" role="img" aria-label={sinais ? bolhas.map((x) => `${x[0]} ${x[1]}`).join(", ") : undefined}>
+            <div className="bubbles" role="img" aria-label={sinais ? numeros.map((x) => `${x[0]} ${x[1]}`).join(", ") : undefined}>
               {sinais &&
                 [48, 39, 31].map((r0, i) => {
-                  const [v, l, c] = bolhas[i];
+                  const [v, l, c] = numeros[i];
                   const r = r0 * k;
                   return (
                     <div
                       key={i}
                       className={"bub" + (!v ? " zero" : "")}
-                      style={{ width: 2 * r, height: 2 * r, background: c, zIndex: 3 - i, fontSize: Math.round(r * 0.72) }}
+                      style={{ width: 2 * r, height: 2 * r, background: c, zIndex: 3 - i, fontSize: Math.round(r * 0.72 * Math.min(1, 3.2 / String(v).length)) }}
                       title={`${v} ${l}`}
                     >
                       {dd(v)}
@@ -356,7 +351,10 @@ export default function Radar({ gestorInicial }: { gestorInicial: string | null 
             <h1 className="mast">
               <span className="mast-k">{p.grupo ? "Radar do cliente" : "Radar de"}</span>
               <span className={"mast-w" + (p.grupo ? " rd-mast-grupo" : "")}>{p.grupo ? p.grupo.toLowerCase() : "clientes"}</span>
-              <span className="mast-d">{`${DIA[dHoje.getDay()]}, ${dHoje.getDate()} de ${MES[dHoje.getMonth()]}`}</span>
+              {/* "anterior" fica na linha da data: no rótulo de cima ele bate nas letras altas de "clientes" */}
+              <span className="mast-d">
+                {p.grupo ? "últimos 90 dias" : `${passado ? "Edição anterior · " : ""}${DIA[dEd.getDay()]}, ${dEd.getDate()} de ${MES[dEd.getMonth()]}`}
+              </span>
             </h1>
             <div className="say">
               <p className="hello">{hello}</p>
@@ -364,7 +362,7 @@ export default function Radar({ gestorInicial }: { gestorInicial: string | null 
               <div className="lead-c">
                 {sinais && (
                   <ul className="legend" style={{ "--nw": "2.2ch" } as CSSProperties}>
-                    {legenda.map(([v, txt, c]) => (
+                    {numeros.map(([v, txt, c]) => (
                       <li key={txt}>
                         <i style={{ background: c }} />
                         <b>{dd(v)}</b>
@@ -374,8 +372,7 @@ export default function Radar({ gestorInicial }: { gestorInicial: string | null 
                   </ul>
                 )}
                 <p className="note">
-                  {p.grupo && refGrupo?.gestor ? `Carteira de ${refGrupo.gestor}. ` : ""}
-                  {visita ? `Última visita: ${fmtVisita(visita)}.` : "Primeira visita ao Radar."}
+                  {p.grupo ? (refGrupo?.gestor ? `Carteira de ${refGrupo.gestor}.` : "") : coletaHora ? `Coleta das ${coletaHora}.` : ""}
                 </p>
               </div>
             </div>
@@ -385,41 +382,32 @@ export default function Radar({ gestorInicial }: { gestorInicial: string | null 
         <div className="filters" id="filtros">
           <span className="kicker">Filtrar</span>
           {!p.grupo && (
-            <>
-              <select aria-label="Gestor da conta" value={p.gestor && gestores.includes(p.gestor) ? p.gestor : ""} onChange={(e) => setParams({ gestor: e.target.value || null })}>
-                <option value="">Todos os gestores</option>
-                {gestores.map((g) => (
-                  <option key={g} value={g}>
-                    {g}
-                  </option>
-                ))}
-              </select>
-            </>
+            <select aria-label="Gestor da conta" value={p.gestor && gestores.includes(p.gestor) ? p.gestor : ""} onChange={(e) => setParams({ gestor: e.target.value || null })}>
+              <option value="">Todos os gestores</option>
+              {gestores.map((g) => (
+                <option key={g} value={g}>
+                  {g}
+                </option>
+              ))}
+            </select>
           )}
-          {/* atalho para a página do cliente; na página dele, troca de cliente sem voltar */}
-          <SeletorCliente clientes={clientesSel} valor={p.grupo} onEscolher={(g) => setParams({ grupo: g, ver: null }, true)} />
+          {/* atalho para a página do cliente; na página dele, troca de cliente */}
+          <SeletorCliente clientes={clientesSel} valor={p.grupo} onEscolher={(g) => setParams({ grupo: g }, true)} />
           {!p.grupo && (
-            <>
-              {/* botões em vez de select: a opção do select não mostra a cor do tier */}
-              <span className="rd-tiers" role="group" aria-label="Tier do cliente">
-                <button type="button" aria-pressed={!p.tier} onClick={() => setParams({ tier: null })}>
-                  Todos os tiers
+            // botões em vez de select: a opção do select não mostra a cor do tier
+            <span className="rd-tiers" role="group" aria-label="Tier do cliente">
+              <button type="button" aria-pressed={!p.tier} onClick={() => setParams({ tier: null })}>
+                Todos os tiers
+              </button>
+              {tiersDisp.map((t) => (
+                <button key={t} type="button" aria-pressed={p.tier === t} onClick={() => setParams({ tier: p.tier === t ? null : t })}>
+                  {ponto(t)}
+                  {t}
                 </button>
-                {tiersDisp.map((t) => (
-                  <button key={t} type="button" aria-pressed={p.tier === t} onClick={() => setParams({ tier: p.tier === t ? null : t })}>
-                    {ponto(t)}
-                    {t}
-                  </button>
-                ))}
-              </span>
-              <select aria-label="Mostrar" value={p.ver ?? ""} onChange={(e) => setParams({ ver: e.target.value || null })}>
-                <option value="">{`Todas as notícias (${noTier.length})`}</option>
-                <option value="novos">{`Só as novas (${noTier.filter(novo).length})`}</option>
-                <option value="agir">{`Só as que pedem ação (${noTier.filter((s) => s.prioridade === "agir").length})`}</option>
-              </select>
-            </>
+              ))}
+            </span>
           )}
-          <button type="button" className="reset" onClick={() => setParams({ gestor: null, tier: null, ver: null, grupo: null }, !!p.grupo)}>
+          <button type="button" className="reset" onClick={() => setParams({ gestor: null, tier: null, grupo: null }, !!p.grupo)}>
             Limpar
           </button>
         </div>
@@ -433,7 +421,7 @@ export default function Radar({ gestorInicial }: { gestorInicial: string | null 
                   <b>{`${lead.titulo}.`}</b> {`${lead.proximo_passo.charAt(0).toUpperCase()}${lead.proximo_passo.slice(1)}`}
                 </>
               ) : sinais ? (
-                "Nenhuma notícia que peça ação neste recorte."
+                `Nenhuma notícia que peça ação ${p.grupo ? "deste cliente" : "nesta edição"}.`
               ) : (
                 "—"
               )}
@@ -458,7 +446,7 @@ export default function Radar({ gestorInicial }: { gestorInicial: string | null 
           <section id="noticias" style={{ marginTop: 52 }}>
             <div className="sec-h">
               <div>
-                <span className="kicker">{p.grupo ? "Histórico" : "Notícias"}</span>
+                <span className="kicker">{p.grupo ? "Histórico" : "Notícias da edição"}</span>
                 <h2>
                   {p.grupo ? (
                     <>
@@ -475,12 +463,13 @@ export default function Radar({ gestorInicial }: { gestorInicial: string | null 
                     ? "Tudo o que o Radar encontrou sobre o cliente nos últimos 90 dias, do que pede ação ao que é só para acompanhar."
                     : "Só aparece aqui o cliente que teve notícia. Clique no nome do cliente para ver o histórico dele."}
                 </p>
-              </div>            </div>
+              </div>
+            </div>
             {lista}
             {ctx.length > 0 && (
               <details className="rd-ctx">
                 <summary>{`${p.grupo ? "Contexto" : "Notas"} sem ação (${ctx.length})`}</summary>
-                {(ordenarSinais(ctx, TIERS) as SinalTela[]).map(cartao)}
+                {ctx.map(cartao)}
               </details>
             )}
           </section>
