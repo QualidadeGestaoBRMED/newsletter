@@ -61,7 +61,7 @@ export async function statusEdicao(id: string) {
   return e?.status ?? null;
 }
 
-export async function marcarEdicao(id: string, status: "enviada" | "falhou") {
+export async function marcarEdicao(id: string, status: "enviada") {
   await db.update(schema.edicoes).set({ status }).where(eq(schema.edicoes.id, id));
 }
 

@@ -29,9 +29,15 @@ const LOGO: Imagem = {
 export const htmlDePrevia = (m: Mensagem) =>
   (m.imagens ?? []).reduce((h, i) => h.replaceAll(`cid:${i.nome}`, `data:${i.tipo};base64,${i.base64}`), m.html);
 
+/** O provedor recusou o endereço (conta inexistente, inativa ou na lista de rejeição): tentar de novo não adianta. */
+export class EnderecoRecusado extends Error {}
+
 export interface Remetente {
   enviar(m: Mensagem): Promise<{ id: string }>;
 }
+
+/** ALERTA_EMAIL aceita vários endereços, separados por vírgula ou ponto e vírgula. */
+export const destinosAlerta = (v = process.env.ALERTA_EMAIL ?? "") => v.split(/[,;]/).map((e) => e.trim()).filter(Boolean);
 
 export function linkPainel(data: Dia, periodo: Periodo, gestor?: string) {
   const u = new URL(exigir("PAINEL_URL"));
@@ -94,9 +100,8 @@ export class MandrillRemetente implements Remetente {
     const body = (await res.json()) as { status?: string; _id?: string; reject_reason?: string; message?: string }[] | { message: string };
     if (!res.ok || !Array.isArray(body)) throw new Error(`Mandrill HTTP ${res.status}: ${JSON.stringify(body)}`);
     const r = body[0];
-    if (!r || !["sent", "queued", "scheduled"].includes(r.status ?? "")) {
-      throw new Error(`Mandrill recusou ${m.para.email}: ${r?.status} ${r?.reject_reason ?? ""}`);
-    }
+    if (r && ["rejected", "invalid"].includes(r.status ?? "")) throw new EnderecoRecusado(`Mandrill recusou ${m.para.email}: ${r.status} ${r.reject_reason ?? ""}`);
+    if (!r || !["sent", "queued", "scheduled"].includes(r.status ?? "")) throw new Error(`Mandrill: ${m.para.email} ${r?.status} ${r?.reject_reason ?? ""}`);
     return { id: r._id! };
   }
 }

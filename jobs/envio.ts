@@ -1,7 +1,7 @@
 // Envio da edição: um e-mail por gestor com e-mail, sem repetir quem já recebeu (tabela envios).
 import type { Periodo } from "./config";
 import type { Carteira } from "./edicao";
-import { montarEmail, type Remetente } from "./email";
+import { EnderecoRecusado, montarEmail, type Remetente } from "./email";
 import type { Dia } from "./regras";
 
 /**
@@ -24,7 +24,10 @@ export interface RegistroEnvios {
   registrar(edicao: string, destinatario: string, messageId: string): Promise<void>;
 }
 
-export type ResultadoEnvio = { enviados: string[]; pulados: string[]; semEmail: Carteira[]; falhas: { gestor: string; erro: string }[] };
+type Falha = { gestor: string; itens: number; erro: string };
+
+/** `recusados`: endereço recusado pelo provedor (não adianta reenviar). `falhas`: erro passageiro, que um novo run reenvia. */
+export type ResultadoEnvio = { enviados: string[]; pulados: string[]; semEmail: Carteira[]; recusados: Falha[]; falhas: Falha[] };
 
 export async function enviarEdicao(
   carteiras: Carteira[],
@@ -35,7 +38,7 @@ export async function enviarEdicao(
   paraTeste?: string,
 ): Promise<ResultadoEnvio> {
   if (modo === "teste" && !paraTeste) throw new Error("ENVIO=teste exige ALERTA_EMAIL");
-  const r: ResultadoEnvio = { enviados: [], pulados: [], semEmail: carteiras.filter((c) => !c.email), falhas: [] };
+  const r: ResultadoEnvio = { enviados: [], pulados: [], semEmail: carteiras.filter((c) => !c.email), recusados: [], falhas: [] };
   const ja = modo === "gestores" ? await registro.jaEnviados(edicao.id) : new Set<string>();
 
   for (const c of carteiras) {
@@ -52,7 +55,8 @@ export async function enviarEdicao(
       if (modo === "gestores") await registro.registrar(edicao.id, email, id);
       r.enviados.push(email);
     } catch (e) {
-      r.falhas.push({ gestor: `${c.nome} <${email}>`, erro: e instanceof Error ? e.message : String(e) });
+      const f = { gestor: `${c.nome} <${email}>`, itens: c.itens.length, erro: e instanceof Error ? e.message : String(e) };
+      (e instanceof EnderecoRecusado ? r.recusados : r.falhas).push(f);
     }
   }
   return r;
@@ -64,6 +68,11 @@ export function resumoProblemas(r: ResultadoEnvio): string | null {
   if (r.semEmail.length) {
     linhas.push("Gestores sem e-mail na Equipe Comercial (não receberam):");
     for (const c of r.semEmail) linhas.push(`- ${c.nome}: ${c.itens.length} itens`);
+  }
+  if (r.recusados.length) {
+    if (linhas.length) linhas.push("");
+    linhas.push("E-mails recusados (conta inexistente ou inativa; corrigir o gestor na DB - BR NET ou o e-mail na Equipe Comercial):");
+    for (const f of r.recusados) linhas.push(`- ${f.gestor}, ${f.itens} itens: ${f.erro}`);
   }
   if (r.falhas.length) {
     if (linhas.length) linhas.push("");

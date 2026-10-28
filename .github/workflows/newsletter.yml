@@ -35,7 +35,7 @@ permissions:
 jobs:
   edicao:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 50 # a leitura do Pipefy chega a 22 min quando o cache da BR NET expira
     env:
       PERIODO: ${{ github.event_name == 'schedule' && (github.event.schedule == '45 9 * * 1-5' && 'manha' || 'tarde') || inputs.periodo }}
       DATA: ${{ inputs.data }}
@@ -77,5 +77,5 @@ jobs:
         if: failure()
         run: >
           npx tsx --tsconfig tsconfig.jobs.json jobs/alerta.ts
-          "Edição $PERIODO falhou em ${{ github.run_started_at }}"
+          "Edição $PERIODO falhou"
           "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"

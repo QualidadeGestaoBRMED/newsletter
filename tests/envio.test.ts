@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Carteira } from "../jobs/edicao";
-import type { Mensagem, Remetente } from "../jobs/email";
+import { destinosAlerta, EnderecoRecusado, type Mensagem, type Remetente } from "../jobs/email";
 import { enviarEdicao, modoEnvio, resumoProblemas, type RegistroEnvios } from "../jobs/envio";
 
 process.env.PAINEL_URL ||= "https://painel.exemplo";
@@ -8,11 +8,12 @@ process.env.PAINEL_URL ||= "https://painel.exemplo";
 const edicao = { id: "2026-10-27-manha", data: "2026-10-27", periodo: "manha" as const };
 const carteira = (nome: string, email: string | null): Carteira => ({ nome, email, itens: [] });
 
-function remetente(falhaPara?: string) {
+function remetente(falhaPara?: string, recusaPara?: string) {
   const enviadas: Mensagem[] = [];
   const r: Remetente = {
     async enviar(m) {
-      if (m.para.email === falhaPara) throw new Error("Mandrill recusou");
+      if (m.para.email === falhaPara) throw new Error("Mandrill fora do ar");
+      if (m.para.email === recusaPara) throw new EnderecoRecusado("Mandrill recusou: rejected hard-bounce");
       enviadas.push(m);
       return { id: `id-${enviadas.length}` };
     },
@@ -63,7 +64,16 @@ describe("enviarEdicao", () => {
     expect(enviadas.map((m) => m.para.email)).toEqual(["bia@x.com"]);
     expect(gravados).toEqual(["bia@x.com"]);
     expect(res.falhas).toHaveLength(1);
-    expect(resumoProblemas(res)).toContain("Ana <ana@x.com>: Mandrill recusou");
+    expect(resumoProblemas(res)).toContain("Ana <ana@x.com>: Mandrill fora do ar");
+  });
+
+  it("endereço recusado (conta inativa) vai para recusados, não para falhas", async () => {
+    const { r, enviadas } = remetente(undefined, "ana@x.com");
+    const res = await enviarEdicao(lista, edicao, "gestores", r, registro().reg);
+    expect(enviadas.map((m) => m.para.email)).toEqual(["bia@x.com"]);
+    expect(res.falhas).toEqual([]);
+    expect(res.recusados.map((f) => f.gestor)).toEqual(["Ana <ana@x.com>"]);
+    expect(resumoProblemas(res)).toContain("conta inexistente ou inativa");
   });
 
   it("teste: tudo vai para a caixa de teste, com [TESTE] e o nome do gestor, sem registrar", async () => {
@@ -78,5 +88,12 @@ describe("enviarEdicao", () => {
   it("sem problemas, não há aviso", async () => {
     const res = await enviarEdicao([carteira("Ana", "ana@x.com")], edicao, "gestores", remetente().r, registro().reg);
     expect(resumoProblemas(res)).toBeNull();
+  });
+});
+
+describe("destinosAlerta", () => {
+  it("aceita vários endereços separados por vírgula ou ponto e vírgula", () => {
+    expect(destinosAlerta("projetos@x.com, eu@x.com;outro@x.com ")).toEqual(["projetos@x.com", "eu@x.com", "outro@x.com"]);
+    expect(destinosAlerta("")).toEqual([]);
   });
 });
